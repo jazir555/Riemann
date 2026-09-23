@@ -18176,3 +18176,538 @@ theorem R12_H_of_residuals (hc : R12_center_residual_tenth)
   R12_H_instance (R12_leaf_of_residuals hc hd) c hc_mem hc_eq
 
 end CentralCoverAssembly
+
+/-! ## ASSEMBLY-R36 leaf+H residual set + factor wall verdict (append-only, no redefinition)
+
+Grep record (read-only, verified before writing):
+- `R35` base is the read model (def 4513; coords 4516-4519; strip 4524-4525;
+  radius_lt 4540 via sample_cell_radius_bound; mem 4543; leaf 4553-4555
+  inner tier (0.15,0.06); H 4582-4592 with hc_mem + hc_eq).
+- `R36` base present (def 4597-4598; coords 4600-4603; width 4605-4606;
+  strip 4608-4609; dx 4611-4613; dy 4615-4617; radius_eq 4619-4622;
+  radius_lt 4624-4625; mem 4627-4633 (0,2.5,0.3,0.49); leaf 4637-4639
+  inner tier (0.15,0.06); fencing 4641-4643; H 4666-4676 with hc_mem + hc_eq).
+- `fine_eps_inner_pos` 1034; `gridFine` 1002; `sample_cell_radius_bound` 421.
+- BD small-r bridge for R36 is separate (BD_R36SmallR 14917-15207:
+  C 5600 at 15057, M 700000 at 15061, threshold 882000.15 at 15173/15183).
+  This block does not touch BD/BG namespaces.
+- Grep-clean before writing: no `R36_budget_lt_app`,
+  `R36_center_of_three_tenths_lower`, `R36_center_residual_three_tenths`,
+  `R36_center_obligation_of_residual_three_tenths`, `R36_deriv_residual`,
+  `R36_leaf_of_residuals`, `R36_H_of_residuals`, `R36_threshold_eq`,
+  `R36_C_eq_app`, `R36_M_eq_app`, `R36_committed_product_lt`,
+  `R36_required_Azeta_of_committed_56`, `R36_wall_infeasible_realistic`
+  in file; R35 base left untouched (no duplication).
+
+Leaf mirror for R36 inner tier (eps, M) = (0.15, 0.06) at
+c36 = (0, 2.5, 0.3, 0.49): budget 0.15 + 0.06 * radius < 0.3 lifts
+R36_radius_lt (same mul_lt_mul_of_pos_left + linarith shape as R06),
+so 0.3 <= norm at R36.center discharges the center conjunct; deriv
+residual is exactly the second conjunct; leaf_of rebuilds
+R36_leaf_obligations; H_of discharges the gridFine H shape via
+R36_H_instance (with hc_mem + hc_eq per 4666, matching R06 form).
+Value-or-gap: budget 0.15 + 0.06 * 1.26 = 0.2256 < 0.3; full R36 H leaf
+now conditional only on two named numeric enclosures (0.3 <= norm at
+center + uniform norm deriv <= 0.06 on R36, not closed here).
+
+Wall verdict (infeasible at filed small-r numbers, exact numerals below):
+with disc factors Apoly = 56, Api = 1 and committed Agam = 1/10000000,
+closing the BD threshold 0.15 + 700000 * 1.26 = 882000.15 needs
+Azeta >= 157500026785 (proved as R36_required_Azeta_of_committed_56),
+while the realistic O(1) range has Azeta <= 10 (true zeta is O(1) on
+this rect); the committed product 56*1*(1/10000000)*10 = 0.000056 is
+far below 882000.15 (R36_committed_product_lt). Hence no O(1) Azeta
+closes R36 at M = 700000; the two leaf enclosures above stay as the
+residual. Zero cells claimed closed.
+-/
+
+namespace CentralCoverAssembly
+
+/-- Numeric budget for the R36 inner tier on the true radius. -/
+theorem R36_budget_lt_app : (0.15 : ℝ) + 0.06 * R36.radius < 0.3 := by
+  have h := R36_radius_lt
+  have hM : 0.06 * R36.radius < 0.06 * 1.26 :=
+    mul_lt_mul_of_pos_left h (by norm_num)
+  linarith
+
+theorem R36_center_of_three_tenths_lower (hC : (0.3 : ℝ) ≤ ‖xiShifted R36.center‖) :
+    (0.15 : ℝ) + 0.06 * R36.radius ≤ ‖xiShifted R36.center‖ := by
+  have hB := R36_budget_lt_app
+  linarith
+
+def R36_center_residual_three_tenths : Prop :=
+  (0.3 : ℝ) ≤ ‖xiShifted R36.center‖
+
+theorem R36_center_obligation_of_residual_three_tenths
+    (h : R36_center_residual_three_tenths) :
+    (0.15 : ℝ) + 0.06 * R36.radius ≤ ‖xiShifted R36.center‖ :=
+  R36_center_of_three_tenths_lower h
+
+def R36_deriv_residual : Prop :=
+  ∀ w, R36.mem w → ‖deriv xiShifted w‖ ≤ (0.06 : ℝ)
+
+theorem R36_leaf_of_residuals (hc : R36_center_residual_three_tenths)
+    (hd : R36_deriv_residual) : R36_leaf_obligations :=
+  ⟨R36_center_obligation_of_residual_three_tenths hc, hd⟩
+
+theorem R36_H_of_residuals (hc : R36_center_residual_three_tenths)
+    (hd : R36_deriv_residual)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ gridFine)
+    (hc_eq : c = (0, 2.5, 0.3, 0.49)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ :=
+  R36_H_instance (R36_leaf_of_residuals hc hd) c hc_mem hc_eq
+
+/-- Small-r threshold value for R36 (inner tier, M = 700000). -/
+theorem R36_threshold_eq : (0.15 : ℝ) + 700000 * 1.26 = 882000.15 := by
+  norm_num
+
+/-- Disc factor product for R36 (poly 56 tier). -/
+theorem R36_C_eq_app : (56 : ℝ) * 1 * 10 * 10 = 5600 := by
+  norm_num
+
+/-- Cauchy M for R36 (same small-r numbers as BD bridge). -/
+theorem R36_M_eq_app : (5600 : ℝ) / 0.008 = 700000 := by
+  norm_num
+
+/-- Committed product far below threshold (exact numbers). -/
+theorem R36_committed_product_lt :
+    56 * 1 * (1 / 10000000) * (10 : ℝ) < (0.15 : ℝ) + 700000 * 1.26 := by
+  norm_num
+
+/-- With committed Agam, closing needs Azeta >= 157500026785 (exact floor). -/
+theorem R36_required_Azeta_of_committed_56 {Azeta : ℝ}
+    (h : (0.15 : ℝ) + 700000 * 1.26 ≤ 56 * 1 * (1 / 10000000) * Azeta) :
+    (157500026785 : ℝ) ≤ Azeta := by
+  have hb : (0.15 : ℝ) + 700000 * 1.26 = 882000.15 := by norm_num
+  rw [hb] at h
+  have hcoeff : (56 : ℝ) * 1 * (1 / 10000000) = 56 / 10000000 := by norm_num
+  rw [hcoeff] at h
+  have hpos : (0 : ℝ) < 56 / 10000000 := by norm_num
+  have hcomm : (56 : ℝ) / 10000000 * Azeta = Azeta * (56 / 10000000) := by ring
+  have h2 : (882000.15 : ℝ) ≤ Azeta * (56 / 10000000) := by
+    rw [← hcomm]
+    exact h
+  have hdiv : (882000.15 : ℝ) / (56 / 10000000) ≤ Azeta :=
+    (div_le_iff₀ hpos).mpr h2
+  have hnum : (157500026785 : ℝ) ≤ (882000.15 : ℝ) / (56 / 10000000) := by
+    rw [le_div_iff₀ hpos]
+    norm_num
+  exact le_trans hnum hdiv
+
+/-- Wall verdict: no realistic O(1) Azeta closes R36 at M = 700000. -/
+theorem R36_wall_infeasible_realistic {Azeta : ℝ} (hle : Azeta ≤ 10)
+    (h : (0.15 : ℝ) + 700000 * 1.26 ≤ 56 * 1 * (1 / 10000000) * Azeta) :
+    False := by
+  have hreq := R36_required_Azeta_of_committed_56 h
+  linarith
+
+end CentralCoverAssembly
+
+/-! ## ASSEMBLY-R37 leaf+H residual set + factor wall verdict (append-only, no redefinition)
+
+Grep record (read-only, verified before writing):
+- `R36` residual+wall is the shape model (18180-18308): `R36_budget_lt_app` 18227,
+  `R36_center_of_three_tenths_lower` 18233, `R36_center_residual_three_tenths` 18238,
+  `R36_center_obligation_of_residual_three_tenths` 18241, `R36_deriv_residual` 18246,
+  `R36_leaf_of_residuals` 18249, `R36_H_of_residuals` 18253, `R36_threshold_eq` 18265,
+  `R36_C_eq_app` 18269, `R36_M_eq_app` 18273, `R36_committed_product_lt` 18277,
+  `R36_required_Azeta_of_committed_56` 18282, `R36_wall_infeasible_realistic` 18302.
+- `R37` base present (mid tier `(0.05,0.07)`): def 4681-4682;
+  coords 4684-4687 (`R37_x0/x1/y0/y1`); strip 4692-4693 (`R37_strip_lo/hi`);
+  dx 4695-4697; dy 4699-4701; radius_eq 4703-4706; radius_lt 4708-4709
+  (`R37.radius < 1.26` via `sample_cell_radius_bound` 421);
+  mem 4711-4717 (`(2,4.5,0.3,0.49)` in `gridFine` 1002);
+  leaf 4721-4723 (`R37_leaf_obligations`: center `0.05 + 0.07 * radius`
+  AND deriv `forall w, mem -> norm deriv <= 0.07`); fencing 4725-4727;
+  H 4750-4760 (`R37_H_instance` with `hc_mem + hc_eq`, `fine_eps_mid_pos` 1033).
+- Small-r numbers for R37 filed separately (BG 12961/12965, BD 15389/15393:
+  C 5600, M 700000 at `0.008`). This block does not touch BG/BD namespaces.
+- Grep-clean before writing: no `R37_budget_lt_app`,
+  `R37_center_of_two_tenths_lower`, `R37_center_residual_two_tenths`,
+  `R37_center_obligation_of_residual_two_tenths`, `R37_deriv_residual`,
+  `R37_leaf_of_residuals`, `R37_H_of_residuals`, `R37_threshold_eq`,
+  `R37_C_eq_app`, `R37_M_eq_app`, `R37_committed_product_lt`,
+  `R37_required_Azeta_of_committed_56`, `R37_wall_infeasible_realistic`
+  in file; R36 base left untouched (no duplication).
+
+Leaf mirror for R37 mid tier (eps, M) = (0.05, 0.07) at
+c37 = (2, 4.5, 0.3, 0.49): budget 0.05 + 0.07 * radius < 0.2 lifts
+R37_radius_lt (same mul_lt_mul_of_pos_left + linarith shape as R36),
+so 0.2 <= norm at R37.center discharges the center conjunct; deriv
+residual is exactly the second conjunct; leaf_of rebuilds
+R37_leaf_obligations; H_of discharges the gridFine H shape via
+R37_H_instance (with hc_mem + hc_eq per 4750, matching R36 form).
+Value-or-gap: budget 0.05 + 0.07 * 1.26 = 0.1382 < 0.2; full R37 H leaf
+now conditional only on two named numeric enclosures (0.2 <= norm at
+center + uniform norm deriv <= 0.07 on R37, not closed here).
+
+Wall verdict (infeasible at filed small-r numbers, exact numerals below):
+with disc factors Apoly = 56, Api = 1 and committed Agam = 1/10000000,
+closing the mid-tier threshold 0.05 + 700000 * 1.26 = 882000.05 needs
+Azeta >= 157500008928 (proved as R37_required_Azeta_of_committed_56),
+while the realistic O(1) range has Azeta <= 10 (true zeta is O(1) on
+this rect); the committed product 56*1*(1/10000000)*10 = 0.000056 is
+far below 882000.05 (R37_committed_product_lt). Hence no O(1) Azeta
+closes R37 at M = 700000; the two leaf enclosures above stay as the
+residual. Zero cells claimed closed.
+-/
+
+namespace CentralCoverAssembly
+
+/-- Numeric budget for the R37 mid tier on the true radius. -/
+theorem R37_budget_lt_app : (0.05 : ℝ) + 0.07 * R37.radius < 0.2 := by
+  have h := R37_radius_lt
+  have hM : 0.07 * R37.radius < 0.07 * 1.26 :=
+    mul_lt_mul_of_pos_left h (by norm_num)
+  linarith
+
+theorem R37_center_of_two_tenths_lower (hC : (0.2 : ℝ) ≤ ‖xiShifted R37.center‖) :
+    (0.05 : ℝ) + 0.07 * R37.radius ≤ ‖xiShifted R37.center‖ := by
+  have hB := R37_budget_lt_app
+  linarith
+
+def R37_center_residual_two_tenths : Prop :=
+  (0.2 : ℝ) ≤ ‖xiShifted R37.center‖
+
+theorem R37_center_obligation_of_residual_two_tenths
+    (h : R37_center_residual_two_tenths) :
+    (0.05 : ℝ) + 0.07 * R37.radius ≤ ‖xiShifted R37.center‖ :=
+  R37_center_of_two_tenths_lower h
+
+def R37_deriv_residual : Prop :=
+  ∀ w, R37.mem w → ‖deriv xiShifted w‖ ≤ (0.07 : ℝ)
+
+theorem R37_leaf_of_residuals (hc : R37_center_residual_two_tenths)
+    (hd : R37_deriv_residual) : R37_leaf_obligations :=
+  ⟨R37_center_obligation_of_residual_two_tenths hc, hd⟩
+
+theorem R37_H_of_residuals (hc : R37_center_residual_two_tenths)
+    (hd : R37_deriv_residual)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ gridFine)
+    (hc_eq : c = (2, 4.5, 0.3, 0.49)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ :=
+  R37_H_instance (R37_leaf_of_residuals hc hd) c hc_mem hc_eq
+
+/-- Small-r threshold value for R37 (mid tier, M = 700000). -/
+theorem R37_threshold_eq : (0.05 : ℝ) + 700000 * 1.26 = 882000.05 := by
+  norm_num
+
+/-- Disc factor product for R37 (poly 56 tier). -/
+theorem R37_C_eq_app : (56 : ℝ) * 1 * 10 * 10 = 5600 := by
+  norm_num
+
+/-- Cauchy M for R37 (same small-r numbers as filed bridge). -/
+theorem R37_M_eq_app : (5600 : ℝ) / 0.008 = 700000 := by
+  norm_num
+
+/-- Committed product far below threshold (exact numbers). -/
+theorem R37_committed_product_lt :
+    56 * 1 * (1 / 10000000) * (10 : ℝ) < (0.05 : ℝ) + 700000 * 1.26 := by
+  norm_num
+
+/-- With committed Agam, closing needs Azeta >= 157500008928 (exact floor). -/
+theorem R37_required_Azeta_of_committed_56 {Azeta : ℝ}
+    (h : (0.05 : ℝ) + 700000 * 1.26 ≤ 56 * 1 * (1 / 10000000) * Azeta) :
+    (157500008928 : ℝ) ≤ Azeta := by
+  have hb : (0.05 : ℝ) + 700000 * 1.26 = 882000.05 := by norm_num
+  rw [hb] at h
+  have hcoeff : (56 : ℝ) * 1 * (1 / 10000000) = 56 / 10000000 := by norm_num
+  rw [hcoeff] at h
+  have hpos : (0 : ℝ) < 56 / 10000000 := by norm_num
+  have hcomm : (56 : ℝ) / 10000000 * Azeta = Azeta * (56 / 10000000) := by ring
+  have h2 : (882000.05 : ℝ) ≤ Azeta * (56 / 10000000) := by
+    rw [← hcomm]
+    exact h
+  have hdiv : (882000.05 : ℝ) / (56 / 10000000) ≤ Azeta :=
+    (div_le_iff₀ hpos).mpr h2
+  have hnum : (157500008928 : ℝ) ≤ (882000.05 : ℝ) / (56 / 10000000) := by
+    rw [le_div_iff₀ hpos]
+    norm_num
+  exact le_trans hnum hdiv
+
+/-- Wall verdict: no realistic O(1) Azeta closes R37 at M = 700000. -/
+theorem R37_wall_infeasible_realistic {Azeta : ℝ} (hle : Azeta ≤ 10)
+    (h : (0.05 : ℝ) + 700000 * 1.26 ≤ 56 * 1 * (1 / 10000000) * Azeta) :
+    False := by
+  have hreq := R37_required_Azeta_of_committed_56 h
+  linarith
+
+end CentralCoverAssembly
+
+/-! ## ASSEMBLY-R38 leaf+H residual set + factor wall verdict (append-only, no redefinition)
+
+Grep record (read-only, verified before writing):
+- `R37` residual+wall is the shape model (18310-18443): `R37_budget_lt_app` 18362,
+  `R37_center_of_two_tenths_lower` 18368, `R37_center_residual_two_tenths` 18373,
+  `R37_center_obligation_of_residual_two_tenths` 18376, `R37_deriv_residual` 18381,
+  `R37_leaf_of_residuals` 18384, `R37_H_of_residuals` 18388, `R37_threshold_eq` 18400,
+  `R37_C_eq_app` 18404, `R37_M_eq_app` 18408, `R37_committed_product_lt` 18412,
+  `R37_required_Azeta_of_committed_56` 18417, `R37_wall_infeasible_realistic` 18437.
+- `R38` base present (mid tier `(0.05,0.07)`): def 4765-4766;
+  coords 4768-4771 (`R38_x0/x1/y0/y1`); strip 4776-4777 (`R38_strip_lo/hi`);
+  dx 4779-4781; dy 4783-4785; radius_eq 4787-4790; radius_lt 4792-4793
+  (`R38.radius < 1.26` via `sample_cell_radius_bound` 421);
+  mem 4795-4801 (`(4,6.5,0.3,0.49)` in `gridFine` 1002);
+  leaf 4805-4807 (`R38_leaf_obligations`: center `0.05 + 0.07 * radius`
+  AND deriv `forall w, mem -> norm deriv <= 0.07`); fencing 4809-4811;
+  H 4834-4844 (`R38_H_instance` with `hc_mem + hc_eq`, `fine_eps_mid_pos` 1033).
+- Small-r numbers for R38 filed separately (BG 13236/13240, BD 15681/15685:
+  C 5600, M 700000 at `0.008`). This block does not touch BG/BD namespaces.
+- Grep-clean before writing: no `R38_budget_lt_app`,
+  `R38_center_of_two_tenths_lower`, `R38_center_residual_two_tenths`,
+  `R38_center_obligation_of_residual_two_tenths`, `R38_deriv_residual`,
+  `R38_leaf_of_residuals`, `R38_H_of_residuals`, `R38_threshold_eq`,
+  `R38_C_eq_app`, `R38_M_eq_app`, `R38_committed_product_lt`,
+  `R38_required_Azeta_of_committed_56`, `R38_wall_infeasible_realistic`
+  in file; R37 base left untouched (no duplication).
+
+Leaf mirror for R38 mid tier (eps, M) = (0.05, 0.07) at
+c38 = (4, 6.5, 0.3, 0.49): budget 0.05 + 0.07 * radius < 0.2 lifts
+R38_radius_lt (same mul_lt_mul_of_pos_left + linarith shape as R37),
+so 0.2 <= norm at R38.center discharges the center conjunct; deriv
+residual is exactly the second conjunct; leaf_of rebuilds
+R38_leaf_obligations; H_of discharges the gridFine H shape via
+R38_H_instance (with hc_mem + hc_eq per 4834, matching R37 form).
+Value-or-gap: budget 0.05 + 0.07 * 1.26 = 0.1382 < 0.2; full R38 H leaf
+now conditional only on two named numeric enclosures (0.2 <= norm at
+center + uniform norm deriv <= 0.07 on R38, not closed here).
+
+Wall verdict (infeasible at filed small-r numbers, exact numerals below):
+with disc factors Apoly = 56, Api = 1 and committed Agam = 1/10000000,
+closing the mid-tier threshold 0.05 + 700000 * 1.26 = 882000.05 needs
+Azeta >= 157500008928 (proved as R38_required_Azeta_of_committed_56),
+while the realistic O(1) range has Azeta <= 10 (true zeta is O(1) on
+this rect); the committed product 56*1*(1/10000000)*10 = 0.000056 is
+far below 882000.05 (R38_committed_product_lt). Hence no O(1) Azeta
+closes R38 at M = 700000; the two leaf enclosures above stay as the
+residual. Zero cells claimed closed.
+-/
+
+namespace CentralCoverAssembly
+
+/-- Numeric budget for the R38 mid tier on the true radius. -/
+theorem R38_budget_lt_app : (0.05 : ℝ) + 0.07 * R38.radius < 0.2 := by
+  have h := R38_radius_lt
+  have hM : 0.07 * R38.radius < 0.07 * 1.26 :=
+    mul_lt_mul_of_pos_left h (by norm_num)
+  linarith
+
+theorem R38_center_of_two_tenths_lower (hC : (0.2 : ℝ) ≤ ‖xiShifted R38.center‖) :
+    (0.05 : ℝ) + 0.07 * R38.radius ≤ ‖xiShifted R38.center‖ := by
+  have hB := R38_budget_lt_app
+  linarith
+
+def R38_center_residual_two_tenths : Prop :=
+  (0.2 : ℝ) ≤ ‖xiShifted R38.center‖
+
+theorem R38_center_obligation_of_residual_two_tenths
+    (h : R38_center_residual_two_tenths) :
+    (0.05 : ℝ) + 0.07 * R38.radius ≤ ‖xiShifted R38.center‖ :=
+  R38_center_of_two_tenths_lower h
+
+def R38_deriv_residual : Prop :=
+  ∀ w, R38.mem w → ‖deriv xiShifted w‖ ≤ (0.07 : ℝ)
+
+theorem R38_leaf_of_residuals (hc : R38_center_residual_two_tenths)
+    (hd : R38_deriv_residual) : R38_leaf_obligations :=
+  ⟨R38_center_obligation_of_residual_two_tenths hc, hd⟩
+
+theorem R38_H_of_residuals (hc : R38_center_residual_two_tenths)
+    (hd : R38_deriv_residual)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ gridFine)
+    (hc_eq : c = (4, 6.5, 0.3, 0.49)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ :=
+  R38_H_instance (R38_leaf_of_residuals hc hd) c hc_mem hc_eq
+
+/-- Small-r threshold value for R38 (mid tier, M = 700000). -/
+theorem R38_threshold_eq : (0.05 : ℝ) + 700000 * 1.26 = 882000.05 := by
+  norm_num
+
+/-- Disc factor product for R38 (poly 56 tier). -/
+theorem R38_C_eq_app : (56 : ℝ) * 1 * 10 * 10 = 5600 := by
+  norm_num
+
+/-- Cauchy M for R38 (same small-r numbers as filed bridge). -/
+theorem R38_M_eq_app : (5600 : ℝ) / 0.008 = 700000 := by
+  norm_num
+
+/-- Committed product far below threshold (exact numbers). -/
+theorem R38_committed_product_lt :
+    56 * 1 * (1 / 10000000) * (10 : ℝ) < (0.05 : ℝ) + 700000 * 1.26 := by
+  norm_num
+
+/-- With committed Agam, closing needs Azeta >= 157500008928 (exact floor). -/
+theorem R38_required_Azeta_of_committed_56 {Azeta : ℝ}
+    (h : (0.05 : ℝ) + 700000 * 1.26 ≤ 56 * 1 * (1 / 10000000) * Azeta) :
+    (157500008928 : ℝ) ≤ Azeta := by
+  have hb : (0.05 : ℝ) + 700000 * 1.26 = 882000.05 := by norm_num
+  rw [hb] at h
+  have hcoeff : (56 : ℝ) * 1 * (1 / 10000000) = 56 / 10000000 := by norm_num
+  rw [hcoeff] at h
+  have hpos : (0 : ℝ) < 56 / 10000000 := by norm_num
+  have hcomm : (56 : ℝ) / 10000000 * Azeta = Azeta * (56 / 10000000) := by ring
+  have h2 : (882000.05 : ℝ) ≤ Azeta * (56 / 10000000) := by
+    rw [← hcomm]
+    exact h
+  have hdiv : (882000.05 : ℝ) / (56 / 10000000) ≤ Azeta :=
+    (div_le_iff₀ hpos).mpr h2
+  have hnum : (157500008928 : ℝ) ≤ (882000.05 : ℝ) / (56 / 10000000) := by
+    rw [le_div_iff₀ hpos]
+    norm_num
+  exact le_trans hnum hdiv
+
+/-- Wall verdict: no realistic O(1) Azeta closes R38 at M = 700000. -/
+theorem R38_wall_infeasible_realistic {Azeta : ℝ} (hle : Azeta ≤ 10)
+    (h : (0.05 : ℝ) + 700000 * 1.26 ≤ 56 * 1 * (1 / 10000000) * Azeta) :
+    False := by
+  have hreq := R38_required_Azeta_of_committed_56 h
+  linarith
+
+end CentralCoverAssembly
+
+/-! ## ASSEMBLY-R39 leaf+H residual set + factor wall verdict (append-only, no redefinition)
+
+Grep record (read-only, verified before writing):
+- `R38` residual+wall is the shape model (18494-18578): `R38_budget_lt_app` 18497,
+  `R38_center_of_two_tenths_lower` 18503, `R38_center_residual_two_tenths` 18508,
+  `R38_center_obligation_of_residual_two_tenths` 18511, `R38_deriv_residual` 18516,
+  `R38_leaf_of_residuals` 18519, `R38_H_of_residuals` 18523, `R38_threshold_eq` 18535,
+  `R38_C_eq_app` 18539, `R38_M_eq_app` 18543, `R38_committed_product_lt` 18547,
+  `R38_required_Azeta_of_committed_56` 18552, `R38_wall_infeasible_realistic` 18572.
+- `R39` base present (outer tier `(0.002,0.07)` leaf): def 4849-4850;
+  coords 4852-4855 (`R39_x0/x1/y0/y1`); strip 4860-4861 (`R39_strip_lo/hi`);
+  dx 4863-4865; dy 4867-4869; radius_eq 4871-4874; radius_lt 4876-4877
+  (`R39.radius < 1.26` via `sample_cell_radius_bound` 421);
+  mem 4879-4885 (`(6,8.5,0.3,0.49)` in `gridFine` 1002);
+  leaf 4889-4891 (`R39_leaf_obligations`: center `0.002 + 0.07 * radius`
+  AND deriv `forall w, mem -> norm deriv <= 0.07`); fencing 4893-4895;
+  H 4918-4928 (`R39_H_instance` with `hc_mem + hc_eq`, `fine_eps_outer_pos`).
+- Small-r numbers for R39 filed separately (BG 13534/13538, BD 16013/16017:
+  C 5600, M 700000 at `0.008`). This block does not touch BG/BD namespaces.
+- Grep-clean before writing: no `R39_budget_lt_app`,
+  `R39_center_of_two_tenths_lower`, `R39_center_residual_two_tenths`,
+  `R39_center_obligation_of_residual_two_tenths`, `R39_deriv_residual`,
+  `R39_leaf_of_residuals`, `R39_H_of_residuals`, `R39_threshold_eq`,
+  `R39_C_eq_app`, `R39_M_eq_app`, `R39_committed_product_lt`,
+  `R39_required_Azeta_of_committed_56`, `R39_wall_infeasible_realistic`
+  in file; R38 base left untouched (no duplication).
+
+Leaf mirror for R39 outer tier (eps, M) = (0.002, 0.07) at
+c39 = (6, 8.5, 0.3, 0.49): budget 0.002 + 0.07 * radius < 0.2 lifts
+R39_radius_lt (same mul_lt_mul_of_pos_left + linarith shape as R38),
+so 0.2 <= norm at R39.center discharges the center conjunct; deriv
+residual is exactly the second conjunct; leaf_of rebuilds
+R39_leaf_obligations; H_of discharges the gridFine H shape via
+R39_H_instance (with hc_mem + hc_eq per 4918, matching R38 form).
+Value-or-gap: budget 0.002 + 0.07 * 1.26 = 0.0902 < 0.2; full R39 H leaf
+now conditional only on two named numeric enclosures (0.2 <= norm at
+center + uniform norm deriv <= 0.07 on R39, not closed here).
+
+Wall verdict (infeasible at filed small-r numbers, exact numerals below):
+with disc factors Apoly = 56, Api = 1 and committed Agam = 1/10000000,
+closing the outer-tier threshold 0.002 + 700000 * 1.26 = 882000.002 needs
+Azeta >= 157500000357 (proved as R39_required_Azeta_of_committed_56),
+while the realistic O(1) range has Azeta <= 10 (true zeta is O(1) on
+this rect); the committed product 56*1*(1/10000000)*10 = 0.000056 is
+far below 882000.002 (R39_committed_product_lt). Hence no O(1) Azeta
+closes R39 at M = 700000; the two leaf enclosures above stay as the
+residual. Zero cells claimed closed.
+-/
+
+namespace CentralCoverAssembly
+
+/-- Numeric budget for the R39 outer tier on the true radius. -/
+theorem R39_budget_lt_app : (0.002 : ℝ) + 0.07 * R39.radius < 0.2 := by
+  have h := R39_radius_lt
+  have hM : 0.07 * R39.radius < 0.07 * 1.26 :=
+    mul_lt_mul_of_pos_left h (by norm_num)
+  linarith
+
+theorem R39_center_of_two_tenths_lower (hC : (0.2 : ℝ) ≤ ‖xiShifted R39.center‖) :
+    (0.002 : ℝ) + 0.07 * R39.radius ≤ ‖xiShifted R39.center‖ := by
+  have hB := R39_budget_lt_app
+  linarith
+
+def R39_center_residual_two_tenths : Prop :=
+  (0.2 : ℝ) ≤ ‖xiShifted R39.center‖
+
+theorem R39_center_obligation_of_residual_two_tenths
+    (h : R39_center_residual_two_tenths) :
+    (0.002 : ℝ) + 0.07 * R39.radius ≤ ‖xiShifted R39.center‖ :=
+  R39_center_of_two_tenths_lower h
+
+def R39_deriv_residual : Prop :=
+  ∀ w, R39.mem w → ‖deriv xiShifted w‖ ≤ (0.07 : ℝ)
+
+theorem R39_leaf_of_residuals (hc : R39_center_residual_two_tenths)
+    (hd : R39_deriv_residual) : R39_leaf_obligations :=
+  ⟨R39_center_obligation_of_residual_two_tenths hc, hd⟩
+
+theorem R39_H_of_residuals (hc : R39_center_residual_two_tenths)
+    (hd : R39_deriv_residual)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ gridFine)
+    (hc_eq : c = (6, 8.5, 0.3, 0.49)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ :=
+  R39_H_instance (R39_leaf_of_residuals hc hd) c hc_mem hc_eq
+
+/-- Small-r threshold value for R39 (outer tier, M = 700000). -/
+theorem R39_threshold_eq : (0.002 : ℝ) + 700000 * 1.26 = 882000.002 := by
+  norm_num
+
+/-- Disc factor product for R39 (poly 56 tier). -/
+theorem R39_C_eq_app : (56 : ℝ) * 1 * 10 * 10 = 5600 := by
+  norm_num
+
+/-- Cauchy M for R39 (same small-r numbers as filed bridge). -/
+theorem R39_M_eq_app : (5600 : ℝ) / 0.008 = 700000 := by
+  norm_num
+
+/-- Committed product far below threshold (exact numbers). -/
+theorem R39_committed_product_lt :
+    56 * 1 * (1 / 10000000) * (10 : ℝ) < (0.002 : ℝ) + 700000 * 1.26 := by
+  norm_num
+
+/-- With committed Agam, closing needs Azeta >= 157500000357 (exact floor). -/
+theorem R39_required_Azeta_of_committed_56 {Azeta : ℝ}
+    (h : (0.002 : ℝ) + 700000 * 1.26 ≤ 56 * 1 * (1 / 10000000) * Azeta) :
+    (157500000357 : ℝ) ≤ Azeta := by
+  have hb : (0.002 : ℝ) + 700000 * 1.26 = 882000.002 := by norm_num
+  rw [hb] at h
+  have hcoeff : (56 : ℝ) * 1 * (1 / 10000000) = 56 / 10000000 := by norm_num
+  rw [hcoeff] at h
+  have hpos : (0 : ℝ) < 56 / 10000000 := by norm_num
+  have hcomm : (56 : ℝ) / 10000000 * Azeta = Azeta * (56 / 10000000) := by ring
+  have h2 : (882000.002 : ℝ) ≤ Azeta * (56 / 10000000) := by
+    rw [← hcomm]
+    exact h
+  have hdiv : (882000.002 : ℝ) / (56 / 10000000) ≤ Azeta :=
+    (div_le_iff₀ hpos).mpr h2
+  have hnum : (157500000357 : ℝ) ≤ (882000.002 : ℝ) / (56 / 10000000) := by
+    rw [le_div_iff₀ hpos]
+    norm_num
+  exact le_trans hnum hdiv
+
+/-- Wall verdict: no realistic O(1) Azeta closes R39 at M = 700000. -/
+theorem R39_wall_infeasible_realistic {Azeta : ℝ} (hle : Azeta ≤ 10)
+    (h : (0.002 : ℝ) + 700000 * 1.26 ≤ 56 * 1 * (1 / 10000000) * Azeta) :
+    False := by
+  have hreq := R39_required_Azeta_of_committed_56 h
+  linarith
+
+end CentralCoverAssembly

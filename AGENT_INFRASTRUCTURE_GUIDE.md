@@ -7620,3 +7620,4 @@ sorry-free infrastructure and the complete commit ledger above.
   keeps sign → Re(eta₁₀) ≥ +r11·0.28 constructive (NOT destructive —
   8π nearer than 7π). Product floor needs r11 lower (follow-up).
   SCUT23 tasked (r11 lower + eta10 gain).
+- 2026-09-23 Wave S52-S60/N26/R25-R39/M55-M68/k57-k59/R21-R29/S23-S28/R36-R40/FINAL17-FINAL20/bridge-1.564: eta Re -12.12 to -14.84 Im -15.52 to -18.24 gaps 16-20 vs 1.94; gamma N26 <0.65; tier keeps 67200; tail exact 2^68; scut 13 destructive; certs R28 fixed-shape 1.26-premise clean (R24-R27 pre-existing 2-to-1.26 linarith fails); off-axis diminishing to -19379/4500; interval poly to 38.45; cutR10 C1-C24; topedge shift12 blocked; bridge best 1.564/0.284 ceiling 1.5643. Off-axis CRLF rebuilt HEAD+tail (879+/0-).

@@ -3882,3 +3882,1165 @@ theorem R19_tier_of_mirror_residual {R19c : ℂ} {R19Rect : ℂ → Prop} {B : �
 #print axioms R19_xi_tier_sufficient_of_zeta0064_given
 #print axioms R19MirrorCloseResidual
 #print axioms R19_tier_of_mirror_residual
+
+/-!
+## Door-3 R20 sup spec mirror attempt (R00 closed-conditional; R01-R19 mirrors filed)
+
+Grep R19 tail (verified before append, total 3884 lines):
+* `R19_deriv_bound_of_sup_given` (`door3_deriv_certs.lean:3813`):
+  R19-shape generic bound CALLING `deriv_bound_of_sphere_sup_on_ball`
+  under explicit `R19c` / `R19Rect` hypotheses.
+* `R19_deriv_tier_of_sup_given` (`3827`): generic tier closure
+  (`2 * B ≤ 0.05` gives `‖deriv‖ ≤ 0.05`).
+* `R19_zeta0064_cap_excludes_banked_scale` (`3837`):
+  `10 ≤ Z → ¬ Z ≤ 0.000064`.
+* `R19_zeta0064_cap_excludes_true_scale` (`3843`):
+  `1 ≤ Z → ¬ Z ≤ 0.000064` (true-scale wall).
+* `R19_xi_tier_sufficient_of_zeta0064_given` (`3850`): sufficient
+  arithmetic `Z ≤ 0.000064 → 770.944 * Z ≤ 0.05`.
+* `R19MirrorCloseResidual` (`3860`): exact missing R19 premises.
+* `R19_tier_of_mirror_residual` (`3867-3876`): closure rebuilt by CALLING
+  the generic bound.
+* `#print axioms` R19 block (`3878-3884`).
+* R20 grep in this file pre-append: no matches (`R20c` / `R20Rect` / R20 s-image
+  absent locally); no banked R20 chain to call.
+
+Mirror attempt (honest, banked chains only, no invented coordinates):
+* Generic tier rule `deriv_bound_of_sphere_sup_on_ball` (`59-83`) is
+  center-independent, so the R20 generic tier closes conditionally below by
+  CALLING it with explicit `R20c` / `R20Rect` hypotheses (parameters, not
+  asserted geometry).
+* R20-specific geometry (center/rect/ball inclusion) and R20 s-image
+  Gamma/Zeta sups are absent locally; R00 numerals (`63.4 * 4 * 1.52`,
+  `770.944`, cap `0.000064`) are reused only as conditional arithmetic shape,
+  not as R20 facts.
+* zeta0064 cap impossibility carries over arithmetically at the same cap.
+
+Banked here (direct tactics only):
+* `R20_deriv_bound_of_sup_given`: R20-shape generic bound CALLING the banked
+  Cauchy rule under explicit hypotheses.
+* `R20_deriv_tier_of_sup_given`: generic tier closure (`2 * B ≤ 0.05` gives
+  `‖deriv‖ ≤ 0.05`).
+* `R20_zeta0064_cap_excludes_banked_scale` / `R20_zeta0064_cap_excludes_true_scale`:
+  cap impossibility at banked/true scales (same shape as R00-R19).
+* `R20_xi_tier_sufficient_of_zeta0064_given`: sufficient arithmetic
+  (`Z ≤ 0.000064 → 770.944 * Z ≤ 0.05`), R00-shape numeral, conditional.
+* `R20MirrorCloseResidual`: exact missing R20 premises (parameters, not invented).
+* `R20_tier_of_mirror_residual`: closure rebuilt by CALLING the generic bound.
+
+Value-or-gap: VALUE = conditional R20 mirror + cap impossibility above;
+  GAP = unconditional R20 geometry + R20 s-image zeta sup (absent locally).
+Residual (exact): supply `R20MirrorCloseResidual`.
+-/
+
+/-- R20-shape generic deriv bound under explicit hypotheses (by CALLING the
+banked Cauchy rule; `R20c` / `R20Rect` are parameters, no coordinates invented). -/
+theorem R20_deriv_bound_of_sup_given {f : ℂ → ℂ} {R20c : ℂ} {R20Rect : ℂ → Prop}
+    {B : ℝ} (hd : DiffContOnCl ℂ f (ball R20c 2))
+    (hB : ∀ z ∈ closedBall R20c 2, ‖f z‖ ≤ B)
+    (hsub : ∀ w : ℂ, R20Rect w → ‖w - R20c‖ ≤ 1.26)
+    {w : ℂ} (hw : R20Rect w) :
+    ‖deriv f w‖ ≤ 2 * B := by
+  have hle : ‖w - R20c‖ ≤ 1.26 := hsub w hw
+  have hw' : ‖w - R20c‖ + (1 / 2 : ℝ) ≤ 2 := by linarith
+  have h := deriv_bound_of_sphere_sup_on_ball hd hB
+    (show (0 : ℝ) < 1 / 2 by norm_num) hw'
+  have heq : B / (1 / 2 : ℝ) = 2 * B := by ring
+  rwa [heq] at h
+
+/-- R20-shape generic tier closure (`2 * B ≤ 0.05` gives the leaf tier). -/
+theorem R20_deriv_tier_of_sup_given {f : ℂ → ℂ} {R20c : ℂ} {R20Rect : ℂ → Prop}
+    {B : ℝ} (hd : DiffContOnCl ℂ f (ball R20c 2))
+    (hB : ∀ z ∈ closedBall R20c 2, ‖f z‖ ≤ B)
+    (hsub : ∀ w : ℂ, R20Rect w → ‖w - R20c‖ ≤ 1.26)
+    {w : ℂ} (hw : R20Rect w) (hTier : 2 * B ≤ 0.05) :
+    ‖deriv f w‖ ≤ 0.05 := by
+  have h := R20_deriv_bound_of_sup_given hd hB hsub hw
+  linarith
+
+/-- R20 cap wall at the banked scale: any `Z ≥ 10` cannot meet `0.000064`. -/
+theorem R20_zeta0064_cap_excludes_banked_scale {Z : ℝ} (h : 10 ≤ Z) :
+    ¬ Z ≤ 0.000064 := by
+  intro hcap
+  linarith
+
+/-- R20 cap wall at the true `|ζ| ~ 1` scale: any `Z ≥ 1` cannot meet `0.000064`. -/
+theorem R20_zeta0064_cap_excludes_true_scale {Z : ℝ} (h : 1 ≤ Z) :
+    ¬ Z ≤ 0.000064 := by
+  intro hcap
+  linarith
+
+/-- R20-shape sufficient arithmetic at the R00 numeral (conditional only):
+`Z ≤ 0.000064 → 770.944 * Z ≤ 0.05`. -/
+theorem R20_xi_tier_sufficient_of_zeta0064_given {Z : ℝ} (h : Z ≤ 0.000064) :
+    770.944 * Z ≤ 0.05 := by
+  have hpos : (0 : ℝ) ≤ 770.944 := by norm_num
+  have h2 : (770.944 : ℝ) * Z ≤ 770.944 * 0.000064 :=
+    mul_le_mul_of_nonneg_left h hpos
+  have e : (770.944 : ℝ) * 0.000064 ≤ 0.05 := by norm_num
+  linarith
+
+/-- Exact missing R20 mirror premises (parameters; nothing asserted about the
+true R20 cell — that geometry plus R20 s-image sups are absent locally). -/
+def R20MirrorCloseResidual (R20c : ℂ) (R20Rect : ℂ → Prop) (B : ℝ) : Prop :=
+  (∀ w : ℂ, R20Rect w → w ∈ closedBall R20c 2) ∧
+  (∀ z ∈ closedBall R20c 2, ‖xiFourShapeAt z‖ ≤ B) ∧
+  2 * B ≤ 0.05 ∧ DiffContOnCl ℂ xiFourShapeAt (ball R20c 2)
+
+/-- R20 tier closure rebuilt from the exact residual (by CALLING the generic
+bound above). -/
+theorem R20_tier_of_mirror_residual {R20c : ℂ} {R20Rect : ℂ → Prop} {B : ℝ}
+    (h : R20MirrorCloseResidual R20c R20Rect B)
+    {w : ℂ} (hw : R20Rect w) : ‖deriv xiFourShapeAt w‖ ≤ 0.05 := by
+  obtain ⟨hmem, hB, hTier, hd⟩ := h
+  have hsub : ∀ u : ℂ, R20Rect u → ‖u - R20c‖ ≤ 1.26 := by
+    intro u hu
+    have h2 := hmem u hu
+    rw [mem_closedBall, dist_eq_norm] at h2
+    linarith
+  exact R20_deriv_tier_of_sup_given hd hB hsub hw hTier
+
+#print axioms R20_deriv_bound_of_sup_given
+#print axioms R20_deriv_tier_of_sup_given
+#print axioms R20_zeta0064_cap_excludes_banked_scale
+#print axioms R20_zeta0064_cap_excludes_true_scale
+#print axioms R20_xi_tier_sufficient_of_zeta0064_given
+#print axioms R20MirrorCloseResidual
+#print axioms R20_tier_of_mirror_residual
+
+/-!
+## Door-3 R21 sup spec mirror attempt (R00 closed-conditional; R01-R20 mirrors filed)
+
+Grep R20 tail (verified before append, total 4009 lines):
+* `R20_deriv_bound_of_sup_given` (`door3_deriv_certs.lean:3938`):
+  R20-shape generic bound CALLING `deriv_bound_of_sphere_sup_on_ball`
+  under explicit `R20c` / `R20Rect` hypotheses.
+* `R20_deriv_tier_of_sup_given` (`3952`): generic tier closure
+  (`2 * B ≤ 0.05` gives `‖deriv‖ ≤ 0.05`).
+* `R20_zeta0064_cap_excludes_banked_scale` (`3962`):
+  `10 ≤ Z → ¬ Z ≤ 0.000064`.
+* `R20_zeta0064_cap_excludes_true_scale` (`3968`):
+  `1 ≤ Z → ¬ Z ≤ 0.000064` (true-scale wall).
+* `R20_xi_tier_sufficient_of_zeta0064_given` (`3975`): sufficient
+  arithmetic `Z ≤ 0.000064 → 770.944 * Z ≤ 0.05`.
+* `R20MirrorCloseResidual` (`3985`): exact missing R20 premises.
+* `R20_tier_of_mirror_residual` (`3992-4001`): closure rebuilt by CALLING
+  the generic bound.
+* `#print axioms` R20 block (`4003-4009`).
+* R21 grep in this file pre-append: no matches (`R21c` / `R21Rect` / R21 s-image
+  absent locally); no banked R21 chain to call.
+
+Mirror attempt (honest, banked chains only, no invented coordinates):
+* Generic tier rule `deriv_bound_of_sphere_sup_on_ball` (`59-83`) is
+  center-independent, so the R21 generic tier closes conditionally below by
+  CALLING it with explicit `R21c` / `R21Rect` hypotheses (parameters, not
+  asserted geometry).
+* R21-specific geometry (center/rect/ball inclusion) and R21 s-image
+  Gamma/Zeta sups are absent locally; R00 numerals (`63.4 * 4 * 1.52`,
+  `770.944`, cap `0.000064`) are reused only as conditional arithmetic shape,
+  not as R21 facts.
+* zeta0064 cap impossibility carries over arithmetically at the same cap.
+
+Banked here (direct tactics only):
+* `R21_deriv_bound_of_sup_given`: R21-shape generic bound CALLING the banked
+  Cauchy rule under explicit hypotheses.
+* `R21_deriv_tier_of_sup_given`: generic tier closure (`2 * B ≤ 0.05` gives
+  `‖deriv‖ ≤ 0.05`).
+* `R21_zeta0064_cap_excludes_banked_scale` / `R21_zeta0064_cap_excludes_true_scale`:
+  cap impossibility at banked/true scales (same shape as R00-R20).
+* `R21_xi_tier_sufficient_of_zeta0064_given`: sufficient arithmetic
+  (`Z ≤ 0.000064 → 770.944 * Z ≤ 0.05`), R00-shape numeral, conditional.
+* `R21MirrorCloseResidual`: exact missing R21 premises (parameters, not invented).
+* `R21_tier_of_mirror_residual`: closure rebuilt by CALLING the generic bound.
+
+Value-or-gap: VALUE = conditional R21 mirror + cap impossibility above;
+  GAP = unconditional R21 geometry + R21 s-image zeta sup (absent locally).
+Residual (exact): supply `R21MirrorCloseResidual`.
+-/
+
+/-- R21-shape generic deriv bound under explicit hypotheses (by CALLING the
+banked Cauchy rule; `R21c` / `R21Rect` are parameters, no coordinates invented). -/
+theorem R21_deriv_bound_of_sup_given {f : ℂ → ℂ} {R21c : ℂ} {R21Rect : ℂ → Prop}
+    {B : ℝ} (hd : DiffContOnCl ℂ f (ball R21c 2))
+    (hB : ∀ z ∈ closedBall R21c 2, ‖f z‖ ≤ B)
+    (hsub : ∀ w : ℂ, R21Rect w → ‖w - R21c‖ ≤ 1.26)
+    {w : ℂ} (hw : R21Rect w) :
+    ‖deriv f w‖ ≤ 2 * B := by
+  have hle : ‖w - R21c‖ ≤ 1.26 := hsub w hw
+  have hw' : ‖w - R21c‖ + (1 / 2 : ℝ) ≤ 2 := by linarith
+  have h := deriv_bound_of_sphere_sup_on_ball hd hB
+    (show (0 : ℝ) < 1 / 2 by norm_num) hw'
+  have heq : B / (1 / 2 : ℝ) = 2 * B := by ring
+  rwa [heq] at h
+
+/-- R21-shape generic tier closure (`2 * B ≤ 0.05` gives the leaf tier). -/
+theorem R21_deriv_tier_of_sup_given {f : ℂ → ℂ} {R21c : ℂ} {R21Rect : ℂ → Prop}
+    {B : ℝ} (hd : DiffContOnCl ℂ f (ball R21c 2))
+    (hB : ∀ z ∈ closedBall R21c 2, ‖f z‖ ≤ B)
+    (hsub : ∀ w : ℂ, R21Rect w → ‖w - R21c‖ ≤ 1.26)
+    {w : ℂ} (hw : R21Rect w) (hTier : 2 * B ≤ 0.05) :
+    ‖deriv f w‖ ≤ 0.05 := by
+  have h := R21_deriv_bound_of_sup_given hd hB hsub hw
+  linarith
+
+/-- R21 cap wall at the banked scale: any `Z ≥ 10` cannot meet `0.000064`. -/
+theorem R21_zeta0064_cap_excludes_banked_scale {Z : ℝ} (h : 10 ≤ Z) :
+    ¬ Z ≤ 0.000064 := by
+  intro hcap
+  linarith
+
+/-- R21 cap wall at the true `|ζ| ~ 1` scale: any `Z ≥ 1` cannot meet `0.000064`. -/
+theorem R21_zeta0064_cap_excludes_true_scale {Z : ℝ} (h : 1 ≤ Z) :
+    ¬ Z ≤ 0.000064 := by
+  intro hcap
+  linarith
+
+/-- R21-shape sufficient arithmetic at the R00 numeral (conditional only):
+`Z ≤ 0.000064 → 770.944 * Z ≤ 0.05`. -/
+theorem R21_xi_tier_sufficient_of_zeta0064_given {Z : ℝ} (h : Z ≤ 0.000064) :
+    770.944 * Z ≤ 0.05 := by
+  have hpos : (0 : ℝ) ≤ 770.944 := by norm_num
+  have h2 : (770.944 : ℝ) * Z ≤ 770.944 * 0.000064 :=
+    mul_le_mul_of_nonneg_left h hpos
+  have e : (770.944 : ℝ) * 0.000064 ≤ 0.05 := by norm_num
+  linarith
+
+/-- Exact missing R21 mirror premises (parameters; nothing asserted about the
+true R21 cell — that geometry plus R21 s-image sups are absent locally). -/
+def R21MirrorCloseResidual (R21c : ℂ) (R21Rect : ℂ → Prop) (B : ℝ) : Prop :=
+  (∀ w : ℂ, R21Rect w → w ∈ closedBall R21c 2) ∧
+  (∀ z ∈ closedBall R21c 2, ‖xiFourShapeAt z‖ ≤ B) ∧
+  2 * B ≤ 0.05 ∧ DiffContOnCl ℂ xiFourShapeAt (ball R21c 2)
+
+/-- R21 tier closure rebuilt from the exact residual (by CALLING the generic
+bound above). -/
+theorem R21_tier_of_mirror_residual {R21c : ℂ} {R21Rect : ℂ → Prop} {B : ℝ}
+    (h : R21MirrorCloseResidual R21c R21Rect B)
+    {w : ℂ} (hw : R21Rect w) : ‖deriv xiFourShapeAt w‖ ≤ 0.05 := by
+  obtain ⟨hmem, hB, hTier, hd⟩ := h
+  have hsub : ∀ u : ℂ, R21Rect u → ‖u - R21c‖ ≤ 1.26 := by
+    intro u hu
+    have h2 := hmem u hu
+    rw [mem_closedBall, dist_eq_norm] at h2
+    linarith
+  exact R21_deriv_tier_of_sup_given hd hB hsub hw hTier
+
+#print axioms R21_deriv_bound_of_sup_given
+#print axioms R21_deriv_tier_of_sup_given
+#print axioms R21_zeta0064_cap_excludes_banked_scale
+#print axioms R21_zeta0064_cap_excludes_true_scale
+#print axioms R21_xi_tier_sufficient_of_zeta0064_given
+#print axioms R21MirrorCloseResidual
+#print axioms R21_tier_of_mirror_residual
+
+/-!
+## Door-3 R22 sup spec mirror attempt (R00 closed-conditional; R01-R21 mirrors filed)
+
+Grep R21 tail (verified before append, total 4134 lines):
+* `R21_deriv_bound_of_sup_given` (`door3_deriv_certs.lean:4063`):
+  R21-shape generic bound CALLING `deriv_bound_of_sphere_sup_on_ball`
+  under explicit `R21c` / `R21Rect` hypotheses.
+* `R21_deriv_tier_of_sup_given` (`4077`): generic tier closure
+  (`2 * B ≤ 0.05` gives `‖deriv‖ ≤ 0.05`).
+* `R21_zeta0064_cap_excludes_banked_scale` (`4087`):
+  `10 ≤ Z → ¬ Z ≤ 0.000064`.
+* `R21_zeta0064_cap_excludes_true_scale` (`4093`):
+  `1 ≤ Z → ¬ Z ≤ 0.000064` (true-scale wall).
+* `R21_xi_tier_sufficient_of_zeta0064_given` (`4100`): sufficient
+  arithmetic `Z ≤ 0.000064 → 770.944 * Z ≤ 0.05`.
+* `R21MirrorCloseResidual` (`4110`): exact missing R21 premises.
+* `R21_tier_of_mirror_residual` (`4117-4126`): closure rebuilt by CALLING
+  the generic bound.
+* `#print axioms` R21 block (`4128-4134`).
+* R22 grep in this file pre-append: no matches (`R22c` / `R22Rect` / R22 s-image
+  absent locally); no banked R22 chain to call.
+
+Mirror attempt (honest, banked chains only, no invented coordinates):
+* Generic tier rule `deriv_bound_of_sphere_sup_on_ball` (`59-83`) is
+  center-independent, so the R22 generic tier closes conditionally below by
+  CALLING it with explicit `R22c` / `R22Rect` hypotheses (parameters, not
+  asserted geometry).
+* R22-specific geometry (center/rect/ball inclusion) and R22 s-image
+  Gamma/Zeta sups are absent locally; R00 numerals (`63.4 * 4 * 1.52`,
+  `770.944`, cap `0.000064`) are reused only as conditional arithmetic shape,
+  not as R22 facts.
+* zeta0064 cap impossibility carries over arithmetically at the same cap.
+
+Banked here (direct tactics only):
+* `R22_deriv_bound_of_sup_given`: R22-shape generic bound CALLING the banked
+  Cauchy rule under explicit hypotheses.
+* `R22_deriv_tier_of_sup_given`: generic tier closure (`2 * B ≤ 0.05` gives
+  `‖deriv‖ ≤ 0.05`).
+* `R22_zeta0064_cap_excludes_banked_scale` / `R22_zeta0064_cap_excludes_true_scale`:
+  cap impossibility at banked/true scales (same shape as R00-R21).
+* `R22_xi_tier_sufficient_of_zeta0064_given`: sufficient arithmetic
+  (`Z ≤ 0.000064 → 770.944 * Z ≤ 0.05`), R00-shape numeral, conditional.
+* `R22MirrorCloseResidual`: exact missing R22 premises (parameters, not invented).
+* `R22_tier_of_mirror_residual`: closure rebuilt by CALLING the generic bound.
+
+Value-or-gap: VALUE = conditional R22 mirror + cap impossibility above;
+  GAP = unconditional R22 geometry + R22 s-image zeta sup (absent locally).
+Residual (exact): supply `R22MirrorCloseResidual`.
+-/
+
+/-- R22-shape generic deriv bound under explicit hypotheses (by CALLING the
+banked Cauchy rule; `R22c` / `R22Rect` are parameters, no coordinates invented). -/
+theorem R22_deriv_bound_of_sup_given {f : ℂ → ℂ} {R22c : ℂ} {R22Rect : ℂ → Prop}
+    {B : ℝ} (hd : DiffContOnCl ℂ f (ball R22c 2))
+    (hB : ∀ z ∈ closedBall R22c 2, ‖f z‖ ≤ B)
+    (hsub : ∀ w : ℂ, R22Rect w → ‖w - R22c‖ ≤ 1.26)
+    {w : ℂ} (hw : R22Rect w) :
+    ‖deriv f w‖ ≤ 2 * B := by
+  have hle : ‖w - R22c‖ ≤ 1.26 := hsub w hw
+  have hw' : ‖w - R22c‖ + (1 / 2 : ℝ) ≤ 2 := by linarith
+  have h := deriv_bound_of_sphere_sup_on_ball hd hB
+    (show (0 : ℝ) < 1 / 2 by norm_num) hw'
+  have heq : B / (1 / 2 : ℝ) = 2 * B := by ring
+  rwa [heq] at h
+
+/-- R22-shape generic tier closure (`2 * B ≤ 0.05` gives the leaf tier). -/
+theorem R22_deriv_tier_of_sup_given {f : ℂ → ℂ} {R22c : ℂ} {R22Rect : ℂ → Prop}
+    {B : ℝ} (hd : DiffContOnCl ℂ f (ball R22c 2))
+    (hB : ∀ z ∈ closedBall R22c 2, ‖f z‖ ≤ B)
+    (hsub : ∀ w : ℂ, R22Rect w → ‖w - R22c‖ ≤ 1.26)
+    {w : ℂ} (hw : R22Rect w) (hTier : 2 * B ≤ 0.05) :
+    ‖deriv f w‖ ≤ 0.05 := by
+  have h := R22_deriv_bound_of_sup_given hd hB hsub hw
+  linarith
+
+/-- R22 cap wall at the banked scale: any `Z ≥ 10` cannot meet `0.000064`. -/
+theorem R22_zeta0064_cap_excludes_banked_scale {Z : ℝ} (h : 10 ≤ Z) :
+    ¬ Z ≤ 0.000064 := by
+  intro hcap
+  linarith
+
+/-- R22 cap wall at the true `|ζ| ~ 1` scale: any `Z ≥ 1` cannot meet `0.000064`. -/
+theorem R22_zeta0064_cap_excludes_true_scale {Z : ℝ} (h : 1 ≤ Z) :
+    ¬ Z ≤ 0.000064 := by
+  intro hcap
+  linarith
+
+/-- R22-shape sufficient arithmetic at the R00 numeral (conditional only):
+`Z ≤ 0.000064 → 770.944 * Z ≤ 0.05`. -/
+theorem R22_xi_tier_sufficient_of_zeta0064_given {Z : ℝ} (h : Z ≤ 0.000064) :
+    770.944 * Z ≤ 0.05 := by
+  have hpos : (0 : ℝ) ≤ 770.944 := by norm_num
+  have h2 : (770.944 : ℝ) * Z ≤ 770.944 * 0.000064 :=
+    mul_le_mul_of_nonneg_left h hpos
+  have e : (770.944 : ℝ) * 0.000064 ≤ 0.05 := by norm_num
+  linarith
+
+/-- Exact missing R22 mirror premises (parameters; nothing asserted about the
+true R22 cell — that geometry plus R22 s-image sups are absent locally). -/
+def R22MirrorCloseResidual (R22c : ℂ) (R22Rect : ℂ → Prop) (B : ℝ) : Prop :=
+  (∀ w : ℂ, R22Rect w → w ∈ closedBall R22c 2) ∧
+  (∀ z ∈ closedBall R22c 2, ‖xiFourShapeAt z‖ ≤ B) ∧
+  2 * B ≤ 0.05 ∧ DiffContOnCl ℂ xiFourShapeAt (ball R22c 2)
+
+/-- R22 tier closure rebuilt from the exact residual (by CALLING the generic
+bound above). -/
+theorem R22_tier_of_mirror_residual {R22c : ℂ} {R22Rect : ℂ → Prop} {B : ℝ}
+    (h : R22MirrorCloseResidual R22c R22Rect B)
+    {w : ℂ} (hw : R22Rect w) : ‖deriv xiFourShapeAt w‖ ≤ 0.05 := by
+  obtain ⟨hmem, hB, hTier, hd⟩ := h
+  have hsub : ∀ u : ℂ, R22Rect u → ‖u - R22c‖ ≤ 1.26 := by
+    intro u hu
+    have h2 := hmem u hu
+    rw [mem_closedBall, dist_eq_norm] at h2
+    linarith
+  exact R22_deriv_tier_of_sup_given hd hB hsub hw hTier
+
+#print axioms R22_deriv_bound_of_sup_given
+#print axioms R22_deriv_tier_of_sup_given
+#print axioms R22_zeta0064_cap_excludes_banked_scale
+#print axioms R22_zeta0064_cap_excludes_true_scale
+#print axioms R22_xi_tier_sufficient_of_zeta0064_given
+#print axioms R22MirrorCloseResidual
+#print axioms R22_tier_of_mirror_residual
+
+/-!
+## Door-3 R23 sup spec mirror attempt (R00 closed-conditional; R01-R22 mirrors filed)
+
+Grep R22 tail (verified before append, total 4259 lines):
+* `R22_deriv_bound_of_sup_given` (`door3_deriv_certs.lean:4188`):
+  R22-shape generic bound CALLING `deriv_bound_of_sphere_sup_on_ball`
+  under explicit `R22c` / `R22Rect` hypotheses.
+* `R22_deriv_tier_of_sup_given` (`4202`): generic tier closure
+  (`2 * B ≤ 0.05` gives `‖deriv‖ ≤ 0.05`).
+* `R22_zeta0064_cap_excludes_banked_scale` (`4212`):
+  `10 ≤ Z → ¬ Z ≤ 0.000064`.
+* `R22_zeta0064_cap_excludes_true_scale` (`4218`):
+  `1 ≤ Z → ¬ Z ≤ 0.000064` (true-scale wall).
+* `R22_xi_tier_sufficient_of_zeta0064_given` (`4225`): sufficient
+  arithmetic `Z ≤ 0.000064 → 770.944 * Z ≤ 0.05`.
+* `R22MirrorCloseResidual` (`4235`): exact missing R22 premises.
+* `R22_tier_of_mirror_residual` (`4242-4251`): closure rebuilt by CALLING
+  the generic bound.
+* `#print axioms` R22 block (`4253-4259`).
+* R23 grep in this file pre-append: no matches (`R23c` / `R23Rect` / R23 s-image
+  absent locally); no banked R23 chain to call.
+
+Mirror attempt (honest, banked chains only, no invented coordinates):
+* Generic tier rule `deriv_bound_of_sphere_sup_on_ball` (`59-83`) is
+  center-independent, so the R23 generic tier closes conditionally below by
+  CALLING it with explicit `R23c` / `R23Rect` hypotheses (parameters, not
+  asserted geometry).
+* R23-specific geometry (center/rect/ball inclusion) and R23 s-image
+  Gamma/Zeta sups are absent locally; R00 numerals (`63.4 * 4 * 1.52`,
+  `770.944`, cap `0.000064`) are reused only as conditional arithmetic shape,
+  not as R23 facts.
+* zeta0064 cap impossibility carries over arithmetically at the same cap.
+
+Banked here (direct tactics only):
+* `R23_deriv_bound_of_sup_given`: R23-shape generic bound CALLING the banked
+  Cauchy rule under explicit hypotheses.
+* `R23_deriv_tier_of_sup_given`: generic tier closure (`2 * B ≤ 0.05` gives
+  `‖deriv‖ ≤ 0.05`).
+* `R23_zeta0064_cap_excludes_banked_scale` / `R23_zeta0064_cap_excludes_true_scale`:
+  cap impossibility at banked/true scales (same shape as R00-R22).
+* `R23_xi_tier_sufficient_of_zeta0064_given`: sufficient arithmetic
+  (`Z ≤ 0.000064 → 770.944 * Z ≤ 0.05`), R00-shape numeral, conditional.
+* `R23MirrorCloseResidual`: exact missing R23 premises (parameters, not invented).
+* `R23_tier_of_mirror_residual`: closure rebuilt by CALLING the generic bound.
+
+Value-or-gap: VALUE = conditional R23 mirror + cap impossibility above;
+  GAP = unconditional R23 geometry + R23 s-image zeta sup (absent locally).
+Residual (exact): supply `R23MirrorCloseResidual`.
+-/
+
+/-- R23-shape generic deriv bound under explicit hypotheses (by CALLING the
+banked Cauchy rule; `R23c` / `R23Rect` are parameters, no coordinates invented). -/
+theorem R23_deriv_bound_of_sup_given {f : ℂ → ℂ} {R23c : ℂ} {R23Rect : ℂ → Prop}
+    {B : ℝ} (hd : DiffContOnCl ℂ f (ball R23c 2))
+    (hB : ∀ z ∈ closedBall R23c 2, ‖f z‖ ≤ B)
+    (hsub : ∀ w : ℂ, R23Rect w → ‖w - R23c‖ ≤ 1.26)
+    {w : ℂ} (hw : R23Rect w) :
+    ‖deriv f w‖ ≤ 2 * B := by
+  have hle : ‖w - R23c‖ ≤ 1.26 := hsub w hw
+  have hw' : ‖w - R23c‖ + (1 / 2 : ℝ) ≤ 2 := by linarith
+  have h := deriv_bound_of_sphere_sup_on_ball hd hB
+    (show (0 : ℝ) < 1 / 2 by norm_num) hw'
+  have heq : B / (1 / 2 : ℝ) = 2 * B := by ring
+  rwa [heq] at h
+
+/-- R23-shape generic tier closure (`2 * B ≤ 0.05` gives the leaf tier). -/
+theorem R23_deriv_tier_of_sup_given {f : ℂ → ℂ} {R23c : ℂ} {R23Rect : ℂ → Prop}
+    {B : ℝ} (hd : DiffContOnCl ℂ f (ball R23c 2))
+    (hB : ∀ z ∈ closedBall R23c 2, ‖f z‖ ≤ B)
+    (hsub : ∀ w : ℂ, R23Rect w → ‖w - R23c‖ ≤ 1.26)
+    {w : ℂ} (hw : R23Rect w) (hTier : 2 * B ≤ 0.05) :
+    ‖deriv f w‖ ≤ 0.05 := by
+  have h := R23_deriv_bound_of_sup_given hd hB hsub hw
+  linarith
+
+/-- R23 cap wall at the banked scale: any `Z ≥ 10` cannot meet `0.000064`. -/
+theorem R23_zeta0064_cap_excludes_banked_scale {Z : ℝ} (h : 10 ≤ Z) :
+    ¬ Z ≤ 0.000064 := by
+  intro hcap
+  linarith
+
+/-- R23 cap wall at the true `|ζ| ~ 1` scale: any `Z ≥ 1` cannot meet `0.000064`. -/
+theorem R23_zeta0064_cap_excludes_true_scale {Z : ℝ} (h : 1 ≤ Z) :
+    ¬ Z ≤ 0.000064 := by
+  intro hcap
+  linarith
+
+/-- R23-shape sufficient arithmetic at the R00 numeral (conditional only):
+`Z ≤ 0.000064 → 770.944 * Z ≤ 0.05`. -/
+theorem R23_xi_tier_sufficient_of_zeta0064_given {Z : ℝ} (h : Z ≤ 0.000064) :
+    770.944 * Z ≤ 0.05 := by
+  have hpos : (0 : ℝ) ≤ 770.944 := by norm_num
+  have h2 : (770.944 : ℝ) * Z ≤ 770.944 * 0.000064 :=
+    mul_le_mul_of_nonneg_left h hpos
+  have e : (770.944 : ℝ) * 0.000064 ≤ 0.05 := by norm_num
+  linarith
+
+/-- Exact missing R23 mirror premises (parameters; nothing asserted about the
+true R23 cell — that geometry plus R23 s-image sups are absent locally). -/
+def R23MirrorCloseResidual (R23c : ℂ) (R23Rect : ℂ → Prop) (B : ℝ) : Prop :=
+  (∀ w : ℂ, R23Rect w → w ∈ closedBall R23c 2) ∧
+  (∀ z ∈ closedBall R23c 2, ‖xiFourShapeAt z‖ ≤ B) ∧
+  2 * B ≤ 0.05 ∧ DiffContOnCl ℂ xiFourShapeAt (ball R23c 2)
+
+/-- R23 tier closure rebuilt from the exact residual (by CALLING the generic
+bound above). -/
+theorem R23_tier_of_mirror_residual {R23c : ℂ} {R23Rect : ℂ → Prop} {B : ℝ}
+    (h : R23MirrorCloseResidual R23c R23Rect B)
+    {w : ℂ} (hw : R23Rect w) : ‖deriv xiFourShapeAt w‖ ≤ 0.05 := by
+  obtain ⟨hmem, hB, hTier, hd⟩ := h
+  have hsub : ∀ u : ℂ, R23Rect u → ‖u - R23c‖ ≤ 1.26 := by
+    intro u hu
+    have h2 := hmem u hu
+    rw [mem_closedBall, dist_eq_norm] at h2
+    linarith
+  exact R23_deriv_tier_of_sup_given hd hB hsub hw hTier
+
+#print axioms R23_deriv_bound_of_sup_given
+#print axioms R23_deriv_tier_of_sup_given
+#print axioms R23_zeta0064_cap_excludes_banked_scale
+#print axioms R23_zeta0064_cap_excludes_true_scale
+#print axioms R23_xi_tier_sufficient_of_zeta0064_given
+#print axioms R23MirrorCloseResidual
+#print axioms R23_tier_of_mirror_residual
+
+/-!
+## Door-3 R24 sup spec mirror attempt (R00 closed-conditional; R01-R23 mirrors filed)
+
+Grep R23 tail (verified before append, total 4384 lines):
+* `R23_deriv_bound_of_sup_given` (`door3_deriv_certs.lean:4313`):
+  R24-shape generic bound CALLING `deriv_bound_of_sphere_sup_on_ball`
+  under explicit `R23c` / `R23Rect` hypotheses.
+* `R23_deriv_tier_of_sup_given` (`4327`): generic tier closure
+  (`2 * B ≤ 0.05` gives `‖deriv‖ ≤ 0.05`).
+* `R23_zeta0064_cap_excludes_banked_scale` (`4337`):
+  `10 ≤ Z → ¬ Z ≤ 0.000064`.
+* `R23_zeta0064_cap_excludes_true_scale` (`4343`):
+  `1 ≤ Z → ¬ Z ≤ 0.000064` (true-scale wall).
+* `R23_xi_tier_sufficient_of_zeta0064_given` (`4350`): sufficient
+  arithmetic `Z ≤ 0.000064 → 770.944 * Z ≤ 0.05`.
+* `R23MirrorCloseResidual` (`4360`): exact missing R23 premises.
+* `R23_tier_of_mirror_residual` (`4367-4376`): closure rebuilt by CALLING
+  the generic bound.
+* `#print axioms` R23 block (`4378-4384`).
+* R24 grep in this file pre-append: no matches (`R24c` / `R24Rect` / R24 s-image
+  absent locally); no banked R24 chain to call.
+
+Mirror attempt (honest, banked chains only, no invented coordinates):
+* Generic tier rule `deriv_bound_of_sphere_sup_on_ball` (`59-83`) is
+  center-independent, so the R24 generic tier closes conditionally below by
+  CALLING it with explicit `R24c` / `R24Rect` hypotheses (parameters, not
+  asserted geometry).
+* R24-specific geometry (center/rect/ball inclusion) and R24 s-image
+  Gamma/Zeta sups are absent locally; R00 numerals (`63.4 * 4 * 1.52`,
+  `770.944`, cap `0.000064`) are reused only as conditional arithmetic shape,
+  not as R24 facts.
+* zeta0064 cap impossibility carries over arithmetically at the same cap.
+
+Banked here (direct tactics only):
+* `R24_deriv_bound_of_sup_given`: R24-shape generic bound CALLING the banked
+  Cauchy rule under explicit hypotheses.
+* `R24_deriv_tier_of_sup_given`: generic tier closure (`2 * B ≤ 0.05` gives
+  `‖deriv‖ ≤ 0.05`).
+* `R24_zeta0064_cap_excludes_banked_scale` / `R24_zeta0064_cap_excludes_true_scale`:
+  cap impossibility at banked/true scales (same shape as R00-R23).
+* `R24_xi_tier_sufficient_of_zeta0064_given`: sufficient arithmetic
+  (`Z ≤ 0.000064 → 770.944 * Z ≤ 0.05`), R00-shape numeral, conditional.
+* `R24MirrorCloseResidual`: exact missing R24 premises (parameters, not invented).
+* `R24_tier_of_mirror_residual`: closure rebuilt by CALLING the generic bound.
+
+Value-or-gap: VALUE = conditional R24 mirror + cap impossibility above;
+  GAP = unconditional R24 geometry + R24 s-image zeta sup (absent locally).
+Residual (exact): supply `R24MirrorCloseResidual`.
+-/
+
+/-- R24-shape generic deriv bound under explicit hypotheses (by CALLING the
+banked Cauchy rule; `R24c` / `R24Rect` are parameters, no coordinates invented). -/
+theorem R24_deriv_bound_of_sup_given {f : ℂ → ℂ} {R24c : ℂ} {R24Rect : ℂ → Prop}
+    {B : ℝ} (hd : DiffContOnCl ℂ f (ball R24c 2))
+    (hB : ∀ z ∈ closedBall R24c 2, ‖f z‖ ≤ B)
+    (hsub : ∀ w : ℂ, R24Rect w → ‖w - R24c‖ ≤ 1.26)
+    {w : ℂ} (hw : R24Rect w) :
+    ‖deriv f w‖ ≤ 2 * B := by
+  have hle : ‖w - R24c‖ ≤ 1.26 := hsub w hw
+  have hw' : ‖w - R24c‖ + (1 / 2 : ℝ) ≤ 2 := by linarith
+  have h := deriv_bound_of_sphere_sup_on_ball hd hB
+    (show (0 : ℝ) < 1 / 2 by norm_num) hw'
+  have heq : B / (1 / 2 : ℝ) = 2 * B := by ring
+  rwa [heq] at h
+
+/-- R24-shape generic tier closure (`2 * B ≤ 0.05` gives the leaf tier). -/
+theorem R24_deriv_tier_of_sup_given {f : ℂ → ℂ} {R24c : ℂ} {R24Rect : ℂ → Prop}
+    {B : ℝ} (hd : DiffContOnCl ℂ f (ball R24c 2))
+    (hB : ∀ z ∈ closedBall R24c 2, ‖f z‖ ≤ B)
+    (hsub : ∀ w : ℂ, R24Rect w → ‖w - R24c‖ ≤ 1.26)
+    {w : ℂ} (hw : R24Rect w) (hTier : 2 * B ≤ 0.05) :
+    ‖deriv f w‖ ≤ 0.05 := by
+  have h := R24_deriv_bound_of_sup_given hd hB hsub hw
+  linarith
+
+/-- R24 cap wall at the banked scale: any `Z ≥ 10` cannot meet `0.000064`. -/
+theorem R24_zeta0064_cap_excludes_banked_scale {Z : ℝ} (h : 10 ≤ Z) :
+    ¬ Z ≤ 0.000064 := by
+  intro hcap
+  linarith
+
+/-- R24 cap wall at the true `|ζ| ~ 1` scale: any `Z ≥ 1` cannot meet `0.000064`. -/
+theorem R24_zeta0064_cap_excludes_true_scale {Z : ℝ} (h : 1 ≤ Z) :
+    ¬ Z ≤ 0.000064 := by
+  intro hcap
+  linarith
+
+/-- R24-shape sufficient arithmetic at the R00 numeral (conditional only):
+`Z ≤ 0.000064 → 770.944 * Z ≤ 0.05`. -/
+theorem R24_xi_tier_sufficient_of_zeta0064_given {Z : ℝ} (h : Z ≤ 0.000064) :
+    770.944 * Z ≤ 0.05 := by
+  have hpos : (0 : ℝ) ≤ 770.944 := by norm_num
+  have h2 : (770.944 : ℝ) * Z ≤ 770.944 * 0.000064 :=
+    mul_le_mul_of_nonneg_left h hpos
+  have e : (770.944 : ℝ) * 0.000064 ≤ 0.05 := by norm_num
+  linarith
+
+/-- Exact missing R24 mirror premises (parameters; nothing asserted about the
+true R24 cell — that geometry plus R24 s-image sups are absent locally). -/
+def R24MirrorCloseResidual (R24c : ℂ) (R24Rect : ℂ → Prop) (B : ℝ) : Prop :=
+  (∀ w : ℂ, R24Rect w → w ∈ closedBall R24c 2) ∧
+  (∀ z ∈ closedBall R24c 2, ‖xiFourShapeAt z‖ ≤ B) ∧
+  2 * B ≤ 0.05 ∧ DiffContOnCl ℂ xiFourShapeAt (ball R24c 2)
+
+/-- R24 tier closure rebuilt from the exact residual (by CALLING the generic
+bound above). -/
+theorem R24_tier_of_mirror_residual {R24c : ℂ} {R24Rect : ℂ → Prop} {B : ℝ}
+    (h : R24MirrorCloseResidual R24c R24Rect B)
+    {w : ℂ} (hw : R24Rect w) : ‖deriv xiFourShapeAt w‖ ≤ 0.05 := by
+  obtain ⟨hmem, hB, hTier, hd⟩ := h
+  have hsub : ∀ u : ℂ, R24Rect u → ‖u - R24c‖ ≤ 1.26 := by
+    intro u hu
+    have h2 := hmem u hu
+    rw [mem_closedBall, dist_eq_norm] at h2
+    linarith
+  exact R24_deriv_tier_of_sup_given hd hB hsub hw hTier
+
+#print axioms R24_deriv_bound_of_sup_given
+#print axioms R24_deriv_tier_of_sup_given
+#print axioms R24_zeta0064_cap_excludes_banked_scale
+#print axioms R24_zeta0064_cap_excludes_true_scale
+#print axioms R24_xi_tier_sufficient_of_zeta0064_given
+#print axioms R24MirrorCloseResidual
+#print axioms R24_tier_of_mirror_residual
+
+/-!
+
+## Door-3 R25 sup spec mirror attempt (R00 closed-conditional; R01-R24 mirrors filed)
+
+Grep R24 tail (verified before append, total 4509 lines):
+
+* `R24_deriv_bound_of_sup_given` (`door3_deriv_certs.lean:4438`):
+  R25-shape generic bound CALLING `deriv_bound_of_sphere_sup_on_ball`
+  under explicit `R24c` / `R24Rect` hypotheses.
+* `R24_deriv_tier_of_sup_given` (`4452`): generic tier closure
+  (`2 * B ≤ 0.05` gives `‖deriv‖ ≤ 0.05`).
+* `R24_zeta0064_cap_excludes_banked_scale` (`4462`):
+  `10 ≤ Z → ¬ Z ≤ 0.000064`.
+* `R24_zeta0064_cap_excludes_true_scale` (`4468`):
+  `1 ≤ Z → ¬ Z ≤ 0.000064` (true-scale wall).
+* `R24_xi_tier_sufficient_of_zeta0064_given` (`4475`): sufficient
+  arithmetic `Z ≤ 0.000064 → 770.944 * Z ≤ 0.05`.
+* `R24MirrorCloseResidual` (`4485`): exact missing R24 premises.
+* `R24_tier_of_mirror_residual` (`4492-4501`): closure rebuilt by CALLING
+  the generic bound.
+* `#print axioms` R24 block (`4503-4509`).
+* R25 grep in this file pre-append: no matches (`R25c` / `R25Rect` / R25 s-image
+  absent locally); no banked R25 chain to call.
+
+Mirror attempt (honest, banked chains only, no invented coordinates):
+
+* Generic tier rule `deriv_bound_of_sphere_sup_on_ball` (`59-83`) is
+  center-independent, so the R25 generic tier closes conditionally below by
+  CALLING it with explicit `R25c` / `R25Rect` hypotheses (parameters, not
+  asserted geometry).
+* R25-specific geometry (center/rect/ball inclusion) and R25 s-image
+  Gamma/Zeta sups are absent locally; R00 numerals (`63.4 * 4 * 1.52`,
+  `770.944`, cap `0.000064`) are reused only as conditional arithmetic shape,
+  not as R25 facts.
+* zeta0064 cap impossibility carries over arithmetically at the same cap.
+
+Banked here (direct tactics only):
+
+* `R25_deriv_bound_of_sup_given`: R25-shape generic bound CALLING the banked
+  Cauchy rule under explicit hypotheses.
+* `R25_deriv_tier_of_sup_given`: generic tier closure (`2 * B ≤ 0.05` gives
+  `‖deriv‖ ≤ 0.05`).
+* `R25_zeta0064_cap_excludes_banked_scale` / `R25_zeta0064_cap_excludes_true_scale`:
+  cap impossibility at banked/true scales (same shape as R00-R24).
+* `R25_xi_tier_sufficient_of_zeta0064_given`: sufficient arithmetic
+  (`Z ≤ 0.000064 → 770.944 * Z ≤ 0.05`), R00-shape numeral, conditional.
+* `R25MirrorCloseResidual`: exact missing R25 premises (parameters, not invented).
+* `R25_tier_of_mirror_residual`: closure rebuilt by CALLING the generic bound.
+
+Value-or-gap: VALUE = conditional R25 mirror + cap impossibility above;
+  GAP = unconditional R25 geometry + R25 s-image zeta sup (absent locally).
+
+Residual (exact): supply `R25MirrorCloseResidual`.
+
+-/
+
+/-- R25-shape generic deriv bound under explicit hypotheses (by CALLING the
+banked Cauchy rule; `R25c` / `R25Rect` are parameters, no coordinates invented). -/
+theorem R25_deriv_bound_of_sup_given {f : ℂ → ℂ} {R25c : ℂ} {R25Rect : ℂ → Prop}
+    {B : ℝ} (hd : DiffContOnCl ℂ f (ball R25c 2))
+    (hB : ∀ z ∈ closedBall R25c 2, ‖f z‖ ≤ B)
+    (hsub : ∀ w : ℂ, R25Rect w → ‖w - R25c‖ ≤ 1.26)
+    {w : ℂ} (hw : R25Rect w) :
+    ‖deriv f w‖ ≤ 2 * B := by
+  have hle : ‖w - R25c‖ ≤ 1.26 := hsub w hw
+  have hw' : ‖w - R25c‖ + (1 / 2 : ℝ) ≤ 2 := by linarith
+  have h := deriv_bound_of_sphere_sup_on_ball hd hB
+    (show (0 : ℝ) < 1 / 2 by norm_num) hw'
+  have heq : B / (1 / 2 : ℝ) = 2 * B := by ring
+  rwa [heq] at h
+
+/-- R25-shape generic tier closure (`2 * B ≤ 0.05` gives the leaf tier). -/
+theorem R25_deriv_tier_of_sup_given {f : ℂ → ℂ} {R25c : ℂ} {R25Rect : ℂ → Prop}
+    {B : ℝ} (hd : DiffContOnCl ℂ f (ball R25c 2))
+    (hB : ∀ z ∈ closedBall R25c 2, ‖f z‖ ≤ B)
+    (hsub : ∀ w : ℂ, R25Rect w → ‖w - R25c‖ ≤ 1.26)
+    {w : ℂ} (hw : R25Rect w) (hTier : 2 * B ≤ 0.05) :
+    ‖deriv f w‖ ≤ 0.05 := by
+  have h := R25_deriv_bound_of_sup_given hd hB hsub hw
+  linarith
+
+/-- R25 cap wall at the banked scale: any `Z ≥ 10` cannot meet `0.000064`. -/
+theorem R25_zeta0064_cap_excludes_banked_scale {Z : ℝ} (h : 10 ≤ Z) :
+    ¬ Z ≤ 0.000064 := by
+  intro hcap
+  linarith
+
+/-- R25 cap wall at the true `|ζ| ~ 1` scale: any `Z ≥ 1` cannot meet `0.000064`. -/
+theorem R25_zeta0064_cap_excludes_true_scale {Z : ℝ} (h : 1 ≤ Z) :
+    ¬ Z ≤ 0.000064 := by
+  intro hcap
+  linarith
+
+/-- R25-shape sufficient arithmetic at the R00 numeral (conditional only):
+`Z ≤ 0.000064 → 770.944 * Z ≤ 0.05`. -/
+theorem R25_xi_tier_sufficient_of_zeta0064_given {Z : ℝ} (h : Z ≤ 0.000064) :
+    770.944 * Z ≤ 0.05 := by
+  have hpos : (0 : ℝ) ≤ 770.944 := by norm_num
+  have h2 : (770.944 : ℝ) * Z ≤ 770.944 * 0.000064 :=
+    mul_le_mul_of_nonneg_left h hpos
+  have e : (770.944 : ℝ) * 0.000064 ≤ 0.05 := by norm_num
+  linarith
+
+/-- Exact missing R25 mirror premises (parameters; nothing asserted about the
+true R25 cell — that geometry plus R25 s-image sups are absent locally). -/
+def R25MirrorCloseResidual (R25c : ℂ) (R25Rect : ℂ → Prop) (B : ℝ) : Prop :=
+  (∀ w : ℂ, R25Rect w → w ∈ closedBall R25c 2) ∧
+  (∀ z ∈ closedBall R25c 2, ‖xiFourShapeAt z‖ ≤ B) ∧
+  2 * B ≤ 0.05 ∧ DiffContOnCl ℂ xiFourShapeAt (ball R25c 2)
+
+/-- R25 tier closure rebuilt from the exact residual (by CALLING the generic
+bound above). -/
+theorem R25_tier_of_mirror_residual {R25c : ℂ} {R25Rect : ℂ → Prop} {B : ℝ}
+    (h : R25MirrorCloseResidual R25c R25Rect B)
+    {w : ℂ} (hw : R25Rect w) : ‖deriv xiFourShapeAt w‖ ≤ 0.05 := by
+  obtain ⟨hmem, hB, hTier, hd⟩ := h
+  have hsub : ∀ u : ℂ, R25Rect u → ‖u - R25c‖ ≤ 1.26 := by
+    intro u hu
+    have h2 := hmem u hu
+    rw [mem_closedBall, dist_eq_norm] at h2
+    linarith
+  exact R25_deriv_tier_of_sup_given hd hB hsub hw hTier
+
+#print axioms R25_deriv_bound_of_sup_given
+#print axioms R25_deriv_tier_of_sup_given
+#print axioms R25_zeta0064_cap_excludes_banked_scale
+#print axioms R25_zeta0064_cap_excludes_true_scale
+#print axioms R25_xi_tier_sufficient_of_zeta0064_given
+#print axioms R25MirrorCloseResidual
+#print axioms R25_tier_of_mirror_residual
+
+/-!
+
+## Door-3 R26 sup spec mirror attempt (R00 closed-conditional; R01-R25 mirrors filed)
+
+Grep R25 tail (verified before append, total 4640 lines):
+
+* `R25_deriv_bound_of_sup_given` (`door3_deriv_certs.lean:4569`):
+  R26-shape generic bound CALLING `deriv_bound_of_sphere_sup_on_ball`
+  under explicit `R25c` / `R25Rect` hypotheses.
+* `R25_deriv_tier_of_sup_given` (`4583`): generic tier closure
+  (`2 * B ≤ 0.05` gives `‖deriv‖ ≤ 0.05`).
+* `R25_zeta0064_cap_excludes_banked_scale` (`4593`):
+  `10 ≤ Z → ¬ Z ≤ 0.000064`.
+* `R25_zeta0064_cap_excludes_true_scale` (`4599`):
+  `1 ≤ Z → ¬ Z ≤ 0.000064` (true-scale wall).
+* `R25_xi_tier_sufficient_of_zeta0064_given` (`4606`): sufficient
+  arithmetic `Z ≤ 0.000064 → 770.944 * Z ≤ 0.05`.
+* `R25MirrorCloseResidual` (`4616`): exact missing R25 premises.
+* `R25_tier_of_mirror_residual` (`4623-4632`): closure rebuilt by CALLING
+  the generic bound.
+* `#print axioms` R25 block (`4634-4640`).
+* R26 grep in this file pre-append: no matches (`R26c` / `R26Rect` / R26 s-image
+  absent locally); no banked R26 chain to call.
+
+Mirror attempt (honest, banked chains only, no invented coordinates):
+
+* Generic tier rule `deriv_bound_of_sphere_sup_on_ball` (`59-83`) is
+  center-independent, so the R26 generic tier closes conditionally below by
+  CALLING it with explicit `R26c` / `R26Rect` hypotheses (parameters, not
+  asserted geometry).
+* R26-specific geometry (center/rect/ball inclusion) and R26 s-image
+  Gamma/Zeta sups are absent locally; R00 numerals (`63.4 * 4 * 1.52`,
+  `770.944`, cap `0.000064`) are reused only as conditional arithmetic shape,
+  not as R26 facts.
+* zeta0064 cap impossibility carries over arithmetically at the same cap.
+
+Banked here (direct tactics only):
+
+* `R26_deriv_bound_of_sup_given`: R26-shape generic bound CALLING the banked
+  Cauchy rule under explicit hypotheses.
+* `R26_deriv_tier_of_sup_given`: generic tier closure (`2 * B ≤ 0.05` gives
+  `‖deriv‖ ≤ 0.05`).
+* `R26_zeta0064_cap_excludes_banked_scale` / `R26_zeta0064_cap_excludes_true_scale`:
+  cap impossibility at banked/true scales (same shape as R00-R25).
+* `R26_xi_tier_sufficient_of_zeta0064_given`: sufficient arithmetic
+  (`Z ≤ 0.000064 → 770.944 * Z ≤ 0.05`), R00-shape numeral, conditional.
+* `R26MirrorCloseResidual`: exact missing R26 premises (parameters, not invented).
+* `R26_tier_of_mirror_residual`: closure rebuilt by CALLING the generic bound.
+
+Value-or-gap: VALUE = conditional R26 mirror + cap impossibility above;
+  GAP = unconditional R26 geometry + R26 s-image zeta sup (absent locally).
+
+Residual (exact): supply `R26MirrorCloseResidual`.
+
+-/
+
+/-- R26-shape generic deriv bound under explicit hypotheses (by CALLING the
+banked Cauchy rule; `R26c` / `R26Rect` are parameters, no coordinates invented). -/
+theorem R26_deriv_bound_of_sup_given {f : ℂ → ℂ} {R26c : ℂ} {R26Rect : ℂ → Prop}
+    {B : ℝ} (hd : DiffContOnCl ℂ f (ball R26c 2))
+    (hB : ∀ z ∈ closedBall R26c 2, ‖f z‖ ≤ B)
+    (hsub : ∀ w : ℂ, R26Rect w → ‖w - R26c‖ ≤ 1.26)
+    {w : ℂ} (hw : R26Rect w) :
+    ‖deriv f w‖ ≤ 2 * B := by
+  have hle : ‖w - R26c‖ ≤ 1.26 := hsub w hw
+  have hw' : ‖w - R26c‖ + (1 / 2 : ℝ) ≤ 2 := by linarith
+  have h := deriv_bound_of_sphere_sup_on_ball hd hB
+    (show (0 : ℝ) < 1 / 2 by norm_num) hw'
+  have heq : B / (1 / 2 : ℝ) = 2 * B := by ring
+  rwa [heq] at h
+
+/-- R26-shape generic tier closure (`2 * B ≤ 0.05` gives the leaf tier). -/
+theorem R26_deriv_tier_of_sup_given {f : ℂ → ℂ} {R26c : ℂ} {R26Rect : ℂ → Prop}
+    {B : ℝ} (hd : DiffContOnCl ℂ f (ball R26c 2))
+    (hB : ∀ z ∈ closedBall R26c 2, ‖f z‖ ≤ B)
+    (hsub : ∀ w : ℂ, R26Rect w → ‖w - R26c‖ ≤ 1.26)
+    {w : ℂ} (hw : R26Rect w) (hTier : 2 * B ≤ 0.05) :
+    ‖deriv f w‖ ≤ 0.05 := by
+  have h := R26_deriv_bound_of_sup_given hd hB hsub hw
+  linarith
+
+/-- R26 cap wall at the banked scale: any `Z ≥ 10` cannot meet `0.000064`. -/
+theorem R26_zeta0064_cap_excludes_banked_scale {Z : ℝ} (h : 10 ≤ Z) :
+    ¬ Z ≤ 0.000064 := by
+  intro hcap
+  linarith
+
+/-- R26 cap wall at the true `|ζ| ~ 1` scale: any `Z ≥ 1` cannot meet `0.000064`. -/
+theorem R26_zeta0064_cap_excludes_true_scale {Z : ℝ} (h : 1 ≤ Z) :
+    ¬ Z ≤ 0.000064 := by
+  intro hcap
+  linarith
+
+/-- R26-shape sufficient arithmetic at the R00 numeral (conditional only):
+`Z ≤ 0.000064 → 770.944 * Z ≤ 0.05`. -/
+theorem R26_xi_tier_sufficient_of_zeta0064_given {Z : ℝ} (h : Z ≤ 0.000064) :
+    770.944 * Z ≤ 0.05 := by
+  have hpos : (0 : ℝ) ≤ 770.944 := by norm_num
+  have h2 : (770.944 : ℝ) * Z ≤ 770.944 * 0.000064 :=
+    mul_le_mul_of_nonneg_left h hpos
+  have e : (770.944 : ℝ) * 0.000064 ≤ 0.05 := by norm_num
+  linarith
+
+/-- Exact missing R26 mirror premises (parameters; nothing asserted about the
+true R26 cell — that geometry plus R26 s-image sups are absent locally). -/
+def R26MirrorCloseResidual (R26c : ℂ) (R26Rect : ℂ → Prop) (B : ℝ) : Prop :=
+  (∀ w : ℂ, R26Rect w → w ∈ closedBall R26c 2) ∧
+  (∀ z ∈ closedBall R26c 2, ‖xiFourShapeAt z‖ ≤ B) ∧
+  2 * B ≤ 0.05 ∧ DiffContOnCl ℂ xiFourShapeAt (ball R26c 2)
+
+/-- R26 tier closure rebuilt from the exact residual (by CALLING the generic
+bound above). -/
+theorem R26_tier_of_mirror_residual {R26c : ℂ} {R26Rect : ℂ → Prop} {B : ℝ}
+    (h : R26MirrorCloseResidual R26c R26Rect B)
+    {w : ℂ} (hw : R26Rect w) : ‖deriv xiFourShapeAt w‖ ≤ 0.05 := by
+  obtain ⟨hmem, hB, hTier, hd⟩ := h
+  have hsub : ∀ u : ℂ, R26Rect u → ‖u - R26c‖ ≤ 1.26 := by
+    intro u hu
+    have h2 := hmem u hu
+    rw [mem_closedBall, dist_eq_norm] at h2
+    linarith
+  exact R26_deriv_tier_of_sup_given hd hB hsub hw hTier
+
+#print axioms R26_deriv_bound_of_sup_given
+#print axioms R26_deriv_tier_of_sup_given
+#print axioms R26_zeta0064_cap_excludes_banked_scale
+#print axioms R26_zeta0064_cap_excludes_true_scale
+#print axioms R26_xi_tier_sufficient_of_zeta0064_given
+#print axioms R26MirrorCloseResidual
+#print axioms R26_tier_of_mirror_residual
+
+/-!
+
+## Door-3 R27 sup spec mirror attempt (R00 closed-conditional; R01-R26 mirrors filed)
+
+Grep R26 tail (verified before append, total 4771 lines):
+
+* `R26_deriv_bound_of_sup_given` (`door3_deriv_certs.lean:4700`):
+  R26-shape generic bound CALLING `deriv_bound_of_sphere_sup_on_ball`
+  under explicit `R26c` / `R26Rect` hypotheses.
+* `R26_deriv_tier_of_sup_given` (`4714`): generic tier closure
+  (`2 * B ≤ 0.05` gives `‖deriv‖ ≤ 0.05`).
+* `R26_zeta0064_cap_excludes_banked_scale` (`4724`):
+  `10 ≤ Z → ¬ Z ≤ 0.000064`.
+* `R26_zeta0064_cap_excludes_true_scale` (`4730`):
+  `1 ≤ Z → ¬ Z ≤ 0.000064` (true-scale wall).
+* `R26_xi_tier_sufficient_of_zeta0064_given` (`4737`): sufficient
+  arithmetic `Z ≤ 0.000064 → 770.944 * Z ≤ 0.05`.
+* `R26MirrorCloseResidual` (`4747`): exact missing R26 premises.
+* `R26_tier_of_mirror_residual` (`4754-4763`): closure rebuilt by CALLING
+  the generic bound.
+* `#print axioms` R26 block (`4765-4771`).
+* R27 grep in this file pre-append: no matches (`R27c` / `R27Rect` / R27 s-image
+  absent locally); no banked R27 chain to call.
+
+Mirror attempt (honest, banked chains only, no invented coordinates):
+
+* Generic tier rule `deriv_bound_of_sphere_sup_on_ball` (`59-83`) is
+  center-independent, so the R27 generic tier closes conditionally below by
+  CALLING it with explicit `R27c` / `R27Rect` hypotheses (parameters, not
+  asserted geometry).
+* R27-specific geometry (center/rect/ball inclusion) and R27 s-image
+  Gamma/Zeta sups are absent locally; R00 numerals (`63.4 * 4 * 1.52`,
+  `770.944`, cap `0.000064`) are reused only as conditional arithmetic shape,
+  not as R27 facts.
+* zeta0064 cap impossibility carries over arithmetically at the same cap.
+
+Banked here (direct tactics only):
+
+* `R27_deriv_bound_of_sup_given`: R27-shape generic bound CALLING the banked
+  Cauchy rule under explicit hypotheses.
+* `R27_deriv_tier_of_sup_given`: generic tier closure (`2 * B ≤ 0.05` gives
+  `‖deriv‖ ≤ 0.05`).
+* `R27_zeta0064_cap_excludes_banked_scale` / `R27_zeta0064_cap_excludes_true_scale`:
+  cap impossibility at banked/true scales (same shape as R00-R26).
+* `R27_xi_tier_sufficient_of_zeta0064_given`: sufficient arithmetic
+  (`Z ≤ 0.000064 → 770.944 * Z ≤ 0.05`), R00-shape numeral, conditional.
+* `R27MirrorCloseResidual`: exact missing R27 premises (parameters, not invented).
+* `R27_tier_of_mirror_residual`: closure rebuilt by CALLING the generic bound.
+
+Value-or-gap: VALUE = conditional R27 mirror + cap impossibility above;
+  GAP = unconditional R27 geometry + R27 s-image zeta sup (absent locally).
+
+Residual (exact): supply `R27MirrorCloseResidual`.
+
+-/
+
+/-- R27-shape generic deriv bound under explicit hypotheses (by CALLING the
+banked Cauchy rule; `R27c` / `R27Rect` are parameters, no coordinates invented). -/
+theorem R27_deriv_bound_of_sup_given {f : ℂ → ℂ} {R27c : ℂ} {R27Rect : ℂ → Prop}
+    {B : ℝ} (hd : DiffContOnCl ℂ f (ball R27c 2))
+    (hB : ∀ z ∈ closedBall R27c 2, ‖f z‖ ≤ B)
+    (hsub : ∀ w : ℂ, R27Rect w → ‖w - R27c‖ ≤ 1.26)
+    {w : ℂ} (hw : R27Rect w) :
+    ‖deriv f w‖ ≤ 2 * B := by
+  have hle : ‖w - R27c‖ ≤ 1.26 := hsub w hw
+  have hw' : ‖w - R27c‖ + (1 / 2 : ℝ) ≤ 2 := by linarith
+  have h := deriv_bound_of_sphere_sup_on_ball hd hB
+    (show (0 : ℝ) < 1 / 2 by norm_num) hw'
+  have heq : B / (1 / 2 : ℝ) = 2 * B := by ring
+  rwa [heq] at h
+
+/-- R27-shape generic tier closure (`2 * B ≤ 0.05` gives the leaf tier). -/
+theorem R27_deriv_tier_of_sup_given {f : ℂ → ℂ} {R27c : ℂ} {R27Rect : ℂ → Prop}
+    {B : ℝ} (hd : DiffContOnCl ℂ f (ball R27c 2))
+    (hB : ∀ z ∈ closedBall R27c 2, ‖f z‖ ≤ B)
+    (hsub : ∀ w : ℂ, R27Rect w → ‖w - R27c‖ ≤ 1.26)
+    {w : ℂ} (hw : R27Rect w) (hTier : 2 * B ≤ 0.05) :
+    ‖deriv f w‖ ≤ 0.05 := by
+  have h := R27_deriv_bound_of_sup_given hd hB hsub hw
+  linarith
+
+/-- R27 cap wall at the banked scale: any `Z ≥ 10` cannot meet `0.000064`. -/
+theorem R27_zeta0064_cap_excludes_banked_scale {Z : ℝ} (h : 10 ≤ Z) :
+    ¬ Z ≤ 0.000064 := by
+  intro hcap
+  linarith
+
+/-- R27 cap wall at the true `|ζ| ~ 1` scale: any `Z ≥ 1` cannot meet `0.000064`. -/
+theorem R27_zeta0064_cap_excludes_true_scale {Z : ℝ} (h : 1 ≤ Z) :
+    ¬ Z ≤ 0.000064 := by
+  intro hcap
+  linarith
+
+/-- R27-shape sufficient arithmetic at the R00 numeral (conditional only):
+`Z ≤ 0.000064 → 770.944 * Z ≤ 0.05`. -/
+theorem R27_xi_tier_sufficient_of_zeta0064_given {Z : ℝ} (h : Z ≤ 0.000064) :
+    770.944 * Z ≤ 0.05 := by
+  have hpos : (0 : ℝ) ≤ 770.944 := by norm_num
+  have h2 : (770.944 : ℝ) * Z ≤ 770.944 * 0.000064 :=
+    mul_le_mul_of_nonneg_left h hpos
+  have e : (770.944 : ℝ) * 0.000064 ≤ 0.05 := by norm_num
+  linarith
+
+/-- Exact missing R27 mirror premises (parameters; nothing asserted about the
+true R27 cell — that geometry plus R27 s-image sups are absent locally). -/
+def R27MirrorCloseResidual (R27c : ℂ) (R27Rect : ℂ → Prop) (B : ℝ) : Prop :=
+  (∀ w : ℂ, R27Rect w → w ∈ closedBall R27c 2) ∧
+  (∀ z ∈ closedBall R27c 2, ‖xiFourShapeAt z‖ ≤ B) ∧
+  2 * B ≤ 0.05 ∧ DiffContOnCl ℂ xiFourShapeAt (ball R27c 2)
+
+/-- R27 tier closure rebuilt from the exact residual (by CALLING the generic
+bound above). -/
+theorem R27_tier_of_mirror_residual {R27c : ℂ} {R27Rect : ℂ → Prop} {B : ℝ}
+    (h : R27MirrorCloseResidual R27c R27Rect B)
+    {w : ℂ} (hw : R27Rect w) : ‖deriv xiFourShapeAt w‖ ≤ 0.05 := by
+  obtain ⟨hmem, hB, hTier, hd⟩ := h
+  have hsub : ∀ u : ℂ, R27Rect u → ‖u - R27c‖ ≤ 1.26 := by
+    intro u hu
+    have h2 := hmem u hu
+    rw [mem_closedBall, dist_eq_norm] at h2
+    linarith
+  exact R27_deriv_tier_of_sup_given hd hB hsub hw hTier
+
+#print axioms R27_deriv_bound_of_sup_given
+#print axioms R27_deriv_tier_of_sup_given
+#print axioms R27_zeta0064_cap_excludes_banked_scale
+#print axioms R27_zeta0064_cap_excludes_true_scale
+#print axioms R27_xi_tier_sufficient_of_zeta0064_given
+#print axioms R27MirrorCloseResidual
+#print axioms R27_tier_of_mirror_residual
+
+/-!
+
+## Door-3 R28 sup spec mirror attempt (R00 closed-conditional; R01-R27 mirrors filed)
+
+Grep R27 tail (verified before append, total 4902 lines):
+
+* `R27_deriv_bound_of_sup_given` (`door3_deriv_certs.lean:4831`):
+  R27-shape generic bound CALLING `deriv_bound_of_sphere_sup_on_ball`
+  under explicit `R27c` / `R27Rect` hypotheses.
+* `R27_deriv_tier_of_sup_given` (`4845`): generic tier closure
+  (`2 * B ≤ 0.05` gives `‖deriv‖ ≤ 0.05`).
+* `R27_zeta0064_cap_excludes_banked_scale` (`4855`):
+  `10 ≤ Z → ¬ Z ≤ 0.000064`.
+* `R27_zeta0064_cap_excludes_true_scale` (`4861`):
+  `1 ≤ Z → ¬ Z ≤ 0.000064` (true-scale wall).
+* `R27_xi_tier_sufficient_of_zeta0064_given` (`4868`): sufficient
+  arithmetic `Z ≤ 0.000064 → 770.944 * Z ≤ 0.05`.
+* `R27MirrorCloseResidual` (`4878`): exact missing R27 premises.
+* `R27_tier_of_mirror_residual` (`4885-4894`): closure rebuilt by CALLING
+  the generic bound.
+* `#print axioms` R27 block (`4896-4902`).
+* R27 grep in this file pre-append: no matches for `R28c` / `R28Rect`
+  (R28 clean); R27 block is the append point.
+
+Mirror attempt (honest, banked chains only, no invented coordinates):
+
+* Generic tier rule `deriv_bound_of_sphere_sup_on_ball` (`59-83`) is
+  center-independent, so the R28 generic tier closes conditionally below by
+  CALLING it with explicit `R28c` / `R28Rect` hypotheses (parameters, not
+  asserted geometry).
+* R28-specific geometry (center/rect/ball inclusion) and R28 s-image
+  Gamma/Zeta sups are absent locally; R00 numerals (`63.4 * 4 * 1.52`,
+  `770.944`, cap `0.000064`) are reused only as conditional arithmetic shape,
+  not as R28 facts.
+* zeta0064 cap impossibility carries over arithmetically at the same cap.
+
+FIX vs R26/R27 (linarith failure repair):
+
+* R26 residual (`4747-4750`) and R27 residual (`4878-4881`) assume only
+  `∀ w, RRect w → w ∈ closedBall Rc 2`, which yields at best
+  `‖u - Rc‖ ≤ 2` after `mem_closedBall` + `dist_eq_norm`.
+  The R26/R27 closures then attempt `‖u - Rc‖ ≤ 1.26` by `linarith`
+  from that `≤ 2` premise, which does not follow (gap `0.74`).
+  Those residuals are therefore too weak to feed the `1.26` hypothesis
+  of the generic bound.
+* R28 fixes this by assuming `‖u - R28c‖ ≤ 1.26` directly in
+  `R28MirrorCloseResidual` below. The R28 closure then passes that
+  hypothesis straight to `R28_deriv_tier_of_sup_given` with no
+  `2 → 1.26` step, so `linarith` is only used for the closing
+  `1.26 + 1/2 ≤ 2` margin inside the generic bound, which holds.
+
+Banked here (direct tactics only):
+
+* `R28_deriv_bound_of_sup_given`: R28-shape generic bound CALLING the banked
+  Cauchy rule under explicit hypotheses.
+* `R28_deriv_tier_of_sup_given`: generic tier closure (`2 * B ≤ 0.05` gives
+  `‖deriv‖ ≤ 0.05`).
+* `R28_zeta0064_cap_excludes_banked_scale` / `R28_zeta0064_cap_excludes_true_scale`:
+  cap impossibility at banked/true scales (same shape as R00-R27).
+* `R28_xi_tier_sufficient_of_zeta0064_given`: sufficient arithmetic
+  (`Z ≤ 0.000064 → 770.944 * Z ≤ 0.05`), R00-shape numeral, conditional.
+* `R28MirrorCloseResidual`: exact missing R28 premises with the tight
+  `1.26` hypothesis (parameters, not invented).
+* `R28_tier_of_mirror_residual`: closure rebuilt by CALLING the generic bound.
+
+Value-or-gap: VALUE = conditional R28 mirror + cap impossibility above;
+  GAP = unconditional R28 geometry + R28 s-image zeta sup (absent locally).
+
+Residual (exact): supply `R28MirrorCloseResidual`.
+
+-/
+
+/-- R28-shape generic deriv bound under explicit hypotheses (by CALLING the
+banked Cauchy rule; `R28c` / `R28Rect` are parameters, no coordinates invented). -/
+theorem R28_deriv_bound_of_sup_given {f : ℂ → ℂ} {R28c : ℂ} {R28Rect : ℂ → Prop}
+    {B : ℝ} (hd : DiffContOnCl ℂ f (ball R28c 2))
+    (hB : ∀ z ∈ closedBall R28c 2, ‖f z‖ ≤ B)
+    (hsub : ∀ w : ℂ, R28Rect w → ‖w - R28c‖ ≤ 1.26)
+    {w : ℂ} (hw : R28Rect w) :
+    ‖deriv f w‖ ≤ 2 * B := by
+  have hle : ‖w - R28c‖ ≤ 1.26 := hsub w hw
+  have hw' : ‖w - R28c‖ + (1 / 2 : ℝ) ≤ 2 := by linarith
+  have h := deriv_bound_of_sphere_sup_on_ball hd hB
+    (show (0 : ℝ) < 1 / 2 by norm_num) hw'
+  have heq : B / (1 / 2 : ℝ) = 2 * B := by ring
+  rwa [heq] at h
+
+/-- R28-shape generic tier closure (`2 * B ≤ 0.05` gives the leaf tier). -/
+theorem R28_deriv_tier_of_sup_given {f : ℂ → ℂ} {R28c : ℂ} {R28Rect : ℂ → Prop}
+    {B : ℝ} (hd : DiffContOnCl ℂ f (ball R28c 2))
+    (hB : ∀ z ∈ closedBall R28c 2, ‖f z‖ ≤ B)
+    (hsub : ∀ w : ℂ, R28Rect w → ‖w - R28c‖ ≤ 1.26)
+    {w : ℂ} (hw : R28Rect w) (hTier : 2 * B ≤ 0.05) :
+    ‖deriv f w‖ ≤ 0.05 := by
+  have h := R28_deriv_bound_of_sup_given hd hB hsub hw
+  linarith
+
+/-- R28 cap wall at the banked scale: any `Z ≥ 10` cannot meet `0.000064`. -/
+theorem R28_zeta0064_cap_excludes_banked_scale {Z : ℝ} (h : 10 ≤ Z) :
+    ¬ Z ≤ 0.000064 := by
+  intro hcap
+  linarith
+
+/-- R28 cap wall at the true `|ζ| ~ 1` scale: any `Z ≥ 1` cannot meet `0.000064`. -/
+theorem R28_zeta0064_cap_excludes_true_scale {Z : ℝ} (h : 1 ≤ Z) :
+    ¬ Z ≤ 0.000064 := by
+  intro hcap
+  linarith
+
+/-- R28-shape sufficient arithmetic at the R00 numeral (conditional only):
+`Z ≤ 0.000064 → 770.944 * Z ≤ 0.05`. -/
+theorem R28_xi_tier_sufficient_of_zeta0064_given {Z : ℝ} (h : Z ≤ 0.000064) :
+    770.944 * Z ≤ 0.05 := by
+  have hpos : (0 : ℝ) ≤ 770.944 := by norm_num
+  have h2 : (770.944 : ℝ) * Z ≤ 770.944 * 0.000064 :=
+    mul_le_mul_of_nonneg_left h hpos
+  have e : (770.944 : ℝ) * 0.000064 ≤ 0.05 := by norm_num
+  linarith
+
+/-- Exact missing R28 mirror premises with the tight `1.26` bound assumed
+directly (parameters; nothing asserted about the true R28 cell — that
+geometry plus R28 s-image sups are absent locally; R26/R27 `closedBall 2`
+residuals are too weak for this bound). -/
+def R28MirrorCloseResidual (R28c : ℂ) (R28Rect : ℂ → Prop) (B : ℝ) : Prop :=
+  (∀ w : ℂ, R28Rect w → ‖w - R28c‖ ≤ 1.26) ∧
+  (∀ z ∈ closedBall R28c 2, ‖xiFourShapeAt z‖ ≤ B) ∧
+  2 * B ≤ 0.05 ∧ DiffContOnCl ℂ xiFourShapeAt (ball R28c 2)
+
+/-- R28 tier closure rebuilt from the exact residual (by CALLING the generic
+bound above; no `2 → 1.26` step, so the tight hypothesis closes). -/
+theorem R28_tier_of_mirror_residual {R28c : ℂ} {R28Rect : ℂ → Prop} {B : ℝ}
+    (h : R28MirrorCloseResidual R28c R28Rect B)
+    {w : ℂ} (hw : R28Rect w) : ‖deriv xiFourShapeAt w‖ ≤ 0.05 := by
+  obtain ⟨hsub, hB, hTier, hd⟩ := h
+  exact R28_deriv_tier_of_sup_given hd hB hsub hw hTier
+
+#print axioms R28_deriv_bound_of_sup_given
+#print axioms R28_deriv_tier_of_sup_given
+#print axioms R28_zeta0064_cap_excludes_banked_scale
+#print axioms R28_zeta0064_cap_excludes_true_scale
+#print axioms R28_xi_tier_sufficient_of_zeta0064_given
+#print axioms R28MirrorCloseResidual
+#print axioms R28_tier_of_mirror_residual

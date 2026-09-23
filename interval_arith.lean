@@ -38421,3 +38421,549 @@ theorem R34_banked_infeasible :
 #print axioms R34CenterAssembly.R34_banked_infeasible
 
 end R34CenterAssembly
+
+namespace R35CenterAssembly
+
+/-- Norm version of `polyPart` at the banked R35 s-center. -/
+theorem polyPart_norm_R35 :
+    ‖R00Enclosure.polyPart R35GammaUpper.sR35‖ =
+      (1 / 2) * ‖R35GammaUpper.sR35‖ * ‖R35GammaUpper.sR35 - 1‖ := by
+  unfold R00Enclosure.polyPart
+  rw [norm_mul, norm_mul, R00Numerics.norm_half]
+
+/-- `‖sR35‖ ≥ 0.75` (`0.75^2 = 0.5625 < 0.105^2 + 0.75^2 = 0.573525`). -/
+theorem norm_sR35_ge : (0.75 : ℝ) ≤ ‖R35GammaUpper.sR35‖ := by
+  have hsq : (0.75 : ℝ) ^ 2 ≤ ‖R35GammaUpper.sR35‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply,
+      R35GammaUpper.sR35_re, R35GammaUpper.sR35_im]
+    norm_num
+  calc (0.75 : ℝ) = Real.sqrt ((0.75 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖R35GammaUpper.sR35‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖R35GammaUpper.sR35‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- `‖sR35 - 1‖ ≥ 1.16` (`0.895^2 + 0.75^2 = 1.363525 > 1.16^2 = 1.3456`). -/
+theorem norm_sR35_sub_one_ge : (1.16 : ℝ) ≤ ‖R35GammaUpper.sR35 - 1‖ := by
+  have hr1 : (R35GammaUpper.sR35 - 1).re = -0.895 := by
+    simp only [Complex.sub_re, Complex.one_re, R35GammaUpper.sR35_re]
+    norm_num
+  have hi1 : (R35GammaUpper.sR35 - 1).im = -0.75 := by
+    simp only [Complex.sub_im, Complex.one_im, R35GammaUpper.sR35_im]
+    norm_num
+  have hsq : (1.16 : ℝ) ^ 2 ≤ ‖R35GammaUpper.sR35 - 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hr1, hi1]
+    norm_num
+  calc (1.16 : ℝ) = Real.sqrt ((1.16 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖R35GammaUpper.sR35 - 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖R35GammaUpper.sR35 - 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- ENCLOSURE (hypothesis-free): `0.43 ≤ ‖polyPart sR35‖`
+(`0.75 * 1.16 / 2 = 0.435 ≥ 0.43`; true `≈ 0.442`, slack `≈ 0.01`). -/
+theorem poly_lower_R35 : (0.43 : ℝ) ≤ ‖R00Enclosure.polyPart R35GammaUpper.sR35‖ := by
+  have hprod : (0.75 : ℝ) * 1.16 ≤ ‖R35GammaUpper.sR35‖ * ‖R35GammaUpper.sR35 - 1‖ :=
+    mul_le_mul norm_sR35_ge norm_sR35_sub_one_ge (by norm_num) (norm_nonneg _)
+  rw [polyPart_norm_R35]
+  nlinarith [hprod]
+
+/-- Conditional R35 center assembly (inner tier `0.15 + 0.06 * radius`):
+banked s-center + new poly `0.43` and pi `1/2` floors are plugged into the
+generic bridge; the Gamma remainder and zeta lower stay explicit.
+The numeric check needs `Agam * Azeta ≥ (0.15 + 0.06 * 1.26) / 0.215`;
+at banked floors (`1/10000000`, `1/26`) it is infeasible, so this is filed as an
+honest conditional, not a closed bound. -/
+theorem R35_center_with_poly_pi_gamma (Agam Azeta : ℝ)
+    (hrad : CentralCoverAssembly.R35.radius ≤ 1.26)
+    (hGam_floor : (1 / 10000000 : ℝ) ≤ Agam)
+    (hgam : Agam ≤ ‖R00Enclosure.gammaPart R35GammaUpper.sR35‖)
+    (hZeta_floor : (1 / 26 : ℝ) ≤ Azeta)
+    (hzeta : Azeta ≤ ‖zeta R35GammaUpper.sR35‖)
+    (hprod : (0.15 : ℝ) + 0.06 * 1.26 ≤ 0.43 * (1 / 2) * Agam * Azeta) :
+    (0.15 : ℝ) + 0.06 * CentralCoverAssembly.R35.radius ≤
+      ‖xiShifted CentralCoverAssembly.R35.center‖ := by
+  have hpoly := poly_lower_R35
+  have hpi : (1 / 2 : ℝ) ≤ ‖R00Enclosure.piPart R35GammaUpper.sR35‖ :=
+    CellUniform.pi_lower_of_re (by rw [R35GammaUpper.sR35_re]; norm_num)
+  have hC0 : (0 : ℝ) ≤ Agam :=
+    le_trans (le_of_lt R00GammaLower.gamma_const_pos) hGam_floor
+  have hD0 : (0 : ℝ) ≤ Azeta :=
+    le_trans (by norm_num) hZeta_floor
+  have harg : R35GammaUpper.sR35
+      = (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R35.center := rfl
+  rw [harg] at hpoly hpi hgam hzeta
+  exact CellUniform.center_bound_of_component_bounds
+    CentralCoverAssembly.R35 0.15 0.06 (by norm_num) hrad
+    0.43 (1 / 2) Agam Azeta (by norm_num) (by norm_num) hC0 hD0
+    hpoly hpi hgam hzeta hprod
+
+/-- Exact R35 inner-tier threshold: `0.15 + 0.06 * 1.26 = 0.2256`. -/
+theorem R35_threshold_eq : (0.15 : ℝ) + 0.06 * 1.26 = 0.2256 := by norm_num
+
+/-- Exact banked base: `0.43 * (1/2) = 0.215`. -/
+theorem R35_base_eq : (0.43 : ℝ) * (1 / 2) = 0.215 := by norm_num
+
+/-- Exact residual: banked floors `0.215 / 260000000` do not clear `0.2256`
+(required `Agam * Azeta ≥ 0.2256 / 0.215 ≈ 1.0493`; banked `≈ 3.85e-09`;
+short by factor `≈ 273000000`, the ~8-order wall). -/
+theorem R35_banked_infeasible :
+    (0.43 : ℝ) * (1 / 2) * (1 / 10000000) * (1 / 26) < (0.15 : ℝ) + 0.06 * 1.26 := by norm_num
+
+#print axioms R35CenterAssembly.poly_lower_R35
+#print axioms R35CenterAssembly.R35_center_with_poly_pi_gamma
+#print axioms R35CenterAssembly.R35_threshold_eq
+#print axioms R35CenterAssembly.R35_banked_infeasible
+
+end R35CenterAssembly
+
+namespace R36CenterAssembly
+
+/-- Norm version of `polyPart` at the banked R36 s-center. -/
+theorem polyPart_norm_R36 :
+    ‖R00Enclosure.polyPart R36GammaUpper.sR36‖ =
+      (1 / 2) * ‖R36GammaUpper.sR36‖ * ‖R36GammaUpper.sR36 - 1‖ := by
+  unfold R00Enclosure.polyPart
+  rw [norm_mul, norm_mul, R00Numerics.norm_half]
+
+/-- `‖sR36‖ ≥ 1.25` (`1.25^2 = 1.5625 < 0.105^2 + 1.25^2 = 1.573525`). -/
+theorem norm_sR36_ge : (1.25 : ℝ) ≤ ‖R36GammaUpper.sR36‖ := by
+  have hsq : (1.25 : ℝ) ^ 2 ≤ ‖R36GammaUpper.sR36‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply,
+      R36GammaUpper.sR36_re, R36GammaUpper.sR36_im]
+    norm_num
+  calc (1.25 : ℝ) = Real.sqrt ((1.25 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖R36GammaUpper.sR36‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖R36GammaUpper.sR36‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- `‖sR36 - 1‖ ≥ 1.53` (`0.895^2 + 1.25^2 = 2.363525 > 1.53^2 = 2.3409`). -/
+theorem norm_sR36_sub_one_ge : (1.53 : ℝ) ≤ ‖R36GammaUpper.sR36 - 1‖ := by
+  have hr1 : (R36GammaUpper.sR36 - 1).re = -0.895 := by
+    simp only [Complex.sub_re, Complex.one_re, R36GammaUpper.sR36_re]
+    norm_num
+  have hi1 : (R36GammaUpper.sR36 - 1).im = 1.25 := by
+    simp only [Complex.sub_im, Complex.one_im, R36GammaUpper.sR36_im]
+    norm_num
+  have hsq : (1.53 : ℝ) ^ 2 ≤ ‖R36GammaUpper.sR36 - 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hr1, hi1]
+    norm_num
+  calc (1.53 : ℝ) = Real.sqrt ((1.53 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖R36GammaUpper.sR36 - 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖R36GammaUpper.sR36 - 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- ENCLOSURE (hypothesis-free): `0.95 ≤ ‖polyPart sR36‖`
+(`1.25 * 1.53 / 2 = 0.95625 ≥ 0.95`; true `≈ 0.964`, slack `≈ 0.014`). -/
+theorem poly_lower_R36 : (0.95 : ℝ) ≤ ‖R00Enclosure.polyPart R36GammaUpper.sR36‖ := by
+  have hprod : (1.25 : ℝ) * 1.53 ≤ ‖R36GammaUpper.sR36‖ * ‖R36GammaUpper.sR36 - 1‖ :=
+    mul_le_mul norm_sR36_ge norm_sR36_sub_one_ge (by norm_num) (norm_nonneg _)
+  rw [polyPart_norm_R36]
+  nlinarith [hprod]
+
+/-- Conditional R36 center assembly (inner tier `0.15 + 0.06 * radius`):
+banked s-center + new poly `0.95` and pi `1/2` floors are plugged into the
+generic bridge; the Gamma remainder and zeta lower stay explicit.
+The numeric check needs `Agam * Azeta ≥ (0.15 + 0.06 * 1.26) / 0.475`;
+at banked floors (`1/10000000`, `1/26`) it is infeasible, so this is filed as an
+honest conditional, not a closed bound. -/
+theorem R36_center_with_poly_pi_gamma (Agam Azeta : ℝ)
+    (hrad : CentralCoverAssembly.R36.radius ≤ 1.26)
+    (hGam_floor : (1 / 10000000 : ℝ) ≤ Agam)
+    (hgam : Agam ≤ ‖R00Enclosure.gammaPart R36GammaUpper.sR36‖)
+    (hZeta_floor : (1 / 26 : ℝ) ≤ Azeta)
+    (hzeta : Azeta ≤ ‖zeta R36GammaUpper.sR36‖)
+    (hprod : (0.15 : ℝ) + 0.06 * 1.26 ≤ 0.95 * (1 / 2) * Agam * Azeta) :
+    (0.15 : ℝ) + 0.06 * CentralCoverAssembly.R36.radius ≤
+      ‖xiShifted CentralCoverAssembly.R36.center‖ := by
+  have hpoly := poly_lower_R36
+  have hpi : (1 / 2 : ℝ) ≤ ‖R00Enclosure.piPart R36GammaUpper.sR36‖ :=
+    CellUniform.pi_lower_of_re (by rw [R36GammaUpper.sR36_re]; norm_num)
+  have hC0 : (0 : ℝ) ≤ Agam :=
+    le_trans (le_of_lt R00GammaLower.gamma_const_pos) hGam_floor
+  have hD0 : (0 : ℝ) ≤ Azeta :=
+    le_trans (by norm_num) hZeta_floor
+  have harg : R36GammaUpper.sR36
+      = (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R36.center := rfl
+  rw [harg] at hpoly hpi hgam hzeta
+  exact CellUniform.center_bound_of_component_bounds
+    CentralCoverAssembly.R36 0.15 0.06 (by norm_num) hrad
+    0.95 (1 / 2) Agam Azeta (by norm_num) (by norm_num) hC0 hD0
+    hpoly hpi hgam hzeta hprod
+
+/-- Exact R36 inner-tier threshold: `0.15 + 0.06 * 1.26 = 0.2256`. -/
+theorem R36_threshold_eq : (0.15 : ℝ) + 0.06 * 1.26 = 0.2256 := by norm_num
+
+/-- Exact banked base: `0.95 * (1/2) = 0.475`. -/
+theorem R36_base_eq : (0.95 : ℝ) * (1 / 2) = 0.475 := by norm_num
+
+/-- Exact residual: banked floors `0.475 / 260000000` do not clear `0.2256`
+(required `Agam * Azeta ≥ 0.2256 / 0.475 ≈ 0.47495`; banked `≈ 3.85e-09`;
+short by factor `≈ 123000000`, the ~8-order wall). -/
+theorem R36_banked_infeasible :
+    (0.95 : ℝ) * (1 / 2) * (1 / 10000000) * (1 / 26) < (0.15 : ℝ) + 0.06 * 1.26 := by norm_num
+
+#print axioms R36CenterAssembly.poly_lower_R36
+#print axioms R36CenterAssembly.R36_center_with_poly_pi_gamma
+#print axioms R36CenterAssembly.R36_threshold_eq
+#print axioms R36CenterAssembly.R36_banked_infeasible
+
+end R36CenterAssembly
+
+namespace R37CenterAssembly
+
+/-- Norm version of `polyPart` at the banked R37 s-center. -/
+theorem polyPart_norm_R37 :
+    ‖R00Enclosure.polyPart R37GammaUpper.sR37‖ =
+      (1 / 2) * ‖R37GammaUpper.sR37‖ * ‖R37GammaUpper.sR37 - 1‖ := by
+  unfold R00Enclosure.polyPart
+  rw [norm_mul, norm_mul, R00Numerics.norm_half]
+
+/-- `‖sR37‖ ≥ 3.25` (`3.25^2 = 10.5625 < 0.105^2 + 3.25^2 = 10.573525`). -/
+theorem norm_sR37_ge : (3.25 : ℝ) ≤ ‖R37GammaUpper.sR37‖ := by
+  have hsq : (3.25 : ℝ) ^ 2 ≤ ‖R37GammaUpper.sR37‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply,
+      R37GammaUpper.sR37_re, R37GammaUpper.sR37_im]
+    norm_num
+  calc (3.25 : ℝ) = Real.sqrt ((3.25 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖R37GammaUpper.sR37‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖R37GammaUpper.sR37‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- `‖sR37 - 1‖ ≥ 3.37` (`0.895^2 + 3.25^2 = 11.363525 > 3.37^2 = 11.3569`). -/
+theorem norm_sR37_sub_one_ge : (3.37 : ℝ) ≤ ‖R37GammaUpper.sR37 - 1‖ := by
+  have hr1 : (R37GammaUpper.sR37 - 1).re = -0.895 := by
+    simp only [Complex.sub_re, Complex.one_re, R37GammaUpper.sR37_re]
+    norm_num
+  have hi1 : (R37GammaUpper.sR37 - 1).im = 3.25 := by
+    simp only [Complex.sub_im, Complex.one_im, R37GammaUpper.sR37_im]
+    norm_num
+  have hsq : (3.37 : ℝ) ^ 2 ≤ ‖R37GammaUpper.sR37 - 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hr1, hi1]
+    norm_num
+  calc (3.37 : ℝ) = Real.sqrt ((3.37 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖R37GammaUpper.sR37 - 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖R37GammaUpper.sR37 - 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- ENCLOSURE (hypothesis-free): `5.47 ≤ ‖polyPart sR37‖`
+(`3.25 * 3.37 / 2 = 5.47625 ≥ 5.47`; true `≈ 5.48`, slack `≈ 0.01`). -/
+theorem poly_lower_R37 : (5.47 : ℝ) ≤ ‖R00Enclosure.polyPart R37GammaUpper.sR37‖ := by
+  have hprod : (3.25 : ℝ) * 3.37 ≤ ‖R37GammaUpper.sR37‖ * ‖R37GammaUpper.sR37 - 1‖ :=
+    mul_le_mul norm_sR37_ge norm_sR37_sub_one_ge (by norm_num) (norm_nonneg _)
+  rw [polyPart_norm_R37]
+  nlinarith [hprod]
+
+/-- Conditional R37 center assembly (mid tier `0.05 + 0.07 * radius`):
+banked s-center + new poly `5.47` and pi `1/2` floors are plugged into the
+generic bridge; the Gamma remainder and zeta lower stay explicit.
+The numeric check needs `Agam * Azeta ≥ (0.05 + 0.07 * 1.26) / 2.735`;
+at banked floors (`1/10000000`, `1/26`) it is infeasible, so this is filed as an
+honest conditional, not a closed bound. -/
+theorem R37_center_with_poly_pi_gamma (Agam Azeta : ℝ)
+    (hrad : CentralCoverAssembly.R37.radius ≤ 1.26)
+    (hGam_floor : (1 / 10000000 : ℝ) ≤ Agam)
+    (hgam : Agam ≤ ‖R00Enclosure.gammaPart R37GammaUpper.sR37‖)
+    (hZeta_floor : (1 / 26 : ℝ) ≤ Azeta)
+    (hzeta : Azeta ≤ ‖zeta R37GammaUpper.sR37‖)
+    (hprod : (0.05 : ℝ) + 0.07 * 1.26 ≤ 5.47 * (1 / 2) * Agam * Azeta) :
+    (0.05 : ℝ) + 0.07 * CentralCoverAssembly.R37.radius ≤
+      ‖xiShifted CentralCoverAssembly.R37.center‖ := by
+  have hpoly := poly_lower_R37
+  have hpi : (1 / 2 : ℝ) ≤ ‖R00Enclosure.piPart R37GammaUpper.sR37‖ :=
+    CellUniform.pi_lower_of_re (by rw [R37GammaUpper.sR37_re]; norm_num)
+  have hC0 : (0 : ℝ) ≤ Agam :=
+    le_trans (le_of_lt R00GammaLower.gamma_const_pos) hGam_floor
+  have hD0 : (0 : ℝ) ≤ Azeta :=
+    le_trans (by norm_num) hZeta_floor
+  have harg : R37GammaUpper.sR37
+      = (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R37.center := rfl
+  rw [harg] at hpoly hpi hgam hzeta
+  exact CellUniform.center_bound_of_component_bounds
+    CentralCoverAssembly.R37 0.05 0.07 (by norm_num) hrad
+    5.47 (1 / 2) Agam Azeta (by norm_num) (by norm_num) hC0 hD0
+    hpoly hpi hgam hzeta hprod
+
+/-- Exact R37 mid-tier threshold: `0.05 + 0.07 * 1.26 = 0.1382`. -/
+theorem R37_threshold_eq : (0.05 : ℝ) + 0.07 * 1.26 = 0.1382 := by norm_num
+
+/-- Exact banked base: `5.47 * (1/2) = 2.735`. -/
+theorem R37_base_eq : (5.47 : ℝ) * (1 / 2) = 2.735 := by norm_num
+
+/-- Exact residual: banked floors `2.735 / 260000000` do not clear `0.1382`
+(required `Agam * Azeta ≥ 0.1382 / 2.735 ≈ 0.05053`; banked `≈ 3.85e-09`;
+short by factor `≈ 13100000`, the ~7-order wall). -/
+theorem R37_banked_infeasible :
+    (5.47 : ℝ) * (1 / 2) * (1 / 10000000) * (1 / 26) < (0.05 : ℝ) + 0.07 * 1.26 := by norm_num
+
+#print axioms R37CenterAssembly.poly_lower_R37
+#print axioms R37CenterAssembly.R37_center_with_poly_pi_gamma
+#print axioms R37CenterAssembly.R37_threshold_eq
+#print axioms R37CenterAssembly.R37_banked_infeasible
+
+end R37CenterAssembly
+
+namespace R38CenterAssembly
+
+/-- Norm version of `polyPart` at the banked R38 s-center. -/
+theorem polyPart_norm_R38 :
+    ‖R00Enclosure.polyPart R38GammaUpper.sR38‖ =
+      (1 / 2) * ‖R38GammaUpper.sR38‖ * ‖R38GammaUpper.sR38 - 1‖ := by
+  unfold R00Enclosure.polyPart
+  rw [norm_mul, norm_mul, R00Numerics.norm_half]
+
+/-- `‖sR38‖ ≥ 5.25` (`5.25^2 = 27.5625 < 0.105^2 + 5.25^2 = 27.573525`). -/
+theorem norm_sR38_ge : (5.25 : ℝ) ≤ ‖R38GammaUpper.sR38‖ := by
+  have hsq : (5.25 : ℝ) ^ 2 ≤ ‖R38GammaUpper.sR38‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply,
+      R38GammaUpper.sR38_re, R38GammaUpper.sR38_im]
+    norm_num
+  calc (5.25 : ℝ) = Real.sqrt ((5.25 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖R38GammaUpper.sR38‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖R38GammaUpper.sR38‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- `‖sR38 - 1‖ ≥ 5.32` (`0.895^2 + 5.25^2 = 28.363525 > 5.32^2 = 28.3024`). -/
+theorem norm_sR38_sub_one_ge : (5.32 : ℝ) ≤ ‖R38GammaUpper.sR38 - 1‖ := by
+  have hr1 : (R38GammaUpper.sR38 - 1).re = -0.895 := by
+    simp only [Complex.sub_re, Complex.one_re, R38GammaUpper.sR38_re]
+    norm_num
+  have hi1 : (R38GammaUpper.sR38 - 1).im = 5.25 := by
+    simp only [Complex.sub_im, Complex.one_im, R38GammaUpper.sR38_im]
+    norm_num
+  have hsq : (5.32 : ℝ) ^ 2 ≤ ‖R38GammaUpper.sR38 - 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hr1, hi1]
+    norm_num
+  calc (5.32 : ℝ) = Real.sqrt ((5.32 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖R38GammaUpper.sR38 - 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖R38GammaUpper.sR38 - 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- ENCLOSURE (hypothesis-free): `13.96 ≤ ‖polyPart sR38‖`
+(`5.25 * 5.32 / 2 = 13.965 ≥ 13.96`; true `≈ 13.983`, slack `≈ 0.02`). -/
+theorem poly_lower_R38 : (13.96 : ℝ) ≤ ‖R00Enclosure.polyPart R38GammaUpper.sR38‖ := by
+  have hprod : (5.25 : ℝ) * 5.32 ≤ ‖R38GammaUpper.sR38‖ * ‖R38GammaUpper.sR38 - 1‖ :=
+    mul_le_mul norm_sR38_ge norm_sR38_sub_one_ge (by norm_num) (norm_nonneg _)
+  rw [polyPart_norm_R38]
+  nlinarith [hprod]
+
+/-- Conditional R38 center assembly (mid tier `0.05 + 0.07 * radius`):
+banked s-center + new poly `13.96` and pi `1/2` floors are plugged into the
+generic bridge; the Gamma remainder and zeta lower stay explicit.
+The numeric check needs `Agam * Azeta ≥ (0.05 + 0.07 * 1.26) / 6.98`;
+at banked floors (`1/10000000`, `1/26`) it is infeasible, so this is filed as an
+honest conditional, not a closed bound. -/
+theorem R38_center_with_poly_pi_gamma (Agam Azeta : ℝ)
+    (hrad : CentralCoverAssembly.R38.radius ≤ 1.26)
+    (hGam_floor : (1 / 10000000 : ℝ) ≤ Agam)
+    (hgam : Agam ≤ ‖R00Enclosure.gammaPart R38GammaUpper.sR38‖)
+    (hZeta_floor : (1 / 26 : ℝ) ≤ Azeta)
+    (hzeta : Azeta ≤ ‖zeta R38GammaUpper.sR38‖)
+    (hprod : (0.05 : ℝ) + 0.07 * 1.26 ≤ 13.96 * (1 / 2) * Agam * Azeta) :
+    (0.05 : ℝ) + 0.07 * CentralCoverAssembly.R38.radius ≤
+      ‖xiShifted CentralCoverAssembly.R38.center‖ := by
+  have hpoly := poly_lower_R38
+  have hpi : (1 / 2 : ℝ) ≤ ‖R00Enclosure.piPart R38GammaUpper.sR38‖ :=
+    CellUniform.pi_lower_of_re (by rw [R38GammaUpper.sR38_re]; norm_num)
+  have hC0 : (0 : ℝ) ≤ Agam :=
+    le_trans (le_of_lt R00GammaLower.gamma_const_pos) hGam_floor
+  have hD0 : (0 : ℝ) ≤ Azeta :=
+    le_trans (by norm_num) hZeta_floor
+  have harg : R38GammaUpper.sR38
+      = (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R38.center := rfl
+  rw [harg] at hpoly hpi hgam hzeta
+  exact CellUniform.center_bound_of_component_bounds
+    CentralCoverAssembly.R38 0.05 0.07 (by norm_num) hrad
+    13.96 (1 / 2) Agam Azeta (by norm_num) (by norm_num) hC0 hD0
+    hpoly hpi hgam hzeta hprod
+
+/-- Exact R38 mid-tier threshold: `0.05 + 0.07 * 1.26 = 0.1382`. -/
+theorem R38_threshold_eq : (0.05 : ℝ) + 0.07 * 1.26 = 0.1382 := by norm_num
+
+/-- Exact banked base: `13.96 * (1/2) = 6.98`. -/
+theorem R38_base_eq : (13.96 : ℝ) * (1 / 2) = 6.98 := by norm_num
+
+/-- Exact residual: banked floors `6.98 / 260000000` do not clear `0.1382`
+(required `Agam * Azeta ≥ 0.1382 / 6.98 ≈ 0.01980`; banked `≈ 3.85e-09`;
+short by factor `≈ 5150000`, the ~6-order wall). -/
+theorem R38_banked_infeasible :
+    (13.96 : ℝ) * (1 / 2) * (1 / 10000000) * (1 / 26) < (0.05 : ℝ) + 0.07 * 1.26 := by norm_num
+
+#print axioms R38CenterAssembly.poly_lower_R38
+#print axioms R38CenterAssembly.R38_center_with_poly_pi_gamma
+#print axioms R38CenterAssembly.R38_threshold_eq
+#print axioms R38CenterAssembly.R38_banked_infeasible
+
+end R38CenterAssembly
+
+namespace R39CenterAssembly
+
+/-- Norm version of `polyPart` at the banked R39 s-center. -/
+theorem polyPart_norm_R39 :
+    ‖R00Enclosure.polyPart R39GammaUpper.sR39‖ =
+      (1 / 2) * ‖R39GammaUpper.sR39‖ * ‖R39GammaUpper.sR39 - 1‖ := by
+  unfold R00Enclosure.polyPart
+  rw [norm_mul, norm_mul, R00Numerics.norm_half]
+
+/-- `‖sR39‖ ≥ 7.25` (`7.25^2 = 52.5625 < 0.105^2 + 7.25^2 = 52.573525`). -/
+theorem norm_sR39_ge : (7.25 : ℝ) ≤ ‖R39GammaUpper.sR39‖ := by
+  have hsq : (7.25 : ℝ) ^ 2 ≤ ‖R39GammaUpper.sR39‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply,
+      R39GammaUpper.sR39_re, R39GammaUpper.sR39_im]
+    norm_num
+  calc (7.25 : ℝ) = Real.sqrt ((7.25 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖R39GammaUpper.sR39‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖R39GammaUpper.sR39‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- `‖sR39 - 1‖ ≥ 7.3` (`0.895^2 + 7.25^2 = 53.363525 > 7.3^2 = 53.29`). -/
+theorem norm_sR39_sub_one_ge : (7.3 : ℝ) ≤ ‖R39GammaUpper.sR39 - 1‖ := by
+  have hr1 : (R39GammaUpper.sR39 - 1).re = -0.895 := by
+    simp only [Complex.sub_re, Complex.one_re, R39GammaUpper.sR39_re]
+    norm_num
+  have hi1 : (R39GammaUpper.sR39 - 1).im = 7.25 := by
+    simp only [Complex.sub_im, Complex.one_im, R39GammaUpper.sR39_im]
+    norm_num
+  have hsq : (7.3 : ℝ) ^ 2 ≤ ‖R39GammaUpper.sR39 - 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hr1, hi1]
+    norm_num
+  calc (7.3 : ℝ) = Real.sqrt ((7.3 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖R39GammaUpper.sR39 - 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖R39GammaUpper.sR39 - 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- ENCLOSURE (hypothesis-free): `26.46 ≤ ‖polyPart sR39‖`
+(`7.25 * 7.3 / 2 = 26.4625 ≥ 26.46`; true `≈ 26.49`, slack `≈ 0.03`). -/
+theorem poly_lower_R39 : (26.46 : ℝ) ≤ ‖R00Enclosure.polyPart R39GammaUpper.sR39‖ := by
+  have hprod : (7.25 : ℝ) * 7.3 ≤ ‖R39GammaUpper.sR39‖ * ‖R39GammaUpper.sR39 - 1‖ :=
+    mul_le_mul norm_sR39_ge norm_sR39_sub_one_ge (by norm_num) (norm_nonneg _)
+  rw [polyPart_norm_R39]
+  nlinarith [hprod]
+
+/-- Conditional R39 center assembly (outer tier `0.002 + 0.07 * radius`):
+banked s-center + new poly `26.46` and pi `1/2` floors are plugged into the
+generic bridge; the Gamma remainder and zeta lower stay explicit.
+The numeric check needs `Agam * Azeta ≥ (0.002 + 0.07 * 1.26) / 13.23`;
+at banked floors (`1/10000000`, `1/26`) it is infeasible, so this is filed as an
+honest conditional, not a closed bound. -/
+theorem R39_center_with_poly_pi_gamma (Agam Azeta : ℝ)
+    (hrad : CentralCoverAssembly.R39.radius ≤ 1.26)
+    (hGam_floor : (1 / 10000000 : ℝ) ≤ Agam)
+    (hgam : Agam ≤ ‖R00Enclosure.gammaPart R39GammaUpper.sR39‖)
+    (hZeta_floor : (1 / 26 : ℝ) ≤ Azeta)
+    (hzeta : Azeta ≤ ‖zeta R39GammaUpper.sR39‖)
+    (hprod : (0.002 : ℝ) + 0.07 * 1.26 ≤ 26.46 * (1 / 2) * Agam * Azeta) :
+    (0.002 : ℝ) + 0.07 * CentralCoverAssembly.R39.radius ≤
+      ‖xiShifted CentralCoverAssembly.R39.center‖ := by
+  have hpoly := poly_lower_R39
+  have hpi : (1 / 2 : ℝ) ≤ ‖R00Enclosure.piPart R39GammaUpper.sR39‖ :=
+    CellUniform.pi_lower_of_re (by rw [R39GammaUpper.sR39_re]; norm_num)
+  have hC0 : (0 : ℝ) ≤ Agam :=
+    le_trans (le_of_lt R00GammaLower.gamma_const_pos) hGam_floor
+  have hD0 : (0 : ℝ) ≤ Azeta :=
+    le_trans (by norm_num) hZeta_floor
+  have harg : R39GammaUpper.sR39
+      = (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R39.center := rfl
+  rw [harg] at hpoly hpi hgam hzeta
+  exact CellUniform.center_bound_of_component_bounds
+    CentralCoverAssembly.R39 0.002 0.07 (by norm_num) hrad
+    26.46 (1 / 2) Agam Azeta (by norm_num) (by norm_num) hC0 hD0
+    hpoly hpi hgam hzeta hprod
+
+/-- Exact R39 outer-tier threshold: `0.002 + 0.07 * 1.26 = 0.0902`. -/
+theorem R39_threshold_eq : (0.002 : ℝ) + 0.07 * 1.26 = 0.0902 := by norm_num
+
+/-- Exact banked base: `26.46 * (1/2) = 13.23`. -/
+theorem R39_base_eq : (26.46 : ℝ) * (1 / 2) = 13.23 := by norm_num
+
+/-- Exact residual: banked floors `13.23 / 260000000` do not clear `0.0902`
+(required `Agam * Azeta ≥ 0.0902 / 13.23 ≈ 0.00682`; banked `≈ 3.85e-09`;
+short by factor `≈ 1770000`, the ~6-order wall). -/
+theorem R39_banked_infeasible :
+    (26.46 : ℝ) * (1 / 2) * (1 / 10000000) * (1 / 26) < (0.002 : ℝ) + 0.07 * 1.26 := by norm_num
+
+#print axioms R39CenterAssembly.poly_lower_R39
+#print axioms R39CenterAssembly.R39_center_with_poly_pi_gamma
+#print axioms R39CenterAssembly.R39_threshold_eq
+#print axioms R39CenterAssembly.R39_banked_infeasible
+
+end R39CenterAssembly
+
+namespace R40CenterAssembly
+
+/-- Norm version of `polyPart` at the banked R40 s-center. -/
+theorem polyPart_norm_R40 :
+    ‖R00Enclosure.polyPart R40GammaUpper.sR40‖ =
+      (1 / 2) * ‖R40GammaUpper.sR40‖ * ‖R40GammaUpper.sR40 - 1‖ := by
+  unfold R00Enclosure.polyPart
+  rw [norm_mul, norm_mul, R00Numerics.norm_half]
+
+/-- `‖sR40‖ ≥ 8.75` (`8.75^2 = 76.5625 < 0.105^2 + 8.75^2 = 76.573525`). -/
+theorem norm_sR40_ge : (8.75 : ℝ) ≤ ‖R40GammaUpper.sR40‖ := by
+  have hsq : (8.75 : ℝ) ^ 2 ≤ ‖R40GammaUpper.sR40‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply,
+      R40GammaUpper.sR40_re, R40GammaUpper.sR40_im]
+    norm_num
+  calc (8.75 : ℝ) = Real.sqrt ((8.75 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖R40GammaUpper.sR40‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖R40GammaUpper.sR40‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- `‖sR40 - 1‖ ≥ 8.79` (`0.895^2 + 8.75^2 = 77.363525 > 8.79^2 = 77.2641`). -/
+theorem norm_sR40_sub_one_ge : (8.79 : ℝ) ≤ ‖R40GammaUpper.sR40 - 1‖ := by
+  have hr1 : (R40GammaUpper.sR40 - 1).re = -0.895 := by
+    simp only [Complex.sub_re, Complex.one_re, R40GammaUpper.sR40_re]
+    norm_num
+  have hi1 : (R40GammaUpper.sR40 - 1).im = 8.75 := by
+    simp only [Complex.sub_im, Complex.one_im, R40GammaUpper.sR40_im]
+    norm_num
+  have hsq : (8.79 : ℝ) ^ 2 ≤ ‖R40GammaUpper.sR40 - 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hr1, hi1]
+    norm_num
+  calc (8.79 : ℝ) = Real.sqrt ((8.79 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖R40GammaUpper.sR40 - 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖R40GammaUpper.sR40 - 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- ENCLOSURE (hypothesis-free): `38.45 ≤ ‖polyPart sR40‖`
+(`8.75 * 8.79 / 2 = 38.45625 ≥ 38.45`; true `≈ 38.49`, slack `≈ 0.04`). -/
+theorem poly_lower_R40 : (38.45 : ℝ) ≤ ‖R00Enclosure.polyPart R40GammaUpper.sR40‖ := by
+  have hprod : (8.75 : ℝ) * 8.79 ≤ ‖R40GammaUpper.sR40‖ * ‖R40GammaUpper.sR40 - 1‖ :=
+    mul_le_mul norm_sR40_ge norm_sR40_sub_one_ge (by norm_num) (norm_nonneg _)
+  rw [polyPart_norm_R40]
+  nlinarith [hprod]
+
+/-- Conditional R40 center assembly (outer tier `0.002 + 0.05 * radius`):
+banked s-center + new poly `38.45` and pi `1/2` floors are plugged into the
+generic bridge; the Gamma remainder and zeta lower stay explicit.
+The numeric check needs `Agam * Azeta ≥ (0.002 + 0.05 * 1.26) / 19.225`;
+at banked floors (`1/10000000`, `1/26`) it is infeasible, so this is filed as an
+honest conditional, not a closed bound. -/
+theorem R40_center_with_poly_pi_gamma (Agam Azeta : ℝ)
+    (hrad : CentralCoverAssembly.R40.radius ≤ 1.26)
+    (hGam_floor : (1 / 10000000 : ℝ) ≤ Agam)
+    (hgam : Agam ≤ ‖R00Enclosure.gammaPart R40GammaUpper.sR40‖)
+    (hZeta_floor : (1 / 26 : ℝ) ≤ Azeta)
+    (hzeta : Azeta ≤ ‖zeta R40GammaUpper.sR40‖)
+    (hprod : (0.002 : ℝ) + 0.05 * 1.26 ≤ 38.45 * (1 / 2) * Agam * Azeta) :
+    (0.002 : ℝ) + 0.05 * CentralCoverAssembly.R40.radius ≤
+      ‖xiShifted CentralCoverAssembly.R40.center‖ := by
+  have hpoly := poly_lower_R40
+  have hpi : (1 / 2 : ℝ) ≤ ‖R00Enclosure.piPart R40GammaUpper.sR40‖ :=
+    CellUniform.pi_lower_of_re (by rw [R40GammaUpper.sR40_re]; norm_num)
+  have hC0 : (0 : ℝ) ≤ Agam :=
+    le_trans (le_of_lt R00GammaLower.gamma_const_pos) hGam_floor
+  have hD0 : (0 : ℝ) ≤ Azeta :=
+    le_trans (by norm_num) hZeta_floor
+  have harg : R40GammaUpper.sR40
+      = (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R40.center := rfl
+  rw [harg] at hpoly hpi hgam hzeta
+  exact CellUniform.center_bound_of_component_bounds
+    CentralCoverAssembly.R40 0.002 0.05 (by norm_num) hrad
+    38.45 (1 / 2) Agam Azeta (by norm_num) (by norm_num) hC0 hD0
+    hpoly hpi hgam hzeta hprod
+
+/-- Exact R40 outer-tier threshold: `0.002 + 0.05 * 1.26 = 0.065`. -/
+theorem R40_threshold_eq : (0.002 : ℝ) + 0.05 * 1.26 = 0.065 := by norm_num
+
+/-- Exact banked base: `38.45 * (1/2) = 19.225`. -/
+theorem R40_base_eq : (38.45 : ℝ) * (1 / 2) = 19.225 := by norm_num
+
+/-- Exact residual: banked floors `19.225 / 260000000` do not clear `0.065`
+(required `Agam * Azeta ≥ 0.065 / 19.225 ≈ 0.00338`; banked `≈ 3.85e-09`;
+short by factor `≈ 878000`, the ~6-order wall). -/
+theorem R40_banked_infeasible :
+    (38.45 : ℝ) * (1 / 2) * (1 / 10000000) * (1 / 26) < (0.002 : ℝ) + 0.05 * 1.26 := by norm_num
+
+#print axioms R40CenterAssembly.poly_lower_R40
+#print axioms R40CenterAssembly.R40_center_with_poly_pi_gamma
+#print axioms R40CenterAssembly.R40_threshold_eq
+#print axioms R40CenterAssembly.R40_banked_infeasible
+
+end R40CenterAssembly

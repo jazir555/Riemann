@@ -1365,3 +1365,20 @@ and hence to the `:1109` residual `etaR02_hConvLe_residual_spec`. No tsum
 numeral for `etaDerivMajorantR02` and no value for `:1109` are filed here. -/
 def etaR02Int_dom_residual_spec : Prop :=
   ∃ C : ℝ, 0 ≤ C ∧ etaR02Int_pointwise_missing C
+
+/-- Next disc rung: extend finite odd `1.05` partial sum from `range 1` to
+`range 2` with cap `2` via `norm_num` (head `= 1`, second term `≤ 1`).
+Grepped last disc/tsum block first: `etaR02Int_odd105_tsum_le_21` (`≤ 21`). -/
+theorem etaR02Int_odd105_sum_range_two_le_two :
+    ∑ n in Finset.range 2, ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) ≤ 2 := by
+  have h0 := etaR02Int_odd105_zero_eq_one
+  have h1le : ((((2 * 1 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) ≤ 1 := by
+    have h3 : ((((2 * 1 + 1 : ℕ)) : ℝ)) = 3 := by norm_num
+    rw [h3]
+    exact Real.rpow_le_one_of_one_le_of_nonpos (by norm_num) (by norm_num)
+  have hsum : ∑ n in Finset.range 2, ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) =
+      ((((2 * 0 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) +
+      ((((2 * 1 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) := by
+    rw [Finset.sum_range_succ, Finset.sum_range_one]
+  rw [hsum, h0]
+  linarith

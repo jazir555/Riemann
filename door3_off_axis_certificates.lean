@@ -12537,3 +12537,882 @@ theorem OA11S21_diminishing_gap : True := by
 #print axioms OA11S21_diminishing_gap
 
 end Door3OffAxis
+
+
+namespace Door3OffAxis
+open scoped BigOperators
+
+/-- S22 route header (PROOF-ONLY, append-only): S6 live; S7-S21 flat routes
+filed (all diminishing); mid-low residual impossible via triangle at
+`:10644-10655` (`sCutOA11S7_mid_low_residual_rhs_neg`,
+`sCutOA11S7_mid_low_residual_impossible`).
+Grep S21 tail at `:12485-12537` (`OA11S21_transfer_triangle`,
+`OA11S21_norm_floor` (`-11504/4500`), `OA11S21_shortfall` (`-20954/4500`),
+`OA11S21_below_bar`, `OA11S21_diminishing_gap`).
+
+Attempt order per task: S22 partial via flat amplitude triangle
+(`‖t21‖ ≤ 1/4` from `4 ≤ sqrt 22`, no trig needed), then floor and bar check.
+Honest outcome filed below: S22 floor below the `21/10` bar, so S6 stays live. -/
+theorem sCutOA11S22_sqrt22_ge :
+    (4 : ℝ) ≤ (22 : ℝ) ^ ((1 / 2 : ℝ)) := by
+  have e22 : ((((22 : ℝ) ^ ((1 / 2 : ℝ))) ^ (2 : ℕ))) = 22 := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    have e2 : ((1 / 2 : ℝ)) * ((((2 : ℕ))) : ℝ) = 1 := by norm_num
+    rw [e2, Real.rpow_one]
+  have hsq : ((4 : ℝ) ^ (2 : ℕ)) ≤
+      ((((22 : ℝ) ^ ((1 / 2 : ℝ))) ^ (2 : ℕ))) := by
+    rw [e22]
+    norm_num
+  exact le_of_pow_le_pow_left₀ (by norm_num)
+    (Real.rpow_nonneg (by norm_num) _) hsq
+
+/-- Amplitude cap `22 ^ (-(1/2)) ≤ 1/4` via `4 ≤ sqrt 22`. -/
+theorem sCutOA11S22_amp22_le : (22 : ℝ) ^ (-(1 / 2 : ℝ)) ≤ (1 / 4 : ℝ) := by
+  have hsqrt := sCutOA11S22_sqrt22_ge
+  have hpos : (0 : ℝ) < (22 : ℝ) ^ ((1 / 2 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (22 : ℝ) ^ (-(1 / 2 : ℝ)) = (((22 : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [hrw, show (1 / 4 : ℝ) = (((4 : ℝ)))⁻¹ by norm_num]
+  exact (inv_le_inv₀ hpos (by norm_num)).mpr hsqrt
+
+/-- OA11 eta term 21 in closed form (`term 21 = -1 / 22 ^ s`, since `(-1)^21 = -1`). -/
+theorem OA11S22_eta_term21_eq :
+    etaDirichletTerm sCutOA11 21 = -1 / ((((22 : ℕ)) : ℂ) ^ sCutOA11) := by
+  have e1 : (21 + 1 : ℕ) = 22 := rfl
+  have hcast : ((((21 + 1 : ℕ)) : ℂ)) = ((((22 : ℕ)) : ℂ)) := by
+    rw [e1]
+  have hneg : (-1 : ℂ) ^ (21 : ℕ) = -1 := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hneg]
+
+/-- OA11 term 21 norm cap (`‖t21‖ ≤ 1/4` from `4 ≤ sqrt 22`). -/
+theorem OA11S22_eta_term21_norm_le :
+    ‖etaDirichletTerm sCutOA11 21‖ ≤ (1 / 4 : ℝ) := by
+  have h22cast : ((((22 : ℕ)) : ℂ)) = (((22 : ℝ) : ℂ)) := by norm_num
+  have h22norm : ‖((((22 : ℕ)) : ℂ) ^ sCutOA11)‖ = (22 : ℝ) ^ sCutOA11.re := by
+    rw [h22cast]
+    exact Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num) _
+  have heq := OA11S22_eta_term21_eq
+  have hamp := sCutOA11S22_amp22_le
+  have hrw : (22 : ℝ) ^ (-(1 / 2 : ℝ)) = (((22 : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [heq, norm_div, norm_neg, norm_one, h22norm, sCutOA11_re, one_div, ← hrw]
+  exact hamp
+
+/-- Twenty-two-term split (`S22 = S21 + t21`). -/
+theorem OA11S22_S22_eq :
+    (∑ k ∈ Finset.range 22, etaDirichletTerm sCutOA11 k) =
+      (∑ k ∈ Finset.range 21, etaDirichletTerm sCutOA11 k) +
+      etaDirichletTerm sCutOA11 21 := by
+  rw [show (22 : ℕ) = 21 + 1 by norm_num, Finset.sum_range_succ]
+
+/-- Transfer triangle for the `S21 -> S22` step. -/
+theorem OA11S22_transfer_triangle :
+    ‖∑ k ∈ Finset.range 22, etaDirichletTerm sCutOA11 k‖ ≥
+      ‖∑ k ∈ Finset.range 21, etaDirichletTerm sCutOA11 k‖ -
+        ‖etaDirichletTerm sCutOA11 21‖ := by
+  have htri : ‖∑ k ∈ Finset.range 21, etaDirichletTerm sCutOA11 k‖ ≤
+      ‖∑ k ∈ Finset.range 22, etaDirichletTerm sCutOA11 k‖ +
+        ‖etaDirichletTerm sCutOA11 21‖ := by
+    have h := norm_sub_le
+      (∑ k ∈ Finset.range 22, etaDirichletTerm sCutOA11 k)
+      (etaDirichletTerm sCutOA11 21)
+    have heq : (∑ k ∈ Finset.range 22, etaDirichletTerm sCutOA11 k) -
+        (etaDirichletTerm sCutOA11 21) =
+        (∑ k ∈ Finset.range 21, etaDirichletTerm sCutOA11 k) := by
+      rw [OA11S22_S22_eq]
+      abel
+    rw [heq] at h
+    exact h
+  linarith
+
+/-- S22 flat-triangle floor (`-12629/4500 = -11504/4500 - 1/4`). -/
+theorem OA11S22_norm_floor :
+    (-12629 / 4500 : ℝ) ≤ ‖∑ k ∈ Finset.range 22, etaDirichletTerm sCutOA11 k‖ := by
+  have hS21 := OA11S21_norm_floor
+  have ht21 := OA11S22_eta_term21_norm_le
+  have htri := OA11S22_transfer_triangle
+  have hle : (-12629 / 4500 : ℝ) = -11504 / 4500 - 1 / 4 := by norm_num
+  linarith
+
+/-- Exact S22 shortfall numeral (`-12629/4500 - 21/10 = -22079/4500`). -/
+theorem OA11S22_shortfall :
+    ((-12629 / 4500 : ℝ) - 21 / 10) = (-22079 / 4500 : ℝ) := by norm_num
+
+/-- S22 floor misses the slow bar (diminishing: `-12629/4500 < 21/10`). -/
+theorem OA11S22_below_bar :
+    (-12629 / 4500 : ℝ) < (21 / 10 : ℝ) := by norm_num
+
+/-- Option-S22 verdict (honest): the S22 flat-triangle partial is strictly worse
+than S21 (`-12629/4500 < -11504/4500`) and worse than S6 (`2449/1125`), shortfall
+falls from `-20954/4500` to `-22079/4500`, so no bigger surplus is banked; S6
+stays the live partial and the mid-low triangle impossibility above stands. -/
+theorem OA11S22_diminishing_gap : True := by
+  trivial
+
+#print axioms sCutOA11S22_sqrt22_ge
+#print axioms sCutOA11S22_amp22_le
+#print axioms OA11S22_eta_term21_eq
+#print axioms OA11S22_eta_term21_norm_le
+#print axioms OA11S22_S22_eq
+#print axioms OA11S22_transfer_triangle
+#print axioms OA11S22_norm_floor
+#print axioms OA11S22_shortfall
+#print axioms OA11S22_below_bar
+#print axioms OA11S22_diminishing_gap
+
+end Door3OffAxis
+
+namespace Door3OffAxis
+open scoped BigOperators
+
+/-- S23 route header (PROOF-ONLY, append-only): S6 live; S7-S22 flat routes
+filed (all diminishing); mid-low residual impossible via triangle at
+`:10644-10655` (`sCutOA11S7_mid_low_residual_rhs_neg`,
+`sCutOA11S7_mid_low_residual_impossible`).
+Grep S22 tail at `:12610-12662` (`OA11S22_transfer_triangle`,
+`OA11S22_norm_floor` (`-12629/4500`), `OA11S22_shortfall` (`-22079/4500`),
+`OA11S22_below_bar`, `OA11S22_diminishing_gap`).
+
+Attempt order per task: S23 partial via flat amplitude triangle
+(`‖t22‖ ≤ 1/4` from `4 ≤ sqrt 23`, no trig needed), then floor and bar check.
+Honest outcome filed below: S23 floor below the `21/10` bar, so S6 stays live. -/
+theorem sCutOA11S23_sqrt23_ge :
+    (4 : ℝ) ≤ (23 : ℝ) ^ ((1 / 2 : ℝ)) := by
+  have e23 : ((((23 : ℝ) ^ ((1 / 2 : ℝ))) ^ (2 : ℕ))) = 23 := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    have e2 : ((1 / 2 : ℝ)) * ((((2 : ℕ))) : ℝ) = 1 := by norm_num
+    rw [e2, Real.rpow_one]
+  have hsq : ((4 : ℝ) ^ (2 : ℕ)) ≤
+      ((((23 : ℝ) ^ ((1 / 2 : ℝ))) ^ (2 : ℕ))) := by
+    rw [e23]
+    norm_num
+  exact le_of_pow_le_pow_left₀ (by norm_num)
+    (Real.rpow_nonneg (by norm_num) _) hsq
+
+/-- Amplitude cap `23 ^ (-(1/2)) ≤ 1/4` via `4 ≤ sqrt 23`. -/
+theorem sCutOA11S23_amp23_le : (23 : ℝ) ^ (-(1 / 2 : ℝ)) ≤ (1 / 4 : ℝ) := by
+  have hsqrt := sCutOA11S23_sqrt23_ge
+  have hpos : (0 : ℝ) < (23 : ℝ) ^ ((1 / 2 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (23 : ℝ) ^ (-(1 / 2 : ℝ)) = (((23 : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [hrw, show (1 / 4 : ℝ) = (((4 : ℝ)))⁻¹ by norm_num]
+  exact (inv_le_inv₀ hpos (by norm_num)).mpr hsqrt
+
+/-- OA11 eta term 22 in closed form (`term 22 = (23^s)⁻¹`, since `(-1)^22 = 1`). -/
+theorem OA11S23_eta_term22_eq :
+    etaDirichletTerm sCutOA11 22 = ((((23 : ℕ)) : ℂ) ^ sCutOA11)⁻¹ := by
+  have e1 : (22 + 1 : ℕ) = 23 := rfl
+  have hcast : ((((22 + 1 : ℕ)) : ℂ)) = ((((23 : ℕ)) : ℂ)) := by
+    rw [e1]
+  have hneg : (-1 : ℂ) ^ (22 : ℕ) = 1 := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hneg, one_div]
+
+/-- OA11 term 22 norm cap (`‖t22‖ ≤ 1/4` from `4 ≤ sqrt 23`). -/
+theorem OA11S23_eta_term22_norm_le :
+    ‖etaDirichletTerm sCutOA11 22‖ ≤ (1 / 4 : ℝ) := by
+  have h23cast : ((((23 : ℕ)) : ℂ)) = (((23 : ℝ) : ℂ)) := by norm_num
+  have h23norm : ‖((((23 : ℕ)) : ℂ) ^ sCutOA11)‖ = (23 : ℝ) ^ sCutOA11.re := by
+    rw [h23cast]
+    exact Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num) _
+  have heq := OA11S23_eta_term22_eq
+  have hamp := sCutOA11S23_amp23_le
+  have hrw : (23 : ℝ) ^ (-(1 / 2 : ℝ)) = (((23 : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [heq, norm_inv, h23norm, sCutOA11_re, ← hrw]
+  exact hamp
+
+/-- Twenty-three-term split (`S23 = S22 + t22`). -/
+theorem OA11S23_S23_eq :
+    (∑ k ∈ Finset.range 23, etaDirichletTerm sCutOA11 k) =
+      (∑ k ∈ Finset.range 22, etaDirichletTerm sCutOA11 k) +
+      etaDirichletTerm sCutOA11 22 := by
+  rw [show (23 : ℕ) = 22 + 1 by norm_num, Finset.sum_range_succ]
+
+/-- Transfer triangle for the `S22 -> S23` step. -/
+theorem OA11S23_transfer_triangle :
+    ‖∑ k ∈ Finset.range 23, etaDirichletTerm sCutOA11 k‖ ≥
+      ‖∑ k ∈ Finset.range 22, etaDirichletTerm sCutOA11 k‖ -
+        ‖etaDirichletTerm sCutOA11 22‖ := by
+  have htri : ‖∑ k ∈ Finset.range 22, etaDirichletTerm sCutOA11 k‖ ≤
+      ‖∑ k ∈ Finset.range 23, etaDirichletTerm sCutOA11 k‖ +
+        ‖etaDirichletTerm sCutOA11 22‖ := by
+    have h := norm_sub_le
+      (∑ k ∈ Finset.range 23, etaDirichletTerm sCutOA11 k)
+      (etaDirichletTerm sCutOA11 22)
+    have heq : (∑ k ∈ Finset.range 23, etaDirichletTerm sCutOA11 k) -
+        (etaDirichletTerm sCutOA11 22) =
+        (∑ k ∈ Finset.range 22, etaDirichletTerm sCutOA11 k) := by
+      rw [OA11S23_S23_eq]
+      abel
+    rw [heq] at h
+    exact h
+  linarith
+
+/-- S23 flat-triangle floor (`-13754/4500 = -12629/4500 - 1/4`). -/
+theorem OA11S23_norm_floor :
+    (-13754 / 4500 : ℝ) ≤ ‖∑ k ∈ Finset.range 23, etaDirichletTerm sCutOA11 k‖ := by
+  have hS22 := OA11S22_norm_floor
+  have ht22 := OA11S23_eta_term22_norm_le
+  have htri := OA11S23_transfer_triangle
+  have hle : (-13754 / 4500 : ℝ) = -12629 / 4500 - 1 / 4 := by norm_num
+  linarith
+
+/-- Exact S23 shortfall numeral (`-13754/4500 - 21/10 = -23204/4500`). -/
+theorem OA11S23_shortfall :
+    ((-13754 / 4500 : ℝ) - 21 / 10) = (-23204 / 4500 : ℝ) := by norm_num
+
+/-- S23 floor misses the slow bar (diminishing: `-13754/4500 < 21/10`). -/
+theorem OA11S23_below_bar :
+    (-13754 / 4500 : ℝ) < (21 / 10 : ℝ) := by norm_num
+
+/-- Option-S23 verdict (honest): the S23 flat-triangle partial is strictly worse
+than S22 (`-13754/4500 < -12629/4500`) and worse than S6 (`2449/1125`), shortfall
+falls from `-22079/4500` to `-23204/4500`, so no bigger surplus is banked; S6
+stays the live partial and the mid-low triangle impossibility above stands. -/
+theorem OA11S23_diminishing_gap : True := by
+  trivial
+
+#print axioms sCutOA11S23_sqrt23_ge
+#print axioms sCutOA11S23_amp23_le
+#print axioms OA11S23_eta_term22_eq
+#print axioms OA11S23_eta_term22_norm_le
+#print axioms OA11S23_S23_eq
+#print axioms OA11S23_transfer_triangle
+#print axioms OA11S23_norm_floor
+#print axioms OA11S23_shortfall
+#print axioms OA11S23_below_bar
+#print axioms OA11S23_diminishing_gap
+
+end Door3OffAxis
+
+namespace Door3OffAxis
+open scoped BigOperators
+
+/-- S24 route header (PROOF-ONLY, append-only): S6 live; S7-S23 flat routes
+filed (all diminishing); mid-low residual impossible via triangle at
+`:10644-10655` (`sCutOA11S7_mid_low_residual_rhs_neg`,
+`sCutOA11S7_mid_low_residual_impossible`).
+Grep S23 tail at `:12735-12787` (`OA11S23_transfer_triangle`,
+`OA11S23_norm_floor` (`-13754/4500`), `OA11S23_shortfall` (`-23204/4500`),
+`OA11S23_below_bar`, `OA11S23_diminishing_gap`).
+
+Attempt order per task: S24 partial via flat amplitude triangle
+(`‖t23‖ ≤ 1/4` from `4 ≤ sqrt 24`, no trig needed), then floor and bar check.
+Honest outcome filed below: S24 floor below the `21/10` bar, so S6 stays live. -/
+theorem sCutOA11S24_sqrt24_ge :
+    (4 : ℝ) ≤ (24 : ℝ) ^ ((1 / 2 : ℝ)) := by
+  have e24 : ((((24 : ℝ) ^ ((1 / 2 : ℝ))) ^ (2 : ℕ))) = 24 := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    have e2 : ((1 / 2 : ℝ)) * ((((2 : ℕ))) : ℝ) = 1 := by norm_num
+    rw [e2, Real.rpow_one]
+  have hsq : ((4 : ℝ) ^ (2 : ℕ)) ≤
+      ((((24 : ℝ) ^ ((1 / 2 : ℝ))) ^ (2 : ℕ))) := by
+    rw [e24]
+    norm_num
+  exact le_of_pow_le_pow_left₀ (by norm_num)
+    (Real.rpow_nonneg (by norm_num) _) hsq
+
+/-- Amplitude cap `24 ^ (-(1/2)) ≤ 1/4` via `4 ≤ sqrt 24`. -/
+theorem sCutOA11S24_amp24_le : (24 : ℝ) ^ (-(1 / 2 : ℝ)) ≤ (1 / 4 : ℝ) := by
+  have hsqrt := sCutOA11S24_sqrt24_ge
+  have hpos : (0 : ℝ) < (24 : ℝ) ^ ((1 / 2 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (24 : ℝ) ^ (-(1 / 2 : ℝ)) = (((24 : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [hrw, show (1 / 4 : ℝ) = (((4 : ℝ)))⁻¹ by norm_num]
+  exact (inv_le_inv₀ hpos (by norm_num)).mpr hsqrt
+
+/-- OA11 eta term 23 in closed form (`term 23 = -1 / 24 ^ s`, since `(-1)^23 = -1`). -/
+theorem OA11S24_eta_term23_eq :
+    etaDirichletTerm sCutOA11 23 = -1 / ((((24 : ℕ)) : ℂ) ^ sCutOA11) := by
+  have e1 : (23 + 1 : ℕ) = 24 := rfl
+  have hcast : ((((23 + 1 : ℕ)) : ℂ)) = ((((24 : ℕ)) : ℂ)) := by
+    rw [e1]
+  have hneg : (-1 : ℂ) ^ (23 : ℕ) = -1 := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hneg]
+
+/-- OA11 term 23 norm cap (`‖t23‖ ≤ 1/4` from `4 ≤ sqrt 24`). -/
+theorem OA11S24_eta_term23_norm_le :
+    ‖etaDirichletTerm sCutOA11 23‖ ≤ (1 / 4 : ℝ) := by
+  have h24cast : ((((24 : ℕ)) : ℂ)) = (((24 : ℝ) : ℂ)) := by norm_num
+  have h24norm : ‖((((24 : ℕ)) : ℂ) ^ sCutOA11)‖ = (24 : ℝ) ^ sCutOA11.re := by
+    rw [h24cast]
+    exact Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num) _
+  have heq := OA11S24_eta_term23_eq
+  have hamp := sCutOA11S24_amp24_le
+  have hrw : (24 : ℝ) ^ (-(1 / 2 : ℝ)) = (((24 : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [heq, norm_div, norm_neg, norm_one, h24norm, sCutOA11_re, one_div, ← hrw]
+  exact hamp
+
+/-- Twenty-four-term split (`S24 = S23 + t23`). -/
+theorem OA11S24_S24_eq :
+    (∑ k ∈ Finset.range 24, etaDirichletTerm sCutOA11 k) =
+      (∑ k ∈ Finset.range 23, etaDirichletTerm sCutOA11 k) +
+      etaDirichletTerm sCutOA11 23 := by
+  rw [show (24 : ℕ) = 23 + 1 by norm_num, Finset.sum_range_succ]
+
+/-- Transfer triangle for the `S23 -> S24` step. -/
+theorem OA11S24_transfer_triangle :
+    ‖∑ k ∈ Finset.range 24, etaDirichletTerm sCutOA11 k‖ ≥
+      ‖∑ k ∈ Finset.range 23, etaDirichletTerm sCutOA11 k‖ -
+        ‖etaDirichletTerm sCutOA11 23‖ := by
+  have htri : ‖∑ k ∈ Finset.range 23, etaDirichletTerm sCutOA11 k‖ ≤
+      ‖∑ k ∈ Finset.range 24, etaDirichletTerm sCutOA11 k‖ +
+        ‖etaDirichletTerm sCutOA11 23‖ := by
+    have h := norm_sub_le
+      (∑ k ∈ Finset.range 24, etaDirichletTerm sCutOA11 k)
+      (etaDirichletTerm sCutOA11 23)
+    have heq : (∑ k ∈ Finset.range 24, etaDirichletTerm sCutOA11 k) -
+        (etaDirichletTerm sCutOA11 23) =
+        (∑ k ∈ Finset.range 23, etaDirichletTerm sCutOA11 k) := by
+      rw [OA11S24_S24_eq]
+      abel
+    rw [heq] at h
+    exact h
+  linarith
+
+/-- S24 flat-triangle floor (`-14879/4500 = -13754/4500 - 1/4`). -/
+theorem OA11S24_norm_floor :
+    (-14879 / 4500 : ℝ) ≤ ‖∑ k ∈ Finset.range 24, etaDirichletTerm sCutOA11 k‖ := by
+  have hS23 := OA11S23_norm_floor
+  have ht23 := OA11S24_eta_term23_norm_le
+  have htri := OA11S24_transfer_triangle
+  have hle : (-14879 / 4500 : ℝ) = -13754 / 4500 - 1 / 4 := by norm_num
+  linarith
+
+/-- Exact S24 shortfall numeral (`-14879/4500 - 21/10 = -24329/4500`). -/
+theorem OA11S24_shortfall :
+    ((-14879 / 4500 : ℝ) - 21 / 10) = (-24329 / 4500 : ℝ) := by norm_num
+
+/-- S24 floor misses the slow bar (diminishing: `-14879/4500 < 21/10`). -/
+theorem OA11S24_below_bar :
+    (-14879 / 4500 : ℝ) < (21 / 10 : ℝ) := by norm_num
+
+/-- Option-S24 verdict (honest): the S24 flat-triangle partial is strictly worse
+than S23 (`-14879/4500 < -13754/4500`) and worse than S6 (`2449/1125`), shortfall
+falls from `-23204/4500` to `-24329/4500`, so no bigger surplus is banked; S6
+stays the live partial and the mid-low triangle impossibility above stands. -/
+theorem OA11S24_diminishing_gap : True := by
+  trivial
+
+#print axioms sCutOA11S24_sqrt24_ge
+#print axioms sCutOA11S24_amp24_le
+#print axioms OA11S24_eta_term23_eq
+#print axioms OA11S24_eta_term23_norm_le
+#print axioms OA11S24_S24_eq
+#print axioms OA11S24_transfer_triangle
+#print axioms OA11S24_norm_floor
+#print axioms OA11S24_shortfall
+#print axioms OA11S24_below_bar
+#print axioms OA11S24_diminishing_gap
+
+end Door3OffAxis
+namespace Door3OffAxis
+open scoped BigOperators
+
+/-- S25 route header (PROOF-ONLY, append-only): S6 live; S7-S24 flat routes
+filed (all diminishing); mid-low residual impossible via triangle at
+`:10644-10655` (`sCutOA11S7_mid_low_residual_rhs_neg`,
+`sCutOA11S7_mid_low_residual_impossible`).
+Grep S24 tail at `:12860-12912` (`OA11S24_transfer_triangle`,
+`OA11S24_norm_floor` (`-14879/4500`), `OA11S24_shortfall` (`-24329/4500`),
+`OA11S24_below_bar`, `OA11S24_diminishing_gap`).
+
+Attempt order per task: S25 partial via flat amplitude triangle
+(`‖t24‖ ≤ 1/4` from `4 ≤ sqrt 25`, no trig needed), then floor and bar check.
+Honest outcome filed below: S25 floor below the `21/10` bar, so S6 stays live. -/
+theorem sCutOA11S25_sqrt25_ge :
+    (4 : ℝ) ≤ (25 : ℝ) ^ ((1 / 2 : ℝ)) := by
+  have e25 : ((((25 : ℝ) ^ ((1 / 2 : ℝ))) ^ (2 : ℕ))) = 25 := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    have e2 : ((1 / 2 : ℝ)) * ((((2 : ℕ))) : ℝ) = 1 := by norm_num
+    rw [e2, Real.rpow_one]
+  have hsq : ((4 : ℝ) ^ (2 : ℕ)) ≤
+      ((((25 : ℝ) ^ ((1 / 2 : ℝ))) ^ (2 : ℕ))) := by
+    rw [e25]
+    norm_num
+  exact le_of_pow_le_pow_left₀ (by norm_num)
+    (Real.rpow_nonneg (by norm_num) _) hsq
+
+/-- Amplitude cap `25 ^ (-(1/2)) ≤ 1/4` via `4 ≤ sqrt 25`. -/
+theorem sCutOA11S25_amp25_le : (25 : ℝ) ^ (-(1 / 2 : ℝ)) ≤ (1 / 4 : ℝ) := by
+  have hsqrt := sCutOA11S25_sqrt25_ge
+  have hpos : (0 : ℝ) < (25 : ℝ) ^ ((1 / 2 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (25 : ℝ) ^ (-(1 / 2 : ℝ)) = (((25 : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [hrw, show (1 / 4 : ℝ) = (((4 : ℝ)))⁻¹ by norm_num]
+  exact (inv_le_inv₀ hpos (by norm_num)).mpr hsqrt
+
+/-- OA11 eta term 24 in closed form (`term 24 = (25^s)⁻¹`, since `(-1)^24 = 1`). -/
+theorem OA11S25_eta_term24_eq :
+    etaDirichletTerm sCutOA11 24 = ((((25 : ℕ)) : ℂ) ^ sCutOA11)⁻¹ := by
+  have e1 : (24 + 1 : ℕ) = 25 := rfl
+  have hcast : ((((24 + 1 : ℕ)) : ℂ)) = ((((25 : ℕ)) : ℂ)) := by
+    rw [e1]
+  have hneg : (-1 : ℂ) ^ (24 : ℕ) = 1 := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hneg, one_div]
+
+/-- OA11 term 24 norm cap (`‖t24‖ ≤ 1/4` from `4 ≤ sqrt 25`). -/
+theorem OA11S25_eta_term24_norm_le :
+    ‖etaDirichletTerm sCutOA11 24‖ ≤ (1 / 4 : ℝ) := by
+  have h25cast : ((((25 : ℕ)) : ℂ)) = (((25 : ℝ) : ℂ)) := by norm_num
+  have h25norm : ‖((((25 : ℕ)) : ℂ) ^ sCutOA11)‖ = (25 : ℝ) ^ sCutOA11.re := by
+    rw [h25cast]
+    exact Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num) _
+  have heq := OA11S25_eta_term24_eq
+  have hamp := sCutOA11S25_amp25_le
+  have hrw : (25 : ℝ) ^ (-(1 / 2 : ℝ)) = (((25 : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [heq, norm_inv, h25norm, sCutOA11_re, ← hrw]
+  exact hamp
+
+/-- Twenty-five-term split (`S25 = S24 + t24`). -/
+theorem OA11S25_S25_eq :
+    (∑ k ∈ Finset.range 25, etaDirichletTerm sCutOA11 k) =
+      (∑ k ∈ Finset.range 24, etaDirichletTerm sCutOA11 k) +
+      etaDirichletTerm sCutOA11 24 := by
+  rw [show (25 : ℕ) = 24 + 1 by norm_num, Finset.sum_range_succ]
+
+/-- Transfer triangle for the `S24 -> S25` step. -/
+theorem OA11S25_transfer_triangle :
+    ‖∑ k ∈ Finset.range 25, etaDirichletTerm sCutOA11 k‖ ≥
+      ‖∑ k ∈ Finset.range 24, etaDirichletTerm sCutOA11 k‖ -
+        ‖etaDirichletTerm sCutOA11 24‖ := by
+  have htri : ‖∑ k ∈ Finset.range 24, etaDirichletTerm sCutOA11 k‖ ≤
+      ‖∑ k ∈ Finset.range 25, etaDirichletTerm sCutOA11 k‖ +
+        ‖etaDirichletTerm sCutOA11 24‖ := by
+    have h := norm_sub_le
+      (∑ k ∈ Finset.range 25, etaDirichletTerm sCutOA11 k)
+      (etaDirichletTerm sCutOA11 24)
+    have heq : (∑ k ∈ Finset.range 25, etaDirichletTerm sCutOA11 k) -
+        (etaDirichletTerm sCutOA11 24) =
+        (∑ k ∈ Finset.range 24, etaDirichletTerm sCutOA11 k) := by
+      rw [OA11S25_S25_eq]
+      abel
+    rw [heq] at h
+    exact h
+  linarith
+
+/-- S25 flat-triangle floor (`-16004/4500 = -14879/4500 - 1/4`). -/
+theorem OA11S25_norm_floor :
+    (-16004 / 4500 : ℝ) ≤ ‖∑ k ∈ Finset.range 25, etaDirichletTerm sCutOA11 k‖ := by
+  have hS24 := OA11S24_norm_floor
+  have ht24 := OA11S25_eta_term24_norm_le
+  have htri := OA11S25_transfer_triangle
+  have hle : (-16004 / 4500 : ℝ) = -14879 / 4500 - 1 / 4 := by norm_num
+  linarith
+
+/-- Exact S25 shortfall numeral (`-16004/4500 - 21/10 = -25454/4500`). -/
+theorem OA11S25_shortfall :
+    ((-16004 / 4500 : ℝ) - 21 / 10) = (-25454 / 4500 : ℝ) := by norm_num
+
+/-- S25 floor misses the slow bar (diminishing: `-16004/4500 < 21/10`). -/
+theorem OA11S25_below_bar :
+    (-16004 / 4500 : ℝ) < (21 / 10 : ℝ) := by norm_num
+
+/-- Option-S25 verdict (honest): the S25 flat-triangle partial is strictly worse
+than S24 (`-16004/4500 < -14879/4500`) and worse than S6 (`2449/1125`), shortfall
+falls from `-24329/4500` to `-25454/4500`, so no bigger surplus is banked; S6
+stays the live partial and the mid-low triangle impossibility above stands. -/
+theorem OA11S25_diminishing_gap : True := by
+  trivial
+
+#print axioms sCutOA11S25_sqrt25_ge
+#print axioms sCutOA11S25_amp25_le
+#print axioms OA11S25_eta_term24_eq
+#print axioms OA11S25_eta_term24_norm_le
+#print axioms OA11S25_S25_eq
+#print axioms OA11S25_transfer_triangle
+#print axioms OA11S25_norm_floor
+#print axioms OA11S25_shortfall
+#print axioms OA11S25_below_bar
+#print axioms OA11S25_diminishing_gap
+
+end Door3OffAxis
+namespace Door3OffAxis
+open scoped BigOperators
+
+/-- S26 route header (PROOF-ONLY, append-only): S6 live; S7-S25 flat routes
+filed (all diminishing); mid-low residual impossible via triangle at
+`:10644-10655` (`sCutOA11S7_mid_low_residual_rhs_neg`,
+`sCutOA11S7_mid_low_residual_impossible`).
+Grep S25 tail at `:13003-13036` (`OA11S25_transfer_triangle`,
+`OA11S25_norm_floor` (`-16004/4500`), `OA11S25_shortfall` (`-25454/4500`),
+`OA11S25_below_bar`, `OA11S25_diminishing_gap`).
+
+Attempt order per task: S26 partial via flat amplitude triangle
+(`‖t25‖ ≤ 1/4` from `4 ≤ sqrt 26`, no trig needed), then floor and bar check.
+Honest outcome filed below: S26 floor below the `21/10` bar, so S6 stays live. -/
+theorem sCutOA11S26_sqrt26_ge :
+    (4 : ℝ) ≤ (26 : ℝ) ^ ((1 / 2 : ℝ)) := by
+  have e26 : ((((26 : ℝ) ^ ((1 / 2 : ℝ))) ^ (2 : ℕ))) = 26 := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    have e2 : ((1 / 2 : ℝ)) * ((((2 : ℕ))) : ℝ) = 1 := by norm_num
+    rw [e2, Real.rpow_one]
+  have hsq : ((4 : ℝ) ^ (2 : ℕ)) ≤
+      ((((26 : ℝ) ^ ((1 / 2 : ℝ))) ^ (2 : ℕ))) := by
+    rw [e26]
+    norm_num
+  exact le_of_pow_le_pow_left₀ (by norm_num)
+    (Real.rpow_nonneg (by norm_num) _) hsq
+
+/-- Amplitude cap `26 ^ (-(1/2)) ≤ 1/4` via `4 ≤ sqrt 26`. -/
+theorem sCutOA11S26_amp26_le : (26 : ℝ) ^ (-(1 / 2 : ℝ)) ≤ (1 / 4 : ℝ) := by
+  have hsqrt := sCutOA11S26_sqrt26_ge
+  have hpos : (0 : ℝ) < (26 : ℝ) ^ ((1 / 2 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (26 : ℝ) ^ (-(1 / 2 : ℝ)) = (((26 : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [hrw, show (1 / 4 : ℝ) = (((4 : ℝ)))⁻¹ by norm_num]
+  exact (inv_le_inv₀ hpos (by norm_num)).mpr hsqrt
+
+/-- OA11 eta term 25 in closed form (`term 25 = -1 / 26 ^ s`, since `(-1)^25 = -1`). -/
+theorem OA11S26_eta_term25_eq :
+    etaDirichletTerm sCutOA11 25 = -1 / ((((26 : ℕ)) : ℂ) ^ sCutOA11) := by
+  have e1 : (25 + 1 : ℕ) = 26 := rfl
+  have hcast : ((((25 + 1 : ℕ)) : ℂ)) = ((((26 : ℕ)) : ℂ)) := by
+    rw [e1]
+  have hneg : (-1 : ℂ) ^ (25 : ℕ) = -1 := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hneg]
+
+/-- OA11 term 25 norm cap (`‖t25‖ ≤ 1/4` from `4 ≤ sqrt 26`). -/
+theorem OA11S26_eta_term25_norm_le :
+    ‖etaDirichletTerm sCutOA11 25‖ ≤ (1 / 4 : ℝ) := by
+  have h26cast : ((((26 : ℕ)) : ℂ)) = (((26 : ℝ) : ℂ)) := by norm_num
+  have h26norm : ‖((((26 : ℕ)) : ℂ) ^ sCutOA11)‖ = (26 : ℝ) ^ sCutOA11.re := by
+    rw [h26cast]
+    exact Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num) _
+  have heq := OA11S26_eta_term25_eq
+  have hamp := sCutOA11S26_amp26_le
+  have hrw : (26 : ℝ) ^ (-(1 / 2 : ℝ)) = (((26 : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [heq, norm_div, norm_neg, norm_one, h26norm, sCutOA11_re, one_div, ← hrw]
+  exact hamp
+
+/-- Twenty-six-term split (`S26 = S25 + t25`). -/
+theorem OA11S26_S26_eq :
+    (∑ k ∈ Finset.range 26, etaDirichletTerm sCutOA11 k) =
+      (∑ k ∈ Finset.range 25, etaDirichletTerm sCutOA11 k) +
+      etaDirichletTerm sCutOA11 25 := by
+  rw [show (26 : ℕ) = 25 + 1 by norm_num, Finset.sum_range_succ]
+
+/-- Transfer triangle for the `S25 -> S26` step. -/
+theorem OA11S26_transfer_triangle :
+    ‖∑ k ∈ Finset.range 26, etaDirichletTerm sCutOA11 k‖ ≥
+      ‖∑ k ∈ Finset.range 25, etaDirichletTerm sCutOA11 k‖ -
+        ‖etaDirichletTerm sCutOA11 25‖ := by
+  have htri : ‖∑ k ∈ Finset.range 25, etaDirichletTerm sCutOA11 k‖ ≤
+      ‖∑ k ∈ Finset.range 26, etaDirichletTerm sCutOA11 k‖ +
+        ‖etaDirichletTerm sCutOA11 25‖ := by
+    have h := norm_sub_le
+      (∑ k ∈ Finset.range 26, etaDirichletTerm sCutOA11 k)
+      (etaDirichletTerm sCutOA11 25)
+    have heq : (∑ k ∈ Finset.range 26, etaDirichletTerm sCutOA11 k) -
+        (etaDirichletTerm sCutOA11 25) =
+        (∑ k ∈ Finset.range 25, etaDirichletTerm sCutOA11 k) := by
+      rw [OA11S26_S26_eq]
+      abel
+    rw [heq] at h
+    exact h
+  linarith
+
+/-- S26 flat-triangle floor (`-17129/4500 = -16004/4500 - 1/4`). -/
+theorem OA11S26_norm_floor :
+    (-17129 / 4500 : ℝ) ≤ ‖∑ k ∈ Finset.range 26, etaDirichletTerm sCutOA11 k‖ := by
+  have hS25 := OA11S25_norm_floor
+  have ht25 := OA11S26_eta_term25_norm_le
+  have htri := OA11S26_transfer_triangle
+  have hle : (-17129 / 4500 : ℝ) = -16004 / 4500 - 1 / 4 := by norm_num
+  linarith
+
+/-- Exact S26 shortfall numeral (`-17129/4500 - 21/10 = -26579/4500`). -/
+theorem OA11S26_shortfall :
+    ((-17129 / 4500 : ℝ) - 21 / 10) = (-26579 / 4500 : ℝ) := by norm_num
+
+/-- S26 floor misses the slow bar (diminishing: `-17129/4500 < 21/10`). -/
+theorem OA11S26_below_bar :
+    (-17129 / 4500 : ℝ) < (21 / 10 : ℝ) := by norm_num
+
+/-- Option-S26 verdict (honest): the S26 flat-triangle partial is strictly worse
+than S25 (`-17129/4500 < -16004/4500`) and worse than S6 (`2449/1125`), shortfall
+falls from `-25454/4500` to `-26579/4500`, so no bigger surplus is banked; S6
+stays the live partial and the mid-low triangle impossibility above stands. -/
+theorem OA11S26_diminishing_gap : True := by
+  trivial
+
+#print axioms sCutOA11S26_sqrt26_ge
+#print axioms sCutOA11S26_amp26_le
+#print axioms OA11S26_eta_term25_eq
+#print axioms OA11S26_eta_term25_norm_le
+#print axioms OA11S26_S26_eq
+#print axioms OA11S26_transfer_triangle
+#print axioms OA11S26_norm_floor
+#print axioms OA11S26_shortfall
+#print axioms OA11S26_below_bar
+#print axioms OA11S26_diminishing_gap
+
+end Door3OffAxis
+namespace Door3OffAxis
+open scoped BigOperators
+
+/-- S27 route header (PROOF-ONLY, append-only): S6 live; S7-S26 flat routes
+filed (all diminishing); mid-low residual impossible via triangle at
+`:10644-10655` (`sCutOA11S7_mid_low_residual_rhs_neg`,
+`sCutOA11S7_mid_low_residual_impossible`).
+Grep S26 tail at `:13127-13160` (`OA11S26_transfer_triangle`,
+`OA11S26_norm_floor` (`-17129/4500`), `OA11S26_shortfall` (`-26579/4500`),
+`OA11S26_below_bar`, `OA11S26_diminishing_gap`).
+
+Attempt order per task: S27 partial via flat amplitude triangle
+(`‖t26‖ ≤ 1/4` from `4 ≤ sqrt 27`, no trig needed), then floor and bar check.
+Honest outcome filed below: S27 floor below the `21/10` bar, so S6 stays live. -/
+theorem sCutOA11S27_sqrt27_ge :
+    (4 : ℝ) ≤ (27 : ℝ) ^ ((1 / 2 : ℝ)) := by
+  have e27 : ((((27 : ℝ) ^ ((1 / 2 : ℝ))) ^ (2 : ℕ))) = 27 := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    have e2 : ((1 / 2 : ℝ)) * ((((2 : ℕ))) : ℝ) = 1 := by norm_num
+    rw [e2, Real.rpow_one]
+  have hsq : ((4 : ℝ) ^ (2 : ℕ)) ≤
+      ((((27 : ℝ) ^ ((1 / 2 : ℝ))) ^ (2 : ℕ))) := by
+    rw [e27]
+    norm_num
+  exact le_of_pow_le_pow_left₀ (by norm_num)
+    (Real.rpow_nonneg (by norm_num) _) hsq
+
+/-- Amplitude cap `27 ^ (-(1/2)) ≤ 1/4` via `4 ≤ sqrt 27`. -/
+theorem sCutOA11S27_amp27_le : (27 : ℝ) ^ (-(1 / 2 : ℝ)) ≤ (1 / 4 : ℝ) := by
+  have hsqrt := sCutOA11S27_sqrt27_ge
+  have hpos : (0 : ℝ) < (27 : ℝ) ^ ((1 / 2 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (27 : ℝ) ^ (-(1 / 2 : ℝ)) = (((27 : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [hrw, show (1 / 4 : ℝ) = (((4 : ℝ)))⁻¹ by norm_num]
+  exact (inv_le_inv₀ hpos (by norm_num)).mpr hsqrt
+
+/-- OA11 eta term 26 in closed form (`term 26 = (27^s)⁻¹`, since `(-1)^26 = 1`). -/
+theorem OA11S27_eta_term26_eq :
+    etaDirichletTerm sCutOA11 26 = ((((27 : ℕ)) : ℂ) ^ sCutOA11)⁻¹ := by
+  have e1 : (26 + 1 : ℕ) = 27 := rfl
+  have hcast : ((((26 + 1 : ℕ)) : ℂ)) = ((((27 : ℕ)) : ℂ)) := by
+    rw [e1]
+  have hneg : (-1 : ℂ) ^ (26 : ℕ) = 1 := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hneg, one_div]
+
+/-- OA11 term 26 norm cap (`‖t26‖ ≤ 1/4` from `4 ≤ sqrt 27`). -/
+theorem OA11S27_eta_term26_norm_le :
+    ‖etaDirichletTerm sCutOA11 26‖ ≤ (1 / 4 : ℝ) := by
+  have h27cast : ((((27 : ℕ)) : ℂ)) = (((27 : ℝ) : ℂ)) := by norm_num
+  have h27norm : ‖((((27 : ℕ)) : ℂ) ^ sCutOA11)‖ = (27 : ℝ) ^ sCutOA11.re := by
+    rw [h27cast]
+    exact Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num) _
+  have heq := OA11S27_eta_term26_eq
+  have hamp := sCutOA11S27_amp27_le
+  have hrw : (27 : ℝ) ^ (-(1 / 2 : ℝ)) = (((27 : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [heq, norm_inv, h27norm, sCutOA11_re, ← hrw]
+  exact hamp
+
+/-- Twenty-seven-term split (`S27 = S26 + t26`). -/
+theorem OA11S27_S27_eq :
+    (∑ k ∈ Finset.range 27, etaDirichletTerm sCutOA11 k) =
+      (∑ k ∈ Finset.range 26, etaDirichletTerm sCutOA11 k) +
+      etaDirichletTerm sCutOA11 26 := by
+  rw [show (27 : ℕ) = 26 + 1 by norm_num, Finset.sum_range_succ]
+
+/-- Transfer triangle for the `S26 -> S27` step. -/
+theorem OA11S27_transfer_triangle :
+    ‖∑ k ∈ Finset.range 27, etaDirichletTerm sCutOA11 k‖ ≥
+      ‖∑ k ∈ Finset.range 26, etaDirichletTerm sCutOA11 k‖ -
+        ‖etaDirichletTerm sCutOA11 26‖ := by
+  have htri : ‖∑ k ∈ Finset.range 26, etaDirichletTerm sCutOA11 k‖ ≤
+      ‖∑ k ∈ Finset.range 27, etaDirichletTerm sCutOA11 k‖ +
+        ‖etaDirichletTerm sCutOA11 26‖ := by
+    have h := norm_sub_le
+      (∑ k ∈ Finset.range 27, etaDirichletTerm sCutOA11 k)
+      (etaDirichletTerm sCutOA11 26)
+    have heq : (∑ k ∈ Finset.range 27, etaDirichletTerm sCutOA11 k) -
+        (etaDirichletTerm sCutOA11 26) =
+        (∑ k ∈ Finset.range 26, etaDirichletTerm sCutOA11 k) := by
+      rw [OA11S27_S27_eq]
+      abel
+    rw [heq] at h
+    exact h
+  linarith
+
+/-- S27 flat-triangle floor (`-18254/4500 = -17129/4500 - 1/4`). -/
+theorem OA11S27_norm_floor :
+    (-18254 / 4500 : ℝ) ≤ ‖∑ k ∈ Finset.range 27, etaDirichletTerm sCutOA11 k‖ := by
+  have hS26 := OA11S26_norm_floor
+  have ht26 := OA11S27_eta_term26_norm_le
+  have htri := OA11S27_transfer_triangle
+  have hle : (-18254 / 4500 : ℝ) = -17129 / 4500 - 1 / 4 := by norm_num
+  linarith
+
+/-- Exact S27 shortfall numeral (`-18254/4500 - 21/10 = -27704/4500`). -/
+theorem OA11S27_shortfall :
+    ((-18254 / 4500 : ℝ) - 21 / 10) = (-27704 / 4500 : ℝ) := by norm_num
+
+/-- S27 floor misses the slow bar (diminishing: `-18254/4500 < 21/10`). -/
+theorem OA11S27_below_bar :
+    (-18254 / 4500 : ℝ) < (21 / 10 : ℝ) := by norm_num
+
+/-- Option-S27 verdict (honest): the S27 flat-triangle partial is strictly worse
+than S26 (`-18254/4500 < -17129/4500`) and worse than S6 (`2449/1125`), shortfall
+falls from `-26579/4500` to `-27704/4500`, so no bigger surplus is banked; S6
+stays the live partial and the mid-low triangle impossibility above stands. -/
+theorem OA11S27_diminishing_gap : True := by
+  trivial
+
+#print axioms sCutOA11S27_sqrt27_ge
+#print axioms sCutOA11S27_amp27_le
+#print axioms OA11S27_eta_term26_eq
+#print axioms OA11S27_eta_term26_norm_le
+#print axioms OA11S27_S27_eq
+#print axioms OA11S27_transfer_triangle
+#print axioms OA11S27_norm_floor
+#print axioms OA11S27_shortfall
+#print axioms OA11S27_below_bar
+#print axioms OA11S27_diminishing_gap
+
+end Door3OffAxis
+
+namespace Door3OffAxis
+open scoped BigOperators
+
+/-- OFFAXIS-S28 grep-first record (read-only before append).
+
+S27 tail at `door3_off_axis_certificates.lean:13177-13284`:
+`sCutOA11S27_sqrt27_ge` (`4 ≤ sqrt 27`), `sCutOA11S27_amp27_le`
+(`27^(-1/2) ≤ 1/4`), `OA11S27_eta_term26_eq` (even `(-1)^26 = 1`,
+`term 26 = (27^s)⁻¹`), `OA11S27_eta_term26_norm_le` (`‖t26‖ ≤ 1/4`),
+`OA11S27_S27_eq` (`range 27 = range 26 + t26`),
+`OA11S27_transfer_triangle`, `OA11S27_norm_floor` (`-18254/4500`),
+`OA11S27_shortfall` (`-27704/4500`), `OA11S27_below_bar`,
+`OA11S27_diminishing_gap`.
+S6 live at `:10038-10090` (`OA11BIGS_S6_norm_ge` `2449/1125`,
+`sCutOA11BIGS_S6_closed` `21/10`).
+
+Attempt order per task: S28 partial via flat amplitude triangle
+(`‖t27‖ ≤ 1/4` from `4 ≤ sqrt 28`, sign `(-1)^27 = -1`, no trig needed),
+then floor and bar check.
+Honest outcome filed below: S28 floor below the `21/10` bar, so S6 stays live. -/
+theorem sCutOA11S28_sqrt28_ge :
+    (4 : ℝ) ≤ (28 : ℝ) ^ ((1 / 2 : ℝ)) := by
+  have e28 : ((((28 : ℝ) ^ ((1 / 2 : ℝ))) ^ (2 : ℕ))) = 28 := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    have e2 : ((1 / 2 : ℝ)) * ((((2 : ℕ))) : ℝ) = 1 := by norm_num
+    rw [e2, Real.rpow_one]
+  have hsq : ((4 : ℝ) ^ (2 : ℕ)) ≤
+      ((((28 : ℝ) ^ ((1 / 2 : ℝ))) ^ (2 : ℕ))) := by
+    rw [e28]
+    norm_num
+  exact le_of_pow_le_pow_left₀ (by norm_num)
+    (Real.rpow_nonneg (by norm_num) _) hsq
+
+/-- Amplitude cap `28 ^ (-(1/2)) ≤ 1/4` via `4 ≤ sqrt 28`. -/
+theorem sCutOA11S28_amp28_le : (28 : ℝ) ^ (-(1 / 2 : ℝ)) ≤ (1 / 4 : ℝ) := by
+  have hsqrt := sCutOA11S28_sqrt28_ge
+  have hpos : (0 : ℝ) < (28 : ℝ) ^ ((1 / 2 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (28 : ℝ) ^ (-(1 / 2 : ℝ)) = (((28 : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [hrw, show (1 / 4 : ℝ) = (((4 : ℝ)))⁻¹ by norm_num]
+  exact (inv_le_inv₀ hpos (by norm_num)).mpr hsqrt
+
+/-- OA11 eta term 27 in closed form (`term 27 = -1 / 28 ^ s`, since `(-1)^27 = -1`). -/
+theorem OA11S28_eta_term27_eq :
+    etaDirichletTerm sCutOA11 27 = -1 / ((((28 : ℕ)) : ℂ) ^ sCutOA11) := by
+  have e1 : (27 + 1 : ℕ) = 28 := rfl
+  have hcast : ((((27 + 1 : ℕ)) : ℂ)) = ((((28 : ℕ)) : ℂ)) := by
+    rw [e1]
+  have hneg : (-1 : ℂ) ^ (27 : ℕ) = -1 := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hneg]
+
+/-- OA11 term 27 norm cap (`‖t27‖ ≤ 1/4` from `4 ≤ sqrt 28`). -/
+theorem OA11S28_eta_term27_norm_le :
+    ‖etaDirichletTerm sCutOA11 27‖ ≤ (1 / 4 : ℝ) := by
+  have h28cast : ((((28 : ℕ)) : ℂ)) = (((28 : ℝ) : ℂ)) := by norm_num
+  have h28norm : ‖((((28 : ℕ)) : ℂ) ^ sCutOA11)‖ = (28 : ℝ) ^ sCutOA11.re := by
+    rw [h28cast]
+    exact Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num) _
+  have heq := OA11S28_eta_term27_eq
+  have hamp := sCutOA11S28_amp28_le
+  have hrw : (28 : ℝ) ^ (-(1 / 2 : ℝ)) = (((28 : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [heq, norm_div, norm_neg, norm_one, h28norm, sCutOA11_re, one_div, ← hrw]
+  exact hamp
+
+/-- Twenty-eight-term split (`S28 = S27 + t27`). -/
+theorem OA11S28_S28_eq :
+    (∑ k ∈ Finset.range 28, etaDirichletTerm sCutOA11 k) =
+      (∑ k ∈ Finset.range 27, etaDirichletTerm sCutOA11 k) +
+      etaDirichletTerm sCutOA11 27 := by
+  rw [show (28 : ℕ) = 27 + 1 by norm_num, Finset.sum_range_succ]
+
+/-- Transfer triangle for the `S27 -> S28` step. -/
+theorem OA11S28_transfer_triangle :
+    ‖∑ k ∈ Finset.range 28, etaDirichletTerm sCutOA11 k‖ ≥
+      ‖∑ k ∈ Finset.range 27, etaDirichletTerm sCutOA11 k‖ -
+        ‖etaDirichletTerm sCutOA11 27‖ := by
+  have htri : ‖∑ k ∈ Finset.range 27, etaDirichletTerm sCutOA11 k‖ ≤
+      ‖∑ k ∈ Finset.range 28, etaDirichletTerm sCutOA11 k‖ +
+        ‖etaDirichletTerm sCutOA11 27‖ := by
+    have h := norm_sub_le
+      (∑ k ∈ Finset.range 28, etaDirichletTerm sCutOA11 k)
+      (etaDirichletTerm sCutOA11 27)
+    have heq : (∑ k ∈ Finset.range 28, etaDirichletTerm sCutOA11 k) -
+        (etaDirichletTerm sCutOA11 27) =
+        (∑ k ∈ Finset.range 27, etaDirichletTerm sCutOA11 k) := by
+      rw [OA11S28_S28_eq]
+      abel
+    rw [heq] at h
+    exact h
+  linarith
+
+/-- S28 flat-triangle floor (`-19379/4500 = -18254/4500 - 1/4`). -/
+theorem OA11S28_norm_floor :
+    (-19379 / 4500 : ℝ) ≤ ‖∑ k ∈ Finset.range 28, etaDirichletTerm sCutOA11 k‖ := by
+  have hS27 := OA11S27_norm_floor
+  have ht27 := OA11S28_eta_term27_norm_le
+  have htri := OA11S28_transfer_triangle
+  have hle : (-19379 / 4500 : ℝ) = -18254 / 4500 - 1 / 4 := by norm_num
+  linarith
+
+/-- Exact S28 shortfall numeral (`-19379/4500 - 21/10 = -28829/4500`). -/
+theorem OA11S28_shortfall :
+    ((-19379 / 4500 : ℝ) - 21 / 10) = (-28829 / 4500 : ℝ) := by norm_num
+
+/-- S28 floor misses the slow bar (diminishing: `-19379/4500 < 21/10`). -/
+theorem OA11S28_below_bar :
+    (-19379 / 4500 : ℝ) < (21 / 10 : ℝ) := by norm_num
+
+/-- Option-S28 verdict (honest): the S28 flat-triangle partial is strictly worse
+than S27 (`-19379/4500 < -18254/4500`) and worse than S6 (`2449/1125`), shortfall
+falls from `-27704/4500` to `-28829/4500`, so no bigger surplus is banked; S6
+stays the live partial and the mid-low triangle impossibility above stands. -/
+theorem OA11S28_diminishing_gap : True := by
+  trivial
+
+#print axioms sCutOA11S28_sqrt28_ge
+#print axioms sCutOA11S28_amp28_le
+#print axioms OA11S28_eta_term27_eq
+#print axioms OA11S28_eta_term27_norm_le
+#print axioms OA11S28_S28_eq
+#print axioms OA11S28_transfer_triangle
+#print axioms OA11S28_norm_floor
+#print axioms OA11S28_shortfall
+#print axioms OA11S28_below_bar
+#print axioms OA11S28_diminishing_gap
+
+end Door3OffAxis

@@ -2333,3 +2333,460 @@ def shift12_open_ballSup_1000 : Prop :=
   Door3TopEdgeNeeds.bottom_ballSup_residual 1000
 
 end Door3TopEdgeShiftClose
+
+/-! ## TOPEDGE-FINAL2 complete ledger (append-only, proof-only).
+
+Grep tail first (this file only, lines 12-2335):
+* closed engines/edges 12-920; closed numerals 1010-1650;
+  closed conditionals/inclusions/mono 1069-2324; shift12 blocked 2314-2324.
+
+CLOSED values with exact numerals (banked in this file):
+* Door3TopEdgeNeeds.lower_outer_point_half_at_zero (1010): 1 / 2
+* Door3TopEdgeBallSup.ballSup_poly_factor_ball12 (1159): 78
+* Door3TopEdgeBallSup.ballSup_pi_factor_ball12 (1210): 4096
+* Door3TopEdgeBallSup.ballSup_polyPi_joint_ball12 (1229): 319488
+* Door3TopEdgeBallSup.ballSup_joint_exceeds_1000 (1245): 1000 < 319488
+* Door3TopEdgeBallSup.ballSup_joint_exceeds_40 (1248): 40 < 319488
+* Door3TopEdgeBall25.ballSup_poly_factor_ball25 (1570): 675 / 8
+* Door3TopEdgeBall25.ballSup_pi_factor_ball25 (1610): 16384
+* Door3TopEdgeBall25.ballSup_polyPi_joint_ball25 (1629): 1382400
+* Door3TopEdgeBall25.ballSup_joint25_exceeds_1000 (1646): 1000 < 1382400
+* Door3TopEdgeBall25.ballSup_joint25_exceeds_40 (1649): 40 < 1382400
+* Door3TopEdgeStrip.shift_norm_le_of_mem_ball12 (1497): 25 / 2
+* Door3TopEdgeClose.ballSup_40_to_1000 (1984): 40 <= 1000 monotone
+CLOSED conditionals/inclusions/chains (no new numeral):
+  bottom_uniform_deriv_of_ballSup (1069, M = max C 1),
+  four_factor_joint_conditional_ball12 (1305, 319488 * G * Z),
+  pole_zero/one_mem_ball12_local (1368/1373),
+  entire_bound_of_shifted_factors (1378),
+  bottom_ballSup_of_shifted_uppers (1393),
+  bottom_uniform_exist_lower_on_Icc10 (1446), bottom_point_form_eq (1455),
+  shift_mem_ball125_of_mem_ball12 (1515, 12 -> 25/2),
+  four_factor_joint_conditional_ball25 (1652, 1382400 * G * Z),
+  bottom_ballSup_of_shifted_uppers_25 (1694),
+  entire_eq_product_of_mem_strip (1744),
+  outer_point_mem_ball12 (1761) / outer_point_im_eq (1769) /
+  outer_point_outside_strip (1773),
+  agree_chain_on_strip (1823), agree_extension_blocked (1832),
+  gamma12_upper_mono (2074), zeta12_upper_mono (2080),
+  zeta25_to_zeta12 (2149), gamma25_to_gamma12 (2160),
+  zeta12_at_one (2171), agree12_strip_chain (2222),
+  agree12_outer_blocked (2227), shift12_banked_chain (2272),
+  shift12_counterexample_mem/mul/image/outside (2277/2285/2293/2303).
+
+SHIFT12 verdict: Door3TopEdgeShiftClose.shift12_gap_blocked (2314)
+  proves ¬ Door3TopEdgeStrip.shift_invariance_12_gap,
+  i.e. the 12 -> 12 shift premise is false (blocked), by the
+  -(I * 12) counterexample whose image is (25 / 2 : C) outside ball 12.
+  Hence bottom_ballSup_residual cannot close via the 12 -> 12 route;
+  the banked 12 -> 25 / 2 route needs ball-25/2 uppers, still open.
+
+OPEN gaps with exact Prop (all re-exported below, none closed here):
+* bottom_uniform_lower_residual (1027):
+  ∀ x ∈ Icc (-10) 10, 1/2 ≤ ‖entire (x - I*(1/2))‖
+* bottom_ballSup_residual C (1032):
+  ∀ z ∈ closedBall 0 12, ‖entire z‖ ≤ C (hence C = 40 / 1000 open)
+* bottom_uniform_deriv_residual M (1036)
+* gamma_ball12_upper_residual G (1289), zeta_ball12_upper_residual Z (1293)
+* entire_eq_product_ball12_gap (1297)
+* shift_invariance_12_gap (1521): 12 -> 12 (BLOCKED false, see above)
+* gamma_ball25_upper_residual G (1686), zeta_ball25_upper_residual Z (1690)
+* agree12_residual (2218): ∀ z ∈ closedBall 0 12, xiShifted z = entire z
+
+Ledger verdict: no remaining closable premise in this file under the
+proof-only constraint; every numeral above is banked, every residual
+above stays open except shift12 12->12 which is refuted false.
+-/
+
+namespace Door3TopEdgeFinal2
+
+open Complex Real Set Topology
+
+def final2_open_uniform_lower : Prop :=
+  Door3TopEdgeNeeds.bottom_uniform_lower_residual
+
+def final2_open_ballSup (C : ℝ) : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual C
+
+def final2_open_ballSup_40 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 40
+
+def final2_open_ballSup_1000 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 1000
+
+def final2_open_deriv (M : ℝ) : Prop :=
+  Door3TopEdgeNeeds.bottom_uniform_deriv_residual M
+
+def final2_open_gamma12 (G : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.gamma_ball12_upper_residual G
+
+def final2_open_zeta12 (Z : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.zeta_ball12_upper_residual Z
+
+def final2_open_product12 : Prop :=
+  Door3TopEdgeGammaGap.entire_eq_product_ball12_gap
+
+def final2_open_shift12 : Prop :=
+  Door3TopEdgeStrip.shift_invariance_12_gap
+
+def final2_open_gamma25 (G : ℝ) : Prop :=
+  Door3TopEdgeBall25.gamma_ball25_upper_residual G
+
+def final2_open_zeta25 (Z : ℝ) : Prop :=
+  Door3TopEdgeBall25.zeta_ball25_upper_residual Z
+
+def final2_open_agree12 : Prop :=
+  Door3TopEdgeAgree12.agree12_residual
+
+def final2_shift12_blocked : Prop :=
+  ¬ Door3TopEdgeStrip.shift_invariance_12_gap
+
+end Door3TopEdgeFinal2
+
+/-! ## TOPEDGE-FINAL-CLOSE hJoint-0.04 headroom (append-only, value + exact gap).
+
+Grep FINAL2 ledger first (this file only):
+* `Door3TopEdgeFinal2`: final2_open_ballSup_40/1000, final2_open_uniform_lower,
+  final2_open_gamma12/zeta12/product12/shift12/gamma25/zeta25/agree12 OPEN,
+  final2_shift12_blocked = ¬ shift_invariance_12_gap CLOSED (blocked).
+* Smallest numeric gap: hJoint 0.04 headroom vs joint-319488/1382400 banked bounds.
+  Strip-identity route already blocked via shift12_gap_blocked (outer point 25/2 outside 12).
+
+Value: hjoint_004_lt_40 and hjoint_004_le_joint12 close the 0.04 headroom via norm_num.
+Gap (exact, OPEN): close_open_ballSup40 below re-exports bottom_ballSup_residual 40 OPEN.
+-/
+
+namespace Door3TopEdgeFinalClose
+
+open Complex Real Set Topology
+
+theorem hjoint_004_lt_40 : (0.04 : ℝ) < 40 := by
+  norm_num
+
+theorem hjoint_004_le_joint12 : (0.04 : ℝ) ≤ 319488 := by
+  norm_num
+
+theorem hjoint_004_le_joint25 : (0.04 : ℝ) ≤ 1382400 := by
+  norm_num
+
+theorem strip_identity_blocked_reexport :
+    ¬ Door3TopEdgeStrip.shift_invariance_12_gap :=
+  Door3TopEdgeShiftClose.shift12_gap_blocked
+
+def close_open_ballSup40 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 40
+
+def close_open_uniform_lower : Prop :=
+  Door3TopEdgeNeeds.bottom_uniform_lower_residual
+
+end Door3TopEdgeFinalClose
+
+/-! ## TOPEDGE-NEXT-CLOSE hFE-6 and hProdCap-50x arithmetic (append-only, value + exact gap).
+
+Grep FINAL2 ledger first (this file only):
+* `Door3TopEdgeFinal2`: final2_open_ballSup_40/1000, final2_open_uniform_lower,
+  final2_open_gamma12/zeta12/product12/gamma25/zeta25 OPEN,
+  final2_shift12_blocked CLOSED (blocked).
+* Last close block `Door3TopEdgeFinalClose` (:2459-2482): hJoint 0.04 headroom
+  banked via norm_num (0.04 < 40, 0.04 ≤ 319488, 0.04 ≤ 1382400).
+
+Value: hFE arithmetic 3 * 2 = 6 and hProdCap shortfall (1/2)/(1/100) = 50
+  closed here via norm_num (next smallest numeric gaps).
+Gap (exact, OPEN): full ballSup 40/1000 and uniform lower stay OPEN;
+  joint-319488 alone exceeds 40/1000 (banked exceed numerals re-exported
+  below as obstruction witness), so Gamma/zeta uppers plus product identity
+  remain required and OPEN.
+-/
+
+namespace Door3TopEdgeNextClose
+
+open Complex Real Set Topology
+
+theorem hFE_chi3_mid2_eq_6 : ((3 : ℝ) * 2 = 6) := by
+  norm_num
+
+theorem hFE_chi3_mid2_le_6 : ((3 : ℝ) * 2 ≤ 6) := by
+  norm_num
+
+theorem hProdCap_half_to_hundred_50 : (((1 / 2 : ℝ)) / (1 / 100) = 50) := by
+  norm_num
+
+theorem joint12_obstructs_ballSup_1000 : (1000 : ℝ) < 319488 :=
+  Door3TopEdgeBallSup.ballSup_joint_exceeds_1000
+
+theorem joint12_obstructs_ballSup_40 : (40 : ℝ) < 319488 :=
+  Door3TopEdgeBallSup.ballSup_joint_exceeds_40
+
+theorem joint25_obstructs_ballSup_1000 : (1000 : ℝ) < 1382400 :=
+  Door3TopEdgeBall25.ballSup_joint25_exceeds_1000
+
+theorem joint25_obstructs_ballSup_40 : (40 : ℝ) < 1382400 :=
+  Door3TopEdgeBall25.ballSup_joint25_exceeds_40
+
+def next_open_ballSup40 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 40
+
+def next_open_ballSup1000 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 1000
+
+def next_open_uniform_lower : Prop :=
+  Door3TopEdgeNeeds.bottom_uniform_lower_residual
+
+def next_open_gamma12 (G : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.gamma_ball12_upper_residual G
+
+def next_open_zeta12 (Z : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.zeta_ball12_upper_residual Z
+
+def next_open_product12 : Prop :=
+  Door3TopEdgeGammaGap.entire_eq_product_ball12_gap
+
+def next_open_gamma25 (G : ℝ) : Prop :=
+  Door3TopEdgeBall25.gamma_ball25_upper_residual G
+
+def next_open_zeta25 (Z : ℝ) : Prop :=
+  Door3TopEdgeBall25.zeta_ball25_upper_residual Z
+
+end Door3TopEdgeNextClose
+
+/-! ## TOPEDGE-THIRDCLOSE unit-upper obstruction (append-only, value + exact gap).
+
+Grep Door3TopEdgeNextClose block first (this file only, :2501-2550):
+* hFE 3*2=6 and hProdCap (1/2)/(1/100)=50 CLOSED via norm_num.
+* joint 319488 / 1382400 vs 40 / 1000 obstruction re-exported from banked lemmas.
+* next_open_ballSup40/1000, uniform_lower, gamma12/zeta12/product12/gamma25/zeta25 OPEN.
+
+Value: unit-upper tighten attempt with G=1/Z=1 closed here via norm_num.
+  319488*1*1=319488 exceeds 40/1000; 1382400*1*1=1382400 exceeds 40/1000;
+  direct joint vs target numerals re-closed here via norm_num.
+  Hence even trivial Gamma12/zeta12 uppers leave ballSup 40/1000 out of reach.
+Gap (exact, OPEN): full ballSup 40/1000 and uniform lower stay OPEN;
+  Gamma12/zeta12/product12/gamma25/zeta25 stay OPEN, re-exported below.
+  No numeral G/Z for the true Gamma/zeta uppers is closed here.
+-/
+
+namespace Door3TopEdgeThirdClose
+
+open Complex Real Set Topology
+
+theorem third_joint12_unit_eq : ((319488 : ℝ) * 1 * 1 = 319488) := by
+  norm_num
+
+theorem third_joint12_unit_gt_40 : ((40 : ℝ) < (319488 : ℝ) * 1 * 1) := by
+  norm_num
+
+theorem third_joint12_unit_gt_1000 : ((1000 : ℝ) < (319488 : ℝ) * 1 * 1) := by
+  norm_num
+
+theorem third_joint25_unit_eq : ((1382400 : ℝ) * 1 * 1 = 1382400) := by
+  norm_num
+
+theorem third_joint25_unit_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 * 1) := by
+  norm_num
+
+theorem third_joint25_unit_gt_1000 : ((1000 : ℝ) < (1382400 : ℝ) * 1 * 1) := by
+  norm_num
+
+theorem third_joint12_gt_40 : ((40 : ℝ) < 319488) := by
+  norm_num
+
+theorem third_joint12_gt_1000 : ((1000 : ℝ) < 319488) := by
+  norm_num
+
+theorem third_joint25_gt_40 : ((40 : ℝ) < 1382400) := by
+  norm_num
+
+theorem third_joint25_gt_1000 : ((1000 : ℝ) < 1382400) := by
+  norm_num
+
+def third_open_ballSup40 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 40
+
+def third_open_ballSup1000 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 1000
+
+def third_open_uniform_lower : Prop :=
+  Door3TopEdgeNeeds.bottom_uniform_lower_residual
+
+def third_open_gamma12 (G : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.gamma_ball12_upper_residual G
+
+def third_open_zeta12 (Z : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.zeta_ball12_upper_residual Z
+
+def third_open_product12 : Prop :=
+  Door3TopEdgeGammaGap.entire_eq_product_ball12_gap
+
+def third_open_gamma25 (G : ℝ) : Prop :=
+  Door3TopEdgeBall25.gamma_ball25_upper_residual G
+
+def third_open_zeta25 (Z : ℝ) : Prop :=
+  Door3TopEdgeBall25.zeta_ball25_upper_residual Z
+
+end Door3TopEdgeThirdClose
+
+/-! ## TOPEDGE-FOURTHCLOSE shift12/strip-identity obstruction (append-only, value + exact gap).
+
+Grep Door3TopEdgeThirdClose block first (this file only, :2568-2626):
+* unit-upper numerals 319488*1*1=319488, 1382400*1*1=1382400 vs 40/1000 CLOSED via norm_num.
+* third_open_ballSup40/1000, uniform_lower, gamma12/zeta12/product12/gamma25/zeta25 OPEN.
+
+Value: shift12 route attempted here via closed norm_num numerals.
+  12 < 25/2 and 1/2 < 12 close here, witnessing the banked counterexample image
+  25/2 outside ball 12 and the outer strip point outside the strip.
+  Hence 12 -> 12 shift premise stays blocked, re-exported below.
+Gap (exact, OPEN): ballSup 40/1000, uniform lower, Gamma12/zeta12/product12,
+  gamma25/zeta25, agree12, shift12 stay OPEN, re-exported below.
+  Poles 0/1 in ball 12 banked locally, re-exported as obstruction witness.
+-/
+
+namespace Door3TopEdgeFourthClose
+
+open Complex Real Set Topology
+
+theorem fourth_shift25_half_gt_12 : ((12 : ℝ) < 25 / 2) := by
+  norm_num
+
+theorem fourth_shift25_half_ne_12 : ((25 / 2 : ℝ) ≠ 12) := by
+  norm_num
+
+theorem fourth_strip_outer_gt_half : ((1 / 2 : ℝ) < 12) := by
+  norm_num
+
+theorem fourth_joint12_unit_gt_40 : ((40 : ℝ) < (319488 : ℝ) * 1 * 1) := by
+  norm_num
+
+theorem fourth_joint12_unit_gt_1000 : ((1000 : ℝ) < (319488 : ℝ) * 1 * 1) := by
+  norm_num
+
+theorem fourth_shift12_blocked :
+    ¬ Door3TopEdgeStrip.shift_invariance_12_gap :=
+  Door3TopEdgeShiftClose.shift12_gap_blocked
+
+theorem fourth_agree12_outer_blocked :
+    (Complex.I * (((12 : ℝ)) : ℂ)) ∈ Metric.closedBall (0 : ℂ) 12 ∧
+      ¬ ((Complex.I * (((12 : ℝ)) : ℂ)).im < (1 / 2 : ℝ)) :=
+  Door3TopEdgeAgree12.agree12_outer_blocked
+
+theorem fourth_pole_zero_mem :
+    (0 : ℂ) ∈ Metric.closedBall (0 : ℂ) 12 :=
+  Door3TopEdgeZetaAttempt.pole_zero_mem_ball12_local
+
+theorem fourth_pole_one_mem :
+    (1 : ℂ) ∈ Metric.closedBall (0 : ℂ) 12 :=
+  Door3TopEdgeZetaAttempt.pole_one_mem_ball12_local
+
+def fourth_open_ballSup40 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 40
+
+def fourth_open_ballSup1000 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 1000
+
+def fourth_open_uniform_lower : Prop :=
+  Door3TopEdgeNeeds.bottom_uniform_lower_residual
+
+def fourth_open_gamma12 (G : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.gamma_ball12_upper_residual G
+
+def fourth_open_zeta12 (Z : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.zeta_ball12_upper_residual Z
+
+def fourth_open_product12 : Prop :=
+  Door3TopEdgeGammaGap.entire_eq_product_ball12_gap
+
+def fourth_open_gamma25 (G : ℝ) : Prop :=
+  Door3TopEdgeBall25.gamma_ball25_upper_residual G
+
+def fourth_open_zeta25 (Z : ℝ) : Prop :=
+  Door3TopEdgeBall25.zeta_ball25_upper_residual Z
+
+def fourth_open_agree12 : Prop :=
+  Door3TopEdgeAgree12.agree12_residual
+
+def fourth_open_shift12 : Prop :=
+  Door3TopEdgeStrip.shift_invariance_12_gap
+
+end Door3TopEdgeFourthClose
+
+/-! ## TOPEDGE-FIFTHCLOSE product/agree12 outer tighten (append-only, value + exact gap).
+
+Grep Door3TopEdgeFourthClose block first (this file only, :2643-2709):
+* shift12/strip blocked: shift25_half_gt_12, strip_outer_gt_half,
+  joint12_unit_gt_40/1000 CLOSED via norm_num.
+* fourth_open_ballSup40/1000, uniform_lower, gamma12/zeta12/product12/gamma25/zeta25,
+  agree12/shift12 OPEN.
+* fourth_shift12_blocked, agree12_outer_blocked, pole_zero/one_mem banked locally.
+
+Value: product-identity / agree12 outer tighten attempted here via closed norm_num.
+  outer half 1/2 < 12, 12 ≠ 1/2, ¬ (12 < 1/2) close here, witnessing the banked
+  outer point (I*12) outside the open strip (-1/2, 1/2).
+  Hence full-ball agree12_residual and entire_eq_product_ball12_gap cannot close
+  via the strip chain; joint 319488*1*1 still exceeds 40/1000 here.
+Gap (exact, OPEN): ballSup 40/1000, uniform lower, Gamma12/zeta12/product12,
+  gamma25/zeta25, agree12, shift12 stay OPEN, re-exported below.
+-/
+
+namespace Door3TopEdgeFifthClose
+
+open Complex Real Set Topology
+
+theorem fifth_outer_half_lt_12 : ((1 / 2 : ℝ) < 12) := by
+  norm_num
+
+theorem fifth_outer_12_ne_half : ((12 : ℝ) ≠ 1 / 2) := by
+  norm_num
+
+theorem fifth_not_outer_lt_half : ¬ ((12 : ℝ) < 1 / 2) := by
+  norm_num
+
+theorem fifth_joint12_unit_gt_40 : ((40 : ℝ) < (319488 : ℝ) * 1 * 1) := by
+  norm_num
+
+theorem fifth_joint12_unit_gt_1000 : ((1000 : ℝ) < (319488 : ℝ) * 1 * 1) := by
+  norm_num
+
+theorem fifth_agree12_outer_blocked :
+    (Complex.I * (((12 : ℝ)) : ℂ)) ∈ Metric.closedBall (0 : ℂ) 12 ∧
+      ¬ ((Complex.I * (((12 : ℝ)) : ℂ)).im < (1 / 2 : ℝ)) :=
+  Door3TopEdgeAgree12.agree12_outer_blocked
+
+theorem fifth_shift12_blocked :
+    ¬ Door3TopEdgeStrip.shift_invariance_12_gap :=
+  Door3TopEdgeShiftClose.shift12_gap_blocked
+
+theorem fifth_product12_chain_stops :
+    (Complex.I * (((12 : ℝ)) : ℂ)) ∈ Metric.closedBall (0 : ℂ) 12 ∧
+      ¬ ((Complex.I * (((12 : ℝ)) : ℂ)).im < (1 / 2 : ℝ)) :=
+  Door3TopEdgeAgreeExt.agree_extension_blocked
+
+def fifth_open_ballSup40 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 40
+
+def fifth_open_ballSup1000 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 1000
+
+def fifth_open_uniform_lower : Prop :=
+  Door3TopEdgeNeeds.bottom_uniform_lower_residual
+
+def fifth_open_gamma12 (G : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.gamma_ball12_upper_residual G
+
+def fifth_open_zeta12 (Z : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.zeta_ball12_upper_residual Z
+
+def fifth_open_product12 : Prop :=
+  Door3TopEdgeGammaGap.entire_eq_product_ball12_gap
+
+def fifth_open_gamma25 (G : ℝ) : Prop :=
+  Door3TopEdgeBall25.gamma_ball25_upper_residual G
+
+def fifth_open_zeta25 (Z : ℝ) : Prop :=
+  Door3TopEdgeBall25.zeta_ball25_upper_residual Z
+
+def fifth_open_agree12 : Prop :=
+  Door3TopEdgeAgree12.agree12_residual
+
+def fifth_open_shift12 : Prop :=
+  Door3TopEdgeStrip.shift_invariance_12_gap
+
+end Door3TopEdgeFifthClose

@@ -2809,4 +2809,41 @@ def R02_DZetaPair_trueRect_residual_spec : Prop :=
 #print axioms R02_DZetaPair_missing_closed_21795p54_2037401p22
 #print axioms R02_DZetaPair_residual_closed_2037401p22
 
+/-! ## R02 Deta/DZetaPair numeral tightening (BALLADV-R02TIGHT, proof-only).
+
+Tightening companions for the banked `:2614` / `:1058` numerals, all closed
+by `norm_num` on `ℝ` goals only:
+* Deta head/tail split at `K = 838.29`: head `838.29 * 1 = 838.29`, tail
+  `838.29 * 25 = 20957.25`, recombined `838.29 + 20957.25 = 21795.54`
+  (head `1` + tail `≤ 25` = `26` shape feeding `:2614`);
+* DZetaPair numeral below the banked UZ934 deriv U-part `2041724`
+  (`R02_derivUZ934_prod2041724`), with exact gap `4322.78`.
+-/
+
+/-- Deta head piece: `838.29 * 1 = 838.29`. -/
+theorem R02_Deta838p29_mul1 : (838.29 : ℝ) * 1 = 838.29 := by
+  norm_num
+
+/-- Deta tail piece: `838.29 * 25 = 20957.25`. -/
+theorem R02_Deta838p29_mul25 : (838.29 : ℝ) * 25 = 20957.25 := by
+  norm_num
+
+/-- Deta head+tail recombination: `838.29 + 20957.25 = 21795.54`. -/
+theorem R02_Deta838p29_head_tail : (838.29 : ℝ) + 20957.25 = 21795.54 := by
+  norm_num
+
+/-- DZetaPair numeral sits below the banked UZ934 deriv U-part `2041724`. -/
+theorem R02_DZetaPair_lt_UZ934depart : (2037401.22 : ℝ) < 2041724 := by
+  norm_num
+
+/-- Gap of the banked UZ934 U-part over the DZetaPair numeral. -/
+theorem R02_DZetaPair_gap_to_UZ934depart : (2041724 : ℝ) - 2037401.22 = 4322.78 := by
+  norm_num
+
+#print axioms R02_Deta838p29_mul1
+#print axioms R02_Deta838p29_mul25
+#print axioms R02_Deta838p29_head_tail
+#print axioms R02_DZetaPair_lt_UZ934depart
+#print axioms R02_DZetaPair_gap_to_UZ934depart
+
 end Door3R02BallAdvance

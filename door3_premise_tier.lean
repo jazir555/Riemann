@@ -2560,3 +2560,712 @@ theorem narrow_R24_deriv_keeps_67200 (hBall : premBall_R24) (w : ℂ)
   premDeriv_R24_of_ball hBall w hw
 
 end Door3PremiseTier
+
+/-! ## 29. R25 premise-tier narrow attempt (append-only wave).
+
+Grep record (verified before writing via `default.grep`):
+* R24 premise block in this file: `premTier_R24 :778`, `premBall_R24 :780`,
+  `premTier_R24_mismatch :784`, `premDeriv_R24_of_ball :786`,
+  `premSphere_R24_of_ball :798` (`R24.mem`, tier `0.07`, value `67200`).
+* R25 premise block in this file: `premTier_R25 :805`, `premBall_R25 :807`,
+  `premTier_R25_mismatch :811`, `premDeriv_R25_of_ball :813`,
+  `premSphere_R25_of_ball :825` (`R25.mem`, tier `0.06`, value `67200`).
+* R24 narrow block in this file: `## 28. R24 premise-tier narrow attempt`
+  `:2504-2562` with `narrow_R24_closedForm_keeps :2544`,
+  `narrow_R24_residual_gap :2548`,
+  `narrow_R24_residual_is_mismatch :2552`,
+  `narrow_R24_deriv_keeps_67200 :2557`; R24 keeps `67200`, no chain.
+* R02 narrow block in this file: `## 6. R02 premise-tier narrowing via banked AO sups`
+  `:1241-1316` with `narrow_R02_deriv_162p96_of_banked :1274`,
+  `narrow_R02_deriv_163_of_banked :1281`,
+  `narrow_R02_sphere_40p74_of_banked :1288`, closed form
+  `40.74 / 0.25 = 162.96` `:1305`, residual `0.07 < 162.96` `:1309`.
+* Banked AO R25 chain search in `central_cover_assembly.lean` (no local chain):
+  pattern `AO_R25|AO_gamma_upper_disc_R25|R25_deriv|R25_uniform|R25_gamma|R25_zeta`
+  returns no files; pattern `namespace AO_` returns only
+  `namespace AO_R02DiscUpdate :9968` (R02 chain only, no `AO_R25` hit);
+  pattern `theorem R25_|def R25` returns only rect guards
+  `R25 :3671`, `R25_x0/x1/y0/y1 :3674-3677`,
+  `R25_strip_lo/hi :3682-3683`, `R25_radius_eq :3693`,
+  `R25_radius_lt :3698`, `R25_mem_gridFine :3701`,
+  `R25_leaf_obligations :3711`, `R25_fencing_of_bounds :3715`
+  (tier guards, not an AO chain);
+  pattern `narrow_R25_` in this file returns no files
+  (no prior R25 narrow).
+* Result below: no R25 mirror of the R02 shape exists locally, so R25 keeps
+  value `67200` (`16800 / 0.25`) with exact residual gap `0.06 < 67200`;
+  tier `0.06` stays open by the same mismatch as `premTier_R25_mismatch :811`.
+-/
+
+namespace Door3PremiseTier
+
+/-- R25 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no banked narrow chain exists locally. -/
+theorem narrow_R25_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R25 residual gap at the kept value: tier `0.06` stays open below `67200`. -/
+theorem narrow_R25_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R25 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R25_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R25 conditional deriv transfer still lands at `67200` from the ball premise
+(re-export for the narrow record). -/
+theorem narrow_R25_deriv_keeps_67200 (hBall : premBall_R25) (w : ℂ)
+    (hw : CentralCoverAssembly.R25.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  premDeriv_R25_of_ball hBall w hw
+
+end Door3PremiseTier
+
+/-! ## 30. R26 premise-tier narrow attempt (append-only wave).
+
+Grep record (verified before writing via `default.grep`):
+* R25 premise block in this file: `premTier_R25 :805`, `premBall_R25 :807`,
+  `premTier_R25_mismatch :811`, `premDeriv_R25_of_ball :813`,
+  `premSphere_R25_of_ball :825` (`R25.mem`, tier `0.06`, value `67200`).
+* R26 premise block in this file: `premTier_R26 :832`, `premBall_R26 :834`,
+  `premTier_R26_mismatch :838`, `premDeriv_R26_of_ball :840`,
+  `premSphere_R26_of_ball :852` (`R26.mem`, tier `0.06`, value `67200`).
+* R25 narrow block in this file: `## 29. R25 premise-tier narrow attempt`
+  `:2564-2622` with `narrow_R25_closedForm_keeps :2604`,
+  `narrow_R25_residual_gap :2608`,
+  `narrow_R25_residual_is_mismatch :2612`,
+  `narrow_R25_deriv_keeps_67200 :2617`; R25 keeps `67200`, no chain.
+* Banked AO R26 chain search in `central_cover_assembly.lean` (no local chain):
+  pattern `AO_R26|R26_deriv|R26_uniform` returns no files
+  (no `AO_R26` hit);
+  pattern `narrow_R26_` in this file returns no files
+  (no prior R26 narrow).
+* Result below: no R26 mirror of the R02 shape exists locally, so R26 keeps
+  value `67200` (`16800 / 0.25`) with exact residual gap `0.06 < 67200`;
+  tier `0.06` stays open by the same mismatch as `premTier_R26_mismatch :838`.
+-/
+
+namespace Door3PremiseTier
+
+/-- R26 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no banked narrow chain exists locally. -/
+theorem narrow_R26_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R26 residual gap at the kept value: tier `0.06` stays open below `67200`. -/
+theorem narrow_R26_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R26 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R26_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R26 conditional deriv transfer still lands at `67200` from the ball premise
+(re-export for the narrow record). -/
+theorem narrow_R26_deriv_keeps_67200 (hBall : premBall_R26) (w : ℂ)
+    (hw : CentralCoverAssembly.R26.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  premDeriv_R26_of_ball hBall w hw
+
+end Door3PremiseTier
+
+/-! ## 31. R27 premise-tier narrow attempt (append-only wave).
+
+Grep record (verified before writing via `default.grep`):
+* R26 premise block in this file: `premTier_R26 :832`, `premBall_R26 :834`,
+  `premTier_R26_mismatch :838`, `premDeriv_R26_of_ball :840`,
+  `premSphere_R26_of_ball :852` (`R26.mem`, tier `0.06`, value `67200`).
+* R27 premise block in this file: `premTier_R27 :859`, `premBall_R27 :861`,
+  `premTier_R27_mismatch :865`, `premDeriv_R27_of_ball :867`,
+  `premSphere_R27_of_ball :879` (`R27.mem`, tier `0.07`, value `67200`).
+* R26 narrow block in this file: `## 30. R26 premise-tier narrow attempt`
+  `:2624-2670` with `narrow_R26_closedForm_keeps :2652`,
+  `narrow_R26_residual_gap :2656`,
+  `narrow_R26_residual_is_mismatch :2660`,
+  `narrow_R26_deriv_keeps_67200 :2665`; R26 keeps `67200`, no chain.
+* Banked AO R27 chain search in `central_cover_assembly.lean` (no local chain):
+  pattern `AO_R27|R27_deriv|R27_uniform` returns no files
+  (no `AO_R27` hit);
+  pattern `narrow_R27_` in this file returns no files
+  (no prior R27 narrow).
+* Result below: no R27 mirror of the R02 shape exists locally, so R27 keeps
+  value `67200` (`16800 / 0.25`) with exact residual gap `0.07 < 67200`;
+  tier `0.07` stays open by the same mismatch as `premTier_R27_mismatch :865`.
+-/
+
+namespace Door3PremiseTier
+
+/-- R27 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no banked narrow chain exists locally. -/
+theorem narrow_R27_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R27 residual gap at the kept value: tier `0.07` stays open below `67200`. -/
+theorem narrow_R27_residual_gap : (0.07 : ℝ) < 67200 := by
+  norm_num
+
+/-- R27 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R27_residual_is_mismatch : (0.07 : ℝ) < 67200 :=
+  tier07_lt_67200
+
+/-- R27 conditional deriv transfer still lands at `67200` from the ball premise
+(re-export for the narrow record). -/
+theorem narrow_R27_deriv_keeps_67200 (hBall : premBall_R27) (w : ℂ)
+    (hw : CentralCoverAssembly.R27.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  premDeriv_R27_of_ball hBall w hw
+
+end Door3PremiseTier
+
+/-! ## 32. R28 premise-tier narrow attempt (append-only wave).
+
+Grep record (verified before writing via `default.grep`):
+* R27 premise block in this file: `premTier_R27 :859`, `premBall_R27 :861`,
+  `premTier_R27_mismatch :865`, `premDeriv_R27_of_ball :867`,
+  `premSphere_R27_of_ball :879` (`R27.mem`, tier `0.07`, value `67200`).
+* R28 premise block in this file: `premTier_R28 :886`, `premBall_R28 :888`,
+  `premTier_R28_mismatch :892`, `premDeriv_R28_of_ball :894`,
+  `premSphere_R28_of_ball :906` (`R28.mem`, tier `0.07`, value `67200`).
+* R27 narrow block in this file: `## 31. R27 premise-tier narrow attempt`
+  `:2672-2718` with `narrow_R27_closedForm_keeps :2700`,
+  `narrow_R27_residual_gap :2704`,
+  `narrow_R27_residual_is_mismatch :2708`,
+  `narrow_R27_deriv_keeps_67200 :2713`; R27 keeps `67200`, no chain.
+* Banked AO R28 chain search in `central_cover_assembly.lean` (no local chain):
+  pattern `AO_R28|R28_deriv|R28_uniform` returns no files
+  (no `AO_R28` hit);
+  pattern `narrow_R28_` in this file returns no files
+  (no prior R28 narrow).
+* Result below: no R28 mirror of the R02 shape exists locally, so R28 keeps
+  value `67200` (`16800 / 0.25`) with exact residual gap `0.07 < 67200`;
+  tier `0.07` stays open by the same mismatch as `premTier_R28_mismatch :892`.
+-/
+
+namespace Door3PremiseTier
+
+/-- R28 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no banked narrow chain exists locally. -/
+theorem narrow_R28_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R28 residual gap at the kept value: tier `0.07` stays open below `67200`. -/
+theorem narrow_R28_residual_gap : (0.07 : ℝ) < 67200 := by
+  norm_num
+
+/-- R28 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R28_residual_is_mismatch : (0.07 : ℝ) < 67200 :=
+  tier07_lt_67200
+
+/-- R28 conditional deriv transfer still lands at `67200` from the ball premise
+(re-export for the narrow record). -/
+theorem narrow_R28_deriv_keeps_67200 (hBall : premBall_R28) (w : ℂ)
+    (hw : CentralCoverAssembly.R28.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  premDeriv_R28_of_ball hBall w hw
+
+end Door3PremiseTier
+
+/-! ## 33. R29 premise-tier narrow attempt (append-only wave).
+
+Grep record (verified before writing via `default.grep`):
+* R28 premise block in this file: `premTier_R28 :886`, `premBall_R28 :888`,
+  `premTier_R28_mismatch :892`, `premDeriv_R28_of_ball :894`,
+  `premSphere_R28_of_ball :906` (`R28.mem`, tier `0.07`, value `67200`).
+* R29 premise block in this file: `premTier_R29 :913`, `premBall_R29 :915`,
+  `premTier_R29_mismatch :919`, `premDeriv_R29_of_ball :921`,
+  `premSphere_R29_of_ball :933` (`R29.mem`, tier `0.07`, value `67200`).
+* R28 narrow block in this file: `## 32. R28 premise-tier narrow attempt`
+  `:2720-2766` with `narrow_R28_closedForm_keeps :2748`,
+  `narrow_R28_residual_gap :2752`,
+  `narrow_R28_residual_is_mismatch :2756`,
+  `narrow_R28_deriv_keeps_67200 :2761`; R28 keeps `67200`, no chain.
+* Banked AO R29 chain search in `central_cover_assembly.lean` (no local chain):
+  pattern `AO_R29|R29_deriv|R29_uniform` returns no files
+  (no `AO_R29` hit);
+  pattern `narrow_R29_` in this file returns no files
+  (no prior R29 narrow).
+* Result below: no R29 mirror of the R02 shape exists locally, so R29 keeps
+  value `67200` (`16800 / 0.25`) with exact residual gap `0.07 < 67200`;
+  tier `0.07` stays open by the same mismatch as `premTier_R29_mismatch :919`.
+-/
+
+namespace Door3PremiseTier
+
+/-- R29 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no banked narrow chain exists locally. -/
+theorem narrow_R29_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R29 residual gap at the kept value: tier `0.07` stays open below `67200`. -/
+theorem narrow_R29_residual_gap : (0.07 : ℝ) < 67200 := by
+  norm_num
+
+/-- R29 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R29_residual_is_mismatch : (0.07 : ℝ) < 67200 :=
+  tier07_lt_67200
+
+/-- R29 conditional deriv transfer still lands at `67200` from the ball premise
+(re-export for the narrow record). -/
+theorem narrow_R29_deriv_keeps_67200 (hBall : premBall_R29) (w : ℂ)
+    (hw : CentralCoverAssembly.R29.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  premDeriv_R29_of_ball hBall w hw
+
+end Door3PremiseTier
+
+/-! ## 34. R30 premise-tier narrow attempt (append-only wave).
+
+Grep record (verified before writing via `default.grep`):
+* R29 premise block in this file: `premTier_R29 :913`, `premBall_R29 :915`,
+  `premTier_R29_mismatch :919`, `premDeriv_R29_of_ball :921`,
+  `premSphere_R29_of_ball :933` (`R29.mem`, tier `0.07`, value `67200`).
+* R30 premise block in this file: `premTier_R30 :940`, `premBall_R30 :942`,
+  `premTier_R30_mismatch :946`, `premDeriv_R30_of_ball :948`,
+  `premSphere_R30_of_ball :960` (`R30.mem`, tier `0.05`, value `67200`).
+* R29 narrow block in this file: `## 33. R29 premise-tier narrow attempt`
+  `:2768-2814` with `narrow_R29_closedForm_keeps :2796`,
+  `narrow_R29_residual_gap :2800`,
+  `narrow_R29_residual_is_mismatch :2804`,
+  `narrow_R29_deriv_keeps_67200 :2809`; R29 keeps `67200`, no chain.
+* Banked AO R30 chain search in `central_cover_assembly.lean` (no local chain):
+  pattern `AO_R30|R30_deriv|R30_uniform` returns no files
+  (no `AO_R30` hit);
+  pattern `narrow_R30_` in this file returns no files
+  (no prior R30 narrow).
+* Result below: no R30 mirror of the R02 shape exists locally, so R30 keeps
+  value `67200` (`16800 / 0.25`) with exact residual gap `0.05 < 67200`;
+  tier `0.05` stays open by the same mismatch as `premTier_R30_mismatch :946`.
+-/
+
+namespace Door3PremiseTier
+
+/-- R30 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no banked narrow chain exists locally. -/
+theorem narrow_R30_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R30 residual gap at the kept value: tier `0.05` stays open below `67200`. -/
+theorem narrow_R30_residual_gap : (0.05 : ℝ) < 67200 := by
+  norm_num
+
+/-- R30 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R30_residual_is_mismatch : (0.05 : ℝ) < 67200 :=
+  tier05_lt_67200
+
+/-- R30 conditional deriv transfer still lands at `67200` from the ball premise
+(re-export for the narrow record). -/
+theorem narrow_R30_deriv_keeps_67200 (hBall : premBall_R30) (w : ℂ)
+    (hw : CentralCoverAssembly.R30.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  premDeriv_R30_of_ball hBall w hw
+
+end Door3PremiseTier
+
+/-! ## 35. R31 premise-tier narrow attempt (append-only wave).
+
+Grep record (verified before writing via `default.grep`):
+* R30 premise block in this file: `premTier_R30 :940`, `premBall_R30 :942`,
+  `premTier_R30_mismatch :946`, `premDeriv_R30_of_ball :948`,
+  `premSphere_R30_of_ball :960` (`R30.mem`, tier `0.05`, value `67200`).
+* R31 premise block in this file: `premTier_R31 :969`, `premBall_R31 :971`,
+  `premTier_R31_mismatch :975`, `premDeriv_R31_of_ball :977`,
+  `premSphere_R31_of_ball :989` (`R31.mem`, tier `0.05`, value `67200`).
+* R30 narrow block in this file: `## 34. R30 premise-tier narrow attempt`
+  `:2816-2862` with `narrow_R30_closedForm_keeps :2844`,
+  `narrow_R30_residual_gap :2848`,
+  `narrow_R30_residual_is_mismatch :2852`,
+  `narrow_R30_deriv_keeps_67200 :2857`; R30 keeps `67200`, no chain.
+* Banked R31 chain search in `central_cover_assembly.lean`:
+  pattern `AO_R31` returns no files (no `AO_R31` hit);
+  pattern `R31_deriv|R31_uniform` returns `R31_uniform_deriv_of_closedBall_bound`,
+  `R31_uniform_sphere_bound`, `R31_deriv_bound_of_factor_bounds`
+  (small-`r` value `5600 / 0.008 = 700000`, still `0.05 < 700000`);
+  pattern `narrow_R31_` in this file returns no files
+  (no prior R31 narrow).
+* Result below: no R31 tier-`0.05` closure exists locally, so R31 keeps
+  value `67200` (`16800 / 0.25`) with exact residual gap `0.05 < 67200`;
+  tier `0.05` stays open by the same mismatch as `premTier_R31_mismatch :975`.
+-/
+
+namespace Door3PremiseTier
+
+/-- R31 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+banked small-`r` chain gives `700000`, no tier closure. -/
+theorem narrow_R31_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R31 residual gap at the kept value: tier `0.05` stays open below `67200`. -/
+theorem narrow_R31_residual_gap : (0.05 : ℝ) < 67200 := by
+  norm_num
+
+/-- R31 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R31_residual_is_mismatch : (0.05 : ℝ) < 67200 :=
+  tier05_lt_67200
+
+/-- R31 conditional deriv transfer still lands at `67200` from the ball premise
+(re-export for the narrow record). -/
+theorem narrow_R31_deriv_keeps_67200 (hBall : premBall_R31) (w : ℂ)
+    (hw : CentralCoverAssembly.R31.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  premDeriv_R31_of_ball hBall w hw
+
+end Door3PremiseTier
+
+/-! ## 36. R32 premise-tier narrow attempt (append-only wave).
+
+Grep record (verified before writing via `default.grep`):
+* R31 premise block in this file: `premTier_R31 :969`, `premBall_R31 :971`,
+  `premTier_R31_mismatch :975`, `premDeriv_R31_of_ball :977`,
+  `premSphere_R31_of_ball :989` (`R31.mem`, tier `0.05`, value `67200`).
+* R32 premise block in this file: `premTier_R32 :996`, `premBall_R32 :998`,
+  `premTier_R32_mismatch :1002`, `premDeriv_R32_of_ball :1004`,
+  `premSphere_R32_of_ball :1016` (`R32.mem`, tier `0.07`, value `67200`).
+* R31 narrow block in this file: `## 35. R31 premise-tier narrow attempt`
+  `:2864-2912` with `narrow_R31_closedForm_keeps :2894`,
+  `narrow_R31_residual_gap :2898`,
+  `narrow_R31_residual_is_mismatch :2902`,
+  `narrow_R31_deriv_keeps_67200 :2907`; R31 keeps `67200`, no chain.
+* Pattern `narrow_R32_` in this file returns no files
+  (no prior R32 narrow).
+* Result below: no R32 tier-`0.07` closure exists locally, so R32 keeps
+  value `67200` (`16800 / 0.25`) with exact residual gap `0.07 < 67200`;
+  tier `0.07` stays open by the same mismatch as `premTier_R32_mismatch :1002`.
+-/
+
+namespace Door3PremiseTier
+
+/-- R32 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R32_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R32 residual gap at the kept value: tier `0.07` stays open below `67200`. -/
+theorem narrow_R32_residual_gap : (0.07 : ℝ) < 67200 := by
+  norm_num
+
+/-- R32 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R32_residual_is_mismatch : (0.07 : ℝ) < 67200 :=
+  tier07_lt_67200
+
+/-- R32 conditional deriv transfer still lands at `67200` from the ball premise
+(re-export for the narrow record). -/
+theorem narrow_R32_deriv_keeps_67200 (hBall : premBall_R32) (w : ℂ)
+    (hw : CentralCoverAssembly.R32.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  premDeriv_R32_of_ball hBall w hw
+
+end Door3PremiseTier
+
+/-! ## 37. R33 premise-tier narrow attempt (append-only wave).
+
+Grep record (verified before writing via `default.grep`):
+* R32 premise block in this file: `premTier_R32 :996`, `premBall_R32 :998`,
+  `premTier_R32_mismatch :1002`, `premDeriv_R32_of_ball :1004`,
+  `premSphere_R32_of_ball :1016` (`R32.mem`, tier `0.07`, value `67200`).
+* R33 premise block in this file: `premTier_R33 :1023`, `premBall_R33 :1025`,
+  `premTier_R33_mismatch :1029`, `premDeriv_R33_of_ball :1031`,
+  `premSphere_R33_of_ball :1043` (`R33.mem`, tier `0.07`, value `67200`).
+* R32 narrow block in this file: `## 36. R32 premise-tier narrow attempt`
+  `:2914-2957` with `narrow_R32_closedForm_keeps :2939`,
+  `narrow_R32_residual_gap :2943`,
+  `narrow_R32_residual_is_mismatch :2947`,
+  `narrow_R32_deriv_keeps_67200 :2952`; R32 keeps `67200`, no chain.
+* Pattern `narrow_R33_` in this file returns no files
+  (no prior R33 narrow).
+* Result below: no R33 tier-`0.07` closure exists locally, so R33 keeps
+  value `67200` (`16800 / 0.25`) with exact residual gap `0.07 < 67200`;
+  tier `0.07` stays open by the same mismatch as `premTier_R33_mismatch :1029`.
+-/
+
+namespace Door3PremiseTier
+
+/-- R33 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R33_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R33 residual gap at the kept value: tier `0.07` stays open below `67200`. -/
+theorem narrow_R33_residual_gap : (0.07 : ℝ) < 67200 := by
+  norm_num
+
+/-- R33 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R33_residual_is_mismatch : (0.07 : ℝ) < 67200 :=
+  tier07_lt_67200
+
+/-- R33 conditional deriv transfer still lands at `67200` from the ball premise
+(re-export for the narrow record). -/
+theorem narrow_R33_deriv_keeps_67200 (hBall : premBall_R33) (w : ℂ)
+    (hw : CentralCoverAssembly.R33.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  premDeriv_R33_of_ball hBall w hw
+
+end Door3PremiseTier
+
+/-! ## 38. R34 premise-tier narrow attempt (append-only wave).
+
+Grep record (verified before writing via `default.grep`):
+* R33 premise block in this file: `premTier_R33 :1023`, `premBall_R33 :1025`,
+  `premTier_R33_mismatch :1029`, `premDeriv_R33_of_ball :1031`,
+  `premSphere_R33_of_ball :1043` (`R33.mem`, tier `0.07`, value `67200`).
+* R34 premise block in this file: `premTier_R34 :1050`, `premBall_R34 :1052`,
+  `premTier_R34_mismatch :1056`, `premDeriv_R34_of_ball :1058`,
+  `premSphere_R34_of_ball :1070` (`R34.mem`, tier `0.07`, value `67200`).
+* R33 narrow block in this file: `## 37. R33 premise-tier narrow attempt`
+  `:2959-3002` with `narrow_R33_closedForm_keeps :2984`,
+  `narrow_R33_residual_gap :2988`,
+  `narrow_R33_residual_is_mismatch :2992`,
+  `narrow_R33_deriv_keeps_67200 :2997`; R33 keeps `67200`, no chain.
+* Pattern `narrow_R34_` in this file returns no files
+  (no prior R34 narrow).
+* Result below: no R34 tier-`0.07` closure exists locally, so R34 keeps
+  value `67200` (`16800 / 0.25`) with exact residual gap `0.07 < 67200`;
+  tier `0.07` stays open by the same mismatch as `premTier_R34_mismatch :1056`.
+-/
+
+namespace Door3PremiseTier
+
+/-- R34 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R34_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R34 residual gap at the kept value: tier `0.07` stays open below `67200`. -/
+theorem narrow_R34_residual_gap : (0.07 : ℝ) < 67200 := by
+  norm_num
+
+/-- R34 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R34_residual_is_mismatch : (0.07 : ℝ) < 67200 :=
+  tier07_lt_67200
+
+/-- R34 conditional deriv transfer still lands at `67200` from the ball premise
+(re-export for the narrow record). -/
+theorem narrow_R34_deriv_keeps_67200 (hBall : premBall_R34) (w : ℂ)
+    (hw : CentralCoverAssembly.R34.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  premDeriv_R34_of_ball hBall w hw
+
+end Door3PremiseTier
+
+/-! ## 39. R35 premise-tier narrow attempt (append-only wave).
+
+Grep record (verified before writing via `default.grep`):
+* R34 premise block in this file: `premTier_R34 :1050`, `premBall_R34 :1052`,
+  `premTier_R34_mismatch :1056`, `premDeriv_R34_of_ball :1058`,
+  `premSphere_R34_of_ball :1070` (`R34.mem`, tier `0.07`, value `67200`).
+* R35 premise block in this file: `premTier_R35 :1077`, `premBall_R35 :1079`,
+  `premTier_R35_mismatch :1083`, `premDeriv_R35_of_ball :1085`,
+  `premSphere_R35_of_ball :1097` (`R35.mem`, tier `0.06`, value `67200`).
+* R34 narrow block in this file: `## 38. R34 premise-tier narrow attempt`
+  `:3004-3047` with `narrow_R34_closedForm_keeps :3029`,
+  `narrow_R34_residual_gap :3033`,
+  `narrow_R34_residual_is_mismatch :3037`,
+  `narrow_R34_deriv_keeps_67200 :3042`; R34 keeps `67200`, no chain.
+* Pattern `narrow_R35_` in this file returns no files
+  (no prior R35 narrow).
+* Result below: no R35 tier-`0.06` closure exists locally, so R35 keeps
+  value `67200` (`16800 / 0.25`) with exact residual gap `0.06 < 67200`;
+  tier `0.06` stays open by the same mismatch as `premTier_R35_mismatch :1083`.
+-/
+
+namespace Door3PremiseTier
+
+/-- R35 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R35_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R35 residual gap at the kept value: tier `0.06` stays open below `67200`. -/
+theorem narrow_R35_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R35 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R35_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R35 conditional deriv transfer still lands at `67200` from the ball premise
+(re-export for the narrow record). -/
+theorem narrow_R35_deriv_keeps_67200 (hBall : premBall_R35) (w : ℂ)
+    (hw : CentralCoverAssembly.R35.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  premDeriv_R35_of_ball hBall w hw
+
+end Door3PremiseTier
+
+/-! ## 40. R36 premise-tier narrow attempt (append-only wave).
+
+Grep record (verified before writing via `default.grep`):
+* R35 premise block in this file: `premTier_R35 :1077`, `premBall_R35 :1079`,
+  `premTier_R35_mismatch :1083`, `premDeriv_R35_of_ball :1085`,
+  `premSphere_R35_of_ball :1097` (`R35.mem`, tier `0.06`, value `67200`).
+* R36 premise block in this file: `premTier_R36 :1104`, `premBall_R36 :1106`,
+  `premTier_R36_mismatch :1110`, `premDeriv_R36_of_ball :1112`,
+  `premSphere_R36_of_ball :1124` (`R36.mem`, tier `0.06`, value `67200`).
+* R35 narrow block in this file: `## 39. R35 premise-tier narrow attempt`
+  `:3049-3092` with `narrow_R35_closedForm_keeps :3074`,
+  `narrow_R35_residual_gap :3078`,
+  `narrow_R35_residual_is_mismatch :3082`,
+  `narrow_R35_deriv_keeps_67200 :3087`; R35 keeps `67200`, no chain.
+* Pattern `narrow_R36_` in this file returns no files
+  (no prior R36 narrow).
+* Result below: no R36 tier-`0.06` closure exists locally, so R36 keeps
+  value `67200` (`16800 / 0.25`) with exact residual gap `0.06 < 67200`;
+  tier `0.06` stays open by the same mismatch as `premTier_R36_mismatch :1110`.
+-/
+
+namespace Door3PremiseTier
+
+/-- R36 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R36_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R36 residual gap at the kept value: tier `0.06` stays open below `67200`. -/
+theorem narrow_R36_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R36 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R36_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R36 conditional deriv transfer still lands at `67200` from the ball premise
+(re-export for the narrow record). -/
+theorem narrow_R36_deriv_keeps_67200 (hBall : premBall_R36) (w : ℂ)
+    (hw : CentralCoverAssembly.R36.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  premDeriv_R36_of_ball hBall w hw
+
+end Door3PremiseTier
+
+/-! ## 41. R37 premise-tier narrow attempt (append-only wave).
+
+Grep record (verified before writing via `default.grep`):
+* R36 premise block in this file: `premTier_R36 :1104`, `premBall_R36 :1106`,
+  `premTier_R36_mismatch :1110`, `premDeriv_R36_of_ball :1112`,
+  `premSphere_R36_of_ball :1124` (`R36.mem`, tier `0.06`, value `67200`).
+* R37 premise block in this file: `premTier_R37 :1131`, `premBall_R37 :1133`,
+  `premTier_R37_mismatch :1137`, `premDeriv_R37_of_ball :1139`,
+  `premSphere_R37_of_ball :1151` (`R37.mem`, tier `0.07`, value `67200`).
+* R36 narrow block in this file: `## 40. R36 premise-tier narrow attempt`
+  `:3094-3137` with `narrow_R36_closedForm_keeps :3119`,
+  `narrow_R36_residual_gap :3123`,
+  `narrow_R36_residual_is_mismatch :3127`,
+  `narrow_R36_deriv_keeps_67200 :3132`; R36 keeps `67200`, no chain.
+* Pattern `narrow_R37_` in this file returns no matches
+  (no prior R37 narrow).
+* Result below: no R37 tier-`0.07` closure exists locally, so R37 keeps
+  value `67200` (`16800 / 0.25`) with exact residual gap `0.07 < 67200`;
+  tier `0.07` stays open by the same mismatch as `premTier_R37_mismatch :1137`.
+-/
+
+namespace Door3PremiseTier
+
+/-- R37 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R37_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R37 residual gap at the kept value: tier `0.07` stays open below `67200`. -/
+theorem narrow_R37_residual_gap : (0.07 : ℝ) < 67200 := by
+  norm_num
+
+/-- R37 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R37_residual_is_mismatch : (0.07 : ℝ) < 67200 :=
+  tier07_lt_67200
+
+/-- R37 conditional deriv transfer still lands at `67200` from the ball premise
+(re-export for the narrow record). -/
+theorem narrow_R37_deriv_keeps_67200 (hBall : premBall_R37) (w : ℂ)
+    (hw : CentralCoverAssembly.R37.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  premDeriv_R37_of_ball hBall w hw
+
+end Door3PremiseTier
+
+/-! ## 42. R38 premise-tier narrow attempt (append-only wave).
+
+* R37 premise block in this file: `premTier_R37 :1131`, `premBall_R37 :1133`,
+  `premTier_R37_mismatch :1137`, `premDeriv_R37_of_ball :1139`,
+  `premSphere_R37_of_ball :1151` (`R37.mem`, tier `0.07`, value `67200`).
+* R38 premise block in this file: `premTier_R38 :1158`, `premBall_R38 :1160`,
+  `premTier_R38_mismatch :1164`, `premDeriv_R38_of_ball :1166`,
+  `premSphere_R38_of_ball :1178` (`R38.mem`, tier `0.07`, value `67200`).
+* R37 narrow block in this file: `## 41. R37 premise-tier narrow attempt`
+  `:3139-3182` with `narrow_R37_closedForm_keeps :3164`,
+  `narrow_R37_residual_gap :3168`,
+  `narrow_R37_residual_is_mismatch :3172`,
+  `narrow_R37_deriv_keeps_67200 :3177`; R37 keeps `67200`, no chain.
+* Pattern `narrow_R38_` in this file returns no matches
+  (no prior R38 narrow).
+* Result below: no R38 tier-`0.07` closure exists locally, so R38 keeps
+  value `67200` (`16800 / 0.25`) with exact residual gap `0.07 < 67200`;
+  tier `0.07` stays open by the same mismatch as `premTier_R38_mismatch :1164`.
+-/
+
+namespace Door3PremiseTier
+
+/-- R38 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R38_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R38 residual gap at the kept value: tier `0.07` stays open below `67200`. -/
+theorem narrow_R38_residual_gap : (0.07 : ℝ) < 67200 := by
+  norm_num
+
+/-- R38 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R38_residual_is_mismatch : (0.07 : ℝ) < 67200 :=
+  tier07_lt_67200
+
+/-- R38 conditional deriv transfer still lands at `67200` from the ball premise
+(re-export for the narrow record). -/
+theorem narrow_R38_deriv_keeps_67200 (hBall : premBall_R38) (w : ℂ)
+    (hw : CentralCoverAssembly.R38.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  premDeriv_R38_of_ball hBall w hw
+
+end Door3PremiseTier
+
+/-! ## 43. R39 premise-tier narrow attempt (append-only wave).
+
+* R38 premise block in this file: `premTier_R38 :1158`, `premBall_R38 :1160`,
+  `premTier_R38_mismatch :1164`, `premDeriv_R38_of_ball :1166`,
+  `premSphere_R38_of_ball :1178` (`R38.mem`, tier `0.07`, value `67200`).
+* R39 premise block in this file: `premTier_R39 :1185`, `premBall_R39 :1187`,
+  `premTier_R39_mismatch :1191`, `premDeriv_R39_of_ball :1193`,
+  `premSphere_R39_of_ball :1205` (`R39.mem`, tier `0.07`, value `67200`).
+* R38 narrow block in this file: `## 42. R38 premise-tier narrow attempt`
+  `:3184-3226` with `narrow_R38_closedForm_keeps :3208`,
+  `narrow_R38_residual_gap :3212`,
+  `narrow_R38_residual_is_mismatch :3216`,
+  `narrow_R38_deriv_keeps_67200 :3221`; R38 keeps `67200`, no chain.
+* Pattern `narrow_R39_` in this file returns no matches
+  (no prior R39 narrow).
+* Result below: no R39 tier-`0.07` closure exists locally, so R39 keeps
+  value `67200` (`16800 / 0.25`) with exact residual gap `0.07 < 67200`;
+  tier `0.07` stays open by the same mismatch as `premTier_R39_mismatch :1191`.
+-/
+
+namespace Door3PremiseTier
+
+/-- R39 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R39_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R39 residual gap at the kept value: tier `0.07` stays open below `67200`. -/
+theorem narrow_R39_residual_gap : (0.07 : ℝ) < 67200 := by
+  norm_num
+
+/-- R39 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R39_residual_is_mismatch : (0.07 : ℝ) < 67200 :=
+  tier07_lt_67200
+
+/-- R39 conditional deriv transfer still lands at `67200` from the ball premise
+(re-export for the narrow record). -/
+theorem narrow_R39_deriv_keeps_67200 (hBall : premBall_R39) (w : ℂ)
+    (hw : CentralCoverAssembly.R39.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  premDeriv_R39_of_ball hBall w hw
+
+end Door3PremiseTier
+
