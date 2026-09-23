@@ -6164,6 +6164,11 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 JOINT+TOPZETA+M21 (backgrounds `ses_f34659ddc`,
+  `ses_f34659dd7`, `ses_f34655cf4`, proof-only, grep-clean): joint
+  sliver rechain (1072/5 closed) + exact gaps; pole rebuild +
+  shifted-factors conditional; M21 tail → K0 19.786 reverses
+  further (namespace-end reposition benign).
 - 2026-09-22 R03M35 (backgrounds `ses_f34655cf6`,
   `ses_f34659dd9`, proof-only, grep-clean): R03 sup mirror + cap
   verdicts + residual; M35 odd floor 185363 banked + beats-prior.

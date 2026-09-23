@@ -2240,3 +2240,85 @@ theorem cutR10_joint_banked_sliver_value8 (z : ℂ)
   cutR10_sliver_sup_banked_closed z hz hs2
 
 end Door3CutR10BallSup
+
+/-! # APPEND-9 (joint best-banked rechain + triple gap file; append-only tail; LF):
+
+Grep record (read before writing, APPEND-8 tail :2172-2242):
+* Gamma best half CLOSED `≤ 1 / 2`: `cutR10_gamma_sup_half_closed :1358`,
+  rechains `:2143-2147`, `:2200-2204`.
+* Zeta edges CLOSED: `cutR10_zeta_rightSliver_closed :1073` (`Re ≥ 3/2 → ≤ 3`),
+  `cutR10_zeta_rightEdge_two_closed :1640` (`Re ≥ 2 → ≤ 2`),
+  rechains `:2215-2222`.
+* Zeta full-rect `≤ 6` OPEN, gated on `hFE` (`3 * 2` shape) via
+  `cutR10_zeta_sup_six_of_FE :1701`, gap `:2226-2232`.
+* Gamma `1 / 100` OPEN, gated on `hProdCap` via gap `:2207-2212`.
+* Joint banked sliver CLOSED `1072 / 5` on in-ball `Re ≥ 2` via
+  `cutR10_sliver_sup_banked_closed :2064`, rechain `:2236-2240`.
+* Joint exact `0.04` OPEN, gated on `hJoint` via
+  `cutR10_closedBall_sup_of_joint :946`.
+
+Verdict here:
+* Best banked Gamma stays `1 / 2`; best banked zeta stays `3` / `2` on edges;
+  best banked joint stays `1072 / 5` on the `Re ≥ 2` sliver (rechained below
+  by direct call, no new analysis).
+* Full-rect `1 / 100` stays gated on single explicit `hProdCap`;
+  full-rect `≤ 6` stays gated on single explicit `hFE`;
+  exact `0.04` stays gated on single explicit `hJoint` (filed exactly below).
+No new imports; nothing else touched.
+-/
+
+namespace Door3CutR10BallSup
+
+/-- Gamma best banked half rechain (`≤ 1 / 2`). -/
+theorem cutR10_gamma_best_half_rechain9 (s : ℂ)
+    (hlo : (-1.06 : ℝ) ≤ s.re) (hhi : s.re ≤ (2.06 : ℝ))
+    (hilo : (8.44 : ℝ) ≤ s.im) (hihi : s.im ≤ (11.56 : ℝ)) :
+    ‖Complex.Gamma (s / 2)‖ ≤ 1 / 2 :=
+  cutR10_gamma_sup_half_closed s hlo hhi hilo hihi
+
+/-- Zeta best banked edge rechain (`Re ≥ 3/2 → ≤ 3`). -/
+theorem cutR10_zeta_edge_three_rechain9 (s : ℂ) (hs : 3 / 2 ≤ s.re) :
+    ‖zeta s‖ ≤ 3 :=
+  cutR10_zeta_rightSliver_closed s hs
+
+/-- Zeta best banked edge rechain (`Re ≥ 2 → ≤ 2`). -/
+theorem cutR10_zeta_edge_two_rechain9 (s : ℂ) (hs : (2 : ℝ) ≤ s.re) :
+    ‖zeta s‖ ≤ 2 :=
+  cutR10_zeta_rightEdge_two_closed s hs
+
+/-- Joint best banked rechain on the in-ball `Re ≥ 2` sliver (`≤ 1072 / 5`). -/
+theorem cutR10_joint_sliver_rechain9 (z : ℂ)
+    (hz : z ∈ Metric.closedBall CutR10.center (CutR10.radius + 1))
+    (hs2 : (2 : ℝ) ≤ (shiftedS z).re) :
+    ‖xiShiftedEntire z‖ ≤ (1072 / 5 : ℝ) :=
+  cutR10_sliver_sup_banked_closed z hz hs2
+
+/-- Gamma gap: `1 / 100` gated on single explicit `hProdCap`. -/
+theorem cutR10_gamma_hundred_gap9 (s : ℂ)
+    (hlo : (-1.06 : ℝ) ≤ s.re) (hhi : s.re ≤ (2.06 : ℝ))
+    (hilo : (8.44 : ℝ) ≤ s.im) (hihi : s.im ≤ (11.56 : ℝ))
+    (hProdCap : ‖Complex.Gamma (s / 2)‖ ≤ 1 / 100) :
+    ‖Complex.Gamma (s / 2)‖ ≤ 1 / 100 :=
+  hProdCap
+
+/-- Zeta gap: full-rect `≤ 6` gated on single explicit `hFE`. -/
+theorem cutR10_zeta_six_gap9 (s : ℂ)
+    (hlo : (-1.06 : ℝ) ≤ s.re) (hhi : s.re ≤ (2.06 : ℝ))
+    (hilo : (8.44 : ℝ) ≤ s.im) (hihi : s.im ≤ (11.56 : ℝ))
+    (hFE : ∀ t : ℂ, (-1.06 : ℝ) ≤ t.re → t.re ≤ (3 / 2 : ℝ) →
+      (8.44 : ℝ) ≤ t.im → t.im ≤ (11.56 : ℝ) → ‖zeta t‖ ≤ 3 * 2) :
+    ‖zeta s‖ ≤ 6 :=
+  cutR10_zeta_sup_six_of_FE s hlo hhi hilo hihi hFE
+
+/-- Joint gap: exact `0.04` gated on single explicit `hJoint`. -/
+theorem cutR10_joint_exact_gap9
+    (hJoint : ∀ z : ℂ, z ∈ Metric.closedBall CutR10.center (CutR10.radius + 1) →
+      ‖(1 / 2 : ℂ) * shiftedS z * (shiftedS z - 1)‖ *
+        ‖((Real.pi : ℂ) ^ (-(shiftedS z / 2)))‖ *
+        ‖Complex.Gamma (shiftedS z / 2)‖ * ‖zeta (shiftedS z)‖
+        ≤ (0.04 : ℝ)) :
+    ∀ z : ℂ, z ∈ Metric.closedBall CutR10.center (CutR10.radius + 1) →
+      ‖xiShiftedEntire z‖ ≤ (0.04 : ℝ) :=
+  cutR10_closedBall_sup_of_joint hJoint
+
+end Door3CutR10BallSup

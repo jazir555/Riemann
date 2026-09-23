@@ -1337,3 +1337,76 @@ theorem four_factor_joint_conditional_ball12 {s : ℂ} {G Z : ℝ}
   exact h2
 
 end Door3TopEdgeGammaGap
+
+/-! ## TOPEDGE-ZETA ball12 zeta-premise attempt (append-only, value-or-gap).
+
+Grep (read before filing):
+* tail `door3_top_edge.lean:1155-1339` (`Door3TopEdgeBallSup` poly-78,
+  pi-4096, joint-319488, plus `Door3TopEdgeGammaGap` Gamma/zeta upper
+  residuals, product gap, four-factor conditional).
+* this file banks no `‖zeta s‖ ≤ Z` upper on `closedBall 0 12` (only
+  nonvanishing at Re = 1 via `riemannZeta_ne_zero_of_one_le_re` near
+  `:151-153`); imports are `central_cover_assembly`,
+  `door3_boundary_real`, `door3_boundary_endpoints` only, so R02-disc /
+  sphere zeta caps from other files are out of scope here.
+* pole obstruction `door3_sliver_edge.lean:1234-1240`
+  (`pole_zero_mem_ball12`, `pole_one_mem_ball12`) and residual
+  `:1111-1116` (points `s = 0` / `s = 1` lie in the ball).
+
+Value: local pole-membership rebuild plus shift-exact joint conditional
+closing `Door3TopEdgeNeeds.bottom_ballSup_residual` from Gamma/zeta
+uppers plus the product identity.
+Gap (exact, OPEN): `Door3TopEdgeGammaGap.zeta_ball12_upper_residual`,
+`gamma_ball12_upper_residual`, `entire_eq_product_ball12_gap` stay OPEN;
+hence `Door3TopEdgeNeeds.bottom_ballSup_residual` stays OPEN.
+-/
+
+namespace Door3TopEdgeZetaAttempt
+
+open Complex Real Set Topology
+
+theorem pole_zero_mem_ball12_local :
+    (0 : ℂ) ∈ Metric.closedBall (0 : ℂ) 12 := by
+  rw [Metric.mem_closedBall, dist_self]
+  norm_num
+
+theorem pole_one_mem_ball12_local :
+    (1 : ℂ) ∈ Metric.closedBall (0 : ℂ) 12 := by
+  rw [Metric.mem_closedBall, dist_zero_right, norm_one]
+  norm_num
+
+theorem entire_bound_of_shifted_factors {z : ℂ} {G Z : ℝ}
+    (hs : ((1 / 2 : ℂ) + Complex.I * z) ∈ Metric.closedBall (0 : ℂ) 12)
+    (hGnn : 0 ≤ G) (hZnn : 0 ≤ Z)
+    (hG : ‖CentralCoverAssembly.gammaOf ((1 / 2 : ℂ) + Complex.I * z)‖ ≤ G)
+    (hZ : ‖zeta ((1 / 2 : ℂ) + Complex.I * z)‖ ≤ Z)
+    (hprod : CentralCoverAssembly.xiShiftedEntire z =
+      CentralCoverAssembly.polyOf ((1 / 2 : ℂ) + Complex.I * z) *
+      CentralCoverAssembly.piOf ((1 / 2 : ℂ) + Complex.I * z) *
+      CentralCoverAssembly.gammaOf ((1 / 2 : ℂ) + Complex.I * z) *
+      zeta ((1 / 2 : ℂ) + Complex.I * z)) :
+    ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ 319488 * G * Z := by
+  rw [hprod]
+  exact Door3TopEdgeGammaGap.four_factor_joint_conditional_ball12
+    hs hGnn hZnn hG hZ
+
+theorem bottom_ballSup_of_shifted_uppers {C G Z : ℝ}
+    (hGnn : 0 ≤ G) (hZnn : 0 ≤ Z) (hC : C = 319488 * G * Z)
+    (hshift : ∀ z ∈ Metric.closedBall (0 : ℂ) 12,
+      ((1 / 2 : ℂ) + Complex.I * z) ∈ Metric.closedBall (0 : ℂ) 12)
+    (hG : ∀ s ∈ Metric.closedBall (0 : ℂ) 12,
+      ‖CentralCoverAssembly.gammaOf s‖ ≤ G)
+    (hZ : ∀ s ∈ Metric.closedBall (0 : ℂ) 12, ‖zeta s‖ ≤ Z)
+    (hprod : Door3TopEdgeGammaGap.entire_eq_product_ball12_gap) :
+    Door3TopEdgeNeeds.bottom_ballSup_residual C := by
+  unfold Door3TopEdgeNeeds.bottom_ballSup_residual
+  intro z hz
+  have hs := hshift z hz
+  have hGb := hG _ hs
+  have hZb := hZ _ hs
+  have hpr := hprod z hz
+  have hb := entire_bound_of_shifted_factors hs hGnn hZnn hGb hZb hpr
+  rw [hC]
+  exact hb
+
+end Door3TopEdgeZetaAttempt
