@@ -6164,6 +6164,9 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 ETA-S32 (background `ses_f3464b312`, proof-only,
+  grep-clean, suppliers-only commit): S32 rung (Re -5.32 + Im
+  conditional, log31/32 phase). S34 next.
 - 2026-09-22 QUAD-B (backgrounds `ses_f3463c29d`,
   `ses_f346401d1`, `ses_f346401ce`, `ses_f34643944`, proof-only,
   grep-clean): R05 sup mirror + residual; S10 route; R23 route
