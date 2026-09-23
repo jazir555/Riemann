@@ -1745,3 +1745,59 @@ theorem narrow_R10_deriv_keeps_67200 (hBall : premBall_R10) (w : ℂ)
   premDeriv_R10_of_ball hBall w hw
 
 end Door3PremiseTier
+
+/-! ## 15. R11 premise-tier narrow attempt (append-only wave).
+
+Grep record (verified before writing via `default.grep`):
+* R10 narrow block in this file: `## 14. R10 premise-tier narrow attempt`
+  `:1693-1747` with `narrow_R10_closedForm_keeps :1729`,
+  `narrow_R10_residual_gap :1733`,
+  `narrow_R10_residual_is_mismatch :1737`,
+  `narrow_R10_deriv_keeps_67200 :1742`; R10 keeps `67200`, no chain.
+* R02 narrow block in this file: `## 6. R02 premise-tier narrowing via banked AO sups`
+  `:1241-1316` with `narrow_R02_deriv_162p96_of_banked :1274`,
+  `narrow_R02_deriv_163_of_banked :1281`,
+  `narrow_R02_sphere_40p74_of_banked :1288`, closed form
+  `40.74 / 0.25 = 162.96` `:1305`, residual `0.07 < 162.96` `:1309`.
+* Banked AO R11 chain search in `central_cover_assembly.lean` (no local chain):
+  pattern `AO_R11|AO_gamma_upper_disc_R11|R11_deriv_bound|R11_uniform|AO.*R11`
+  returns only residual refs `R11_deriv_residual :18091` lines `:18091-18107`
+  (leaf residual plus H-residual wiring, not a banked AO narrow chain);
+  pattern
+  `R11_deriv|R11_uniform|R11.*sphere|R11.*gamma|gamma.*R11|R11.*zeta|zeta.*R11|R11_gamma|R11_zeta|R11.*guard|guard.*R11`
+  returns only `R11_deriv_residual :18091` lines `:18091-18107`
+  (same residual, not a narrow chain);
+  pattern `namespace AO_` returns only `namespace AO_R02DiscUpdate :9968`
+  (R02 chain only, no `AO_R11` hit); pattern
+  `R11_leaf|R11_strip|R11_center|R11.*obligation` returns
+  `R11_strip_lo/hi :2504-2505`, `R11_leaf_obligations :2533`,
+  `R11_H_instance :2562`, `R11_center_residual_tenth :18084`,
+  `R11_deriv_residual :18091` (tier guards/residuals, not an AO chain).
+* Result below: no R11 mirror of the R02 shape exists locally, so R11 keeps
+  value `67200` (`16800 / 0.25`) with exact residual gap `0.05 < 67200`;
+  tier `0.05` stays open by the same mismatch as `premTier_R11_mismatch :431`.
+-/
+
+namespace Door3PremiseTier
+
+/-- R11 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no banked narrow chain exists locally. -/
+theorem narrow_R11_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R11 residual gap at the kept value: tier `0.05` stays open below `67200`. -/
+theorem narrow_R11_residual_gap : (0.05 : ℝ) < 67200 := by
+  norm_num
+
+/-- R11 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R11_residual_is_mismatch : (0.05 : ℝ) < 67200 :=
+  tier05_lt_67200
+
+/-- R11 conditional deriv transfer still lands at `67200` from the ball premise
+(re-export for the narrow record). -/
+theorem narrow_R11_deriv_keeps_67200 (hBall : premBall_R11) (w : ℂ)
+    (hw : CentralCoverAssembly.R11.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  premDeriv_R11_of_ball hBall w hw
+
+end Door3PremiseTier

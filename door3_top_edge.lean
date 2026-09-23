@@ -1526,3 +1526,196 @@ def shift_invariance_12_open : Prop :=
   shift_invariance_12_gap
 
 end Door3TopEdgeStrip
+
+/-! ## TOPEDGE-BALL25 ball-25/2 premise attempt (append-only, value + exact gap).
+
+Grep (read before filing):
+* tail `door3_top_edge.lean:1493-1528` (`Door3TopEdgeStrip`: triangle
+  `shift_norm_le_of_mem_ball12`, inclusion `shift_mem_ball125_of_mem_ball12`
+  `12 -> 25/2`, gap `shift_invariance_12_gap` `12 -> 12` OPEN).
+* ball-12 factors `Door3TopEdgeBallSup` (`:1159-1243`: poly-78, pi-4096,
+  joint-319488) live on `closedBall 0 12`; no lemma in this file supplies a
+  sup on `closedBall 0 (25/2)` (grep `closedBall.*25` in this file hits only
+  `:1517`, the shift target).
+* Gamma/zeta uppers `Door3TopEdgeGammaGap.gamma_ball12_upper_residual`,
+  `zeta_ball12_upper_residual` (`:1289-1295`) are ball-12 only; product gap
+  `entire_eq_product_ball12_gap` (`:1297-1303`) is at `z` in ball-12.
+
+Value: local poly/pi/joint rebuild on `closedBall 0 (25/2)` (poly `675/8`,
+pi `16384` via exponent `<= 7`, joint `1382400`), four-factor conditional on
+the shifted point, and `bottom_ballSup_of_shifted_uppers_25` chaining the
+banked `12 -> 25/2` inclusion so `bottom_ballSup_residual` follows from
+25/2 Gamma/zeta uppers plus the existing product identity.
+Gap (exact, OPEN): `gamma_ball25_upper_residual`, `zeta_ball25_upper_residual`
+below; hence `Door3TopEdgeNeeds.bottom_ballSup_residual` stays OPEN.
+-/
+
+namespace Door3TopEdgeBall25
+
+open Complex Real Set Topology
+
+theorem ballSup_ball25_re_bounds {s : ℂ}
+    (hs : s ∈ Metric.closedBall (0 : ℂ) (25 / 2)) :
+    (-(25 / 2) : ℝ) ≤ s.re ∧ s.re ≤ (25 / 2 : ℝ) := by
+  have hdist : dist s (0 : ℂ) ≤ (25 / 2 : ℝ) := Metric.mem_closedBall.mp hs
+  have heq : dist s (0 : ℂ) = ‖s‖ := dist_zero_right s
+  have hnorm : ‖s‖ ≤ (25 / 2 : ℝ) := by
+    rw [heq] at hdist
+    exact hdist
+  have hre : |s.re| ≤ ‖s‖ := Complex.abs_re_le_norm s
+  rw [abs_le] at hre
+  obtain ⟨hlo, hhi⟩ := hre
+  constructor <;> linarith
+
+theorem ballSup_poly_factor_ball25 {s : ℂ}
+    (hs : s ∈ Metric.closedBall (0 : ℂ) (25 / 2)) :
+    ‖CentralCoverAssembly.polyOf s‖ ≤ (675 / 8 : ℝ) := by
+  unfold CentralCoverAssembly.polyOf
+  have hdist : dist s (0 : ℂ) ≤ (25 / 2 : ℝ) := Metric.mem_closedBall.mp hs
+  have heq : dist s (0 : ℂ) = ‖s‖ := dist_zero_right s
+  have hnorm : ‖s‖ ≤ (25 / 2 : ℝ) := by
+    rw [heq] at hdist
+    exact hdist
+  have hle : ‖s - 1‖ ≤ ‖s‖ + ‖(1 : ℂ)‖ := norm_sub_le s 1
+  have h1 : ‖(1 : ℂ)‖ = (1 : ℝ) := norm_one
+  have hs1 : ‖s - 1‖ ≤ (27 / 2 : ℝ) := by
+    rw [h1] at hle
+    linarith
+  have hstep1 : ‖s‖ * ‖s - 1‖ ≤ (25 / 2 : ℝ) * ‖s - 1‖ :=
+    mul_le_mul_of_nonneg_right hnorm (norm_nonneg _)
+  have hstep2 : (25 / 2 : ℝ) * ‖s - 1‖ ≤ (25 / 2 : ℝ) * (27 / 2 : ℝ) :=
+    mul_le_mul_of_nonneg_left hs1 (by norm_num)
+  have hmul : ‖s * (s - 1)‖ ≤ (25 / 2 : ℝ) * (27 / 2 : ℝ) := by
+    have hnm : ‖s * (s - 1)‖ = ‖s‖ * ‖s - 1‖ := norm_mul s (s - 1)
+    rw [hnm]
+    exact le_trans hstep1 hstep2
+  have hdiv : ‖s * (s - 1) / (2 : ℂ)‖ ≤ (25 / 2 : ℝ) * (27 / 2 : ℝ) / 2 := by
+    rw [norm_div, Complex.norm_two]
+    linarith
+  have hcalc : (25 / 2 : ℝ) * (27 / 2 : ℝ) / 2 = (675 / 8 : ℝ) := by
+    norm_num
+  rw [hcalc] at hdiv
+  exact hdiv
+
+theorem ballSup_piOf_norm_eq_25 (s : ℂ) :
+    ‖CentralCoverAssembly.piOf s‖ = Real.pi ^ (-(s.re) / 2) := by
+  unfold CentralCoverAssembly.piOf
+  rw [Complex.norm_cpow_eq_rpow_re_of_pos Real.pi_pos _]
+  congr 1
+  have h2 : (s / 2).re = s.re / 2 := by rw [Complex.div_ofNat_re]
+  have hneg : (-(s / 2)).re = -((s / 2).re) := Complex.neg_re _
+  rw [hneg, h2]
+  ring
+
+theorem ballSup_pi_factor_ball25 {s : ℂ}
+    (hs : s ∈ Metric.closedBall (0 : ℂ) (25 / 2)) :
+    ‖CentralCoverAssembly.piOf s‖ ≤ (16384 : ℝ) := by
+  rw [ballSup_piOf_norm_eq_25]
+  obtain ⟨hlo, _⟩ := ballSup_ball25_re_bounds hs
+  have hpi1 : (1 : ℝ) ≤ Real.pi := by linarith [Real.pi_gt_three]
+  have hexp : -(s.re) / 2 ≤ (7 : ℝ) := by linarith
+  have hle1 : Real.pi ^ (-(s.re) / 2) ≤ Real.pi ^ (7 : ℝ) :=
+    Real.rpow_le_rpow_of_exponent_le hpi1 hexp
+  have hle2 : Real.pi ^ (7 : ℝ) ≤ (4 : ℝ) ^ (7 : ℝ) :=
+    Real.rpow_le_rpow (le_of_lt Real.pi_pos) Real.pi_le_four (by norm_num)
+  have h4 : (4 : ℝ) ^ (7 : ℝ) = (16384 : ℝ) := by
+    have h7 : (7 : ℝ) = (((7 : ℕ)) : ℝ) := by norm_num
+    rw [h7, Real.rpow_natCast]
+    norm_num
+  calc Real.pi ^ (-(s.re) / 2) ≤ Real.pi ^ (7 : ℝ) := hle1
+    _ ≤ (4 : ℝ) ^ (7 : ℝ) := hle2
+    _ = (16384 : ℝ) := h4
+
+theorem ballSup_polyPi_joint_ball25 {s : ℂ}
+    (hs : s ∈ Metric.closedBall (0 : ℂ) (25 / 2)) :
+    ‖CentralCoverAssembly.polyOf s * CentralCoverAssembly.piOf s‖ ≤
+      (1382400 : ℝ) := by
+  have hpoly := ballSup_poly_factor_ball25 hs
+  have hpi := ballSup_pi_factor_ball25 hs
+  have hnn2 : (0 : ℝ) ≤ ‖CentralCoverAssembly.piOf s‖ := norm_nonneg _
+  have hmul : ‖CentralCoverAssembly.polyOf s‖ * ‖CentralCoverAssembly.piOf s‖ ≤
+      (675 / 8 : ℝ) * (16384 : ℝ) :=
+    mul_le_mul hpoly hpi hnn2 (by norm_num)
+  have hnm : ‖CentralCoverAssembly.polyOf s * CentralCoverAssembly.piOf s‖ =
+      ‖CentralCoverAssembly.polyOf s‖ * ‖CentralCoverAssembly.piOf s‖ :=
+    norm_mul _ _
+  have hcalc : (675 / 8 : ℝ) * (16384 : ℝ) = (1382400 : ℝ) := by norm_num
+  rw [hnm, hcalc] at hmul
+  exact hmul
+
+theorem ballSup_joint25_exceeds_1000 : (1000 : ℝ) < (1382400 : ℝ) := by
+  norm_num
+
+theorem ballSup_joint25_exceeds_40 : (40 : ℝ) < (1382400 : ℝ) := by
+  norm_num
+
+theorem four_factor_joint_conditional_ball25 {s : ℂ} {G Z : ℝ}
+    (hs : s ∈ Metric.closedBall (0 : ℂ) (25 / 2))
+    (hGnn : 0 ≤ G) (hZnn : 0 ≤ Z)
+    (hG : ‖CentralCoverAssembly.gammaOf s‖ ≤ G)
+    (hZ : ‖zeta s‖ ≤ Z) :
+    ‖CentralCoverAssembly.polyOf s * CentralCoverAssembly.piOf s *
+      CentralCoverAssembly.gammaOf s * zeta s‖ ≤ 1382400 * G * Z := by
+  have hPP := ballSup_polyPi_joint_ball25 hs
+  have hPPnn : (0 : ℝ) ≤
+      ‖CentralCoverAssembly.polyOf s * CentralCoverAssembly.piOf s‖ :=
+    norm_nonneg _
+  have hGnn0 : (0 : ℝ) ≤ ‖CentralCoverAssembly.gammaOf s‖ :=
+    norm_nonneg _
+  have hZnn0 : (0 : ℝ) ≤ ‖zeta s‖ := norm_nonneg _
+  have h319nn : (0 : ℝ) ≤ (1382400 : ℝ) := by norm_num
+  have h319Gnn : (0 : ℝ) ≤ (1382400 : ℝ) * G :=
+    mul_nonneg h319nn hGnn
+  have h1 : ‖CentralCoverAssembly.polyOf s * CentralCoverAssembly.piOf s‖ *
+      ‖CentralCoverAssembly.gammaOf s‖ ≤ (1382400 : ℝ) * G :=
+    mul_le_mul hPP hG hGnn0 h319nn
+  have h2 : (‖CentralCoverAssembly.polyOf s * CentralCoverAssembly.piOf s‖ *
+      ‖CentralCoverAssembly.gammaOf s‖) * ‖zeta s‖ ≤
+      ((1382400 : ℝ) * G) * Z :=
+    mul_le_mul h1 hZ hZnn0 h319Gnn
+  have hnorm : ‖CentralCoverAssembly.polyOf s * CentralCoverAssembly.piOf s *
+      CentralCoverAssembly.gammaOf s * zeta s‖ =
+      (‖CentralCoverAssembly.polyOf s * CentralCoverAssembly.piOf s‖ *
+      ‖CentralCoverAssembly.gammaOf s‖) * ‖zeta s‖ := by
+    rw [norm_mul, norm_mul]
+  have hassoc : (1382400 : ℝ) * G * Z = ((1382400 : ℝ) * G) * Z := by
+    ring
+  rw [hnorm, hassoc]
+  exact h2
+
+def gamma_ball25_upper_residual (G : ℝ) : Prop :=
+  ∀ s ∈ Metric.closedBall (0 : ℂ) (25 / 2),
+    ‖CentralCoverAssembly.gammaOf s‖ ≤ G
+
+def zeta_ball25_upper_residual (Z : ℝ) : Prop :=
+  ∀ s ∈ Metric.closedBall (0 : ℂ) (25 / 2),
+    ‖zeta s‖ ≤ Z
+
+theorem bottom_ballSup_of_shifted_uppers_25 {C G Z : ℝ}
+    (hGnn : 0 ≤ G) (hZnn : 0 ≤ Z) (hC : C = 1382400 * G * Z)
+    (hG : ∀ s ∈ Metric.closedBall (0 : ℂ) (25 / 2),
+      ‖CentralCoverAssembly.gammaOf s‖ ≤ G)
+    (hZ : ∀ s ∈ Metric.closedBall (0 : ℂ) (25 / 2), ‖zeta s‖ ≤ Z)
+    (hprod : Door3TopEdgeGammaGap.entire_eq_product_ball12_gap) :
+    Door3TopEdgeNeeds.bottom_ballSup_residual C := by
+  unfold Door3TopEdgeNeeds.bottom_ballSup_residual
+  intro z hz
+  have hs25 : ((1 / 2 : ℂ) + Complex.I * z) ∈
+      Metric.closedBall (0 : ℂ) (25 / 2) :=
+    Door3TopEdgeStrip.shift_mem_ball125_of_mem_ball12 hz
+  have hGb : ‖CentralCoverAssembly.gammaOf ((1 / 2 : ℂ) + Complex.I * z)‖ ≤ G :=
+    hG _ hs25
+  have hZb : ‖zeta ((1 / 2 : ℂ) + Complex.I * z)‖ ≤ Z :=
+    hZ _ hs25
+  have hpr : CentralCoverAssembly.xiShiftedEntire z =
+      CentralCoverAssembly.polyOf ((1 / 2 : ℂ) + Complex.I * z) *
+      CentralCoverAssembly.piOf ((1 / 2 : ℂ) + Complex.I * z) *
+      CentralCoverAssembly.gammaOf ((1 / 2 : ℂ) + Complex.I * z) *
+      zeta ((1 / 2 : ℂ) + Complex.I * z) := hprod z hz
+  have hb : ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ 1382400 * G * Z := by
+    rw [hpr]
+    exact four_factor_joint_conditional_ball25 hs25 hGnn hZnn hGb hZb
+  rw [hC]
+  exact hb
+
+end Door3TopEdgeBall25
