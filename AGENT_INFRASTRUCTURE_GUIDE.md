@@ -6164,6 +6164,12 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 FIVE-F (backgrounds `ses_f345b9a02`,
+  `ses_f345c4dd8`, `ses_f345b31ed`, `ses_f345b31ec`, `ses_f345c4dda`,
+  proof-only, grep-clean): R11 sup mirror + residual; N21 honest
+  ceiling <0.643 gap exact; R16 keeps 67200; M44 exact (sqrt
+  4194304); R28 route (poly 13.9/base 6.95, banked infeasible;
+  namespace-end benign).
 - 2026-09-22 ZETA-M26 (background `ses_f345cd3a`, proof-only,
   grep-clean, zeta-only commit): M26 tail → K0 19.906 reverses
   further (minimum at N=17 stands).

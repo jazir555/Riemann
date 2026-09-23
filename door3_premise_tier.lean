@@ -2025,3 +2025,61 @@ theorem narrow_R15_deriv_keeps_67200 (hBall : premBall_R15) (w : ℂ)
   premDeriv_R15_of_ball hBall w hw
 
 end Door3PremiseTier
+
+/-! ## 20. R16 premise-tier narrow attempt (append-only wave).
+
+Grep record (verified before writing via `default.grep`):
+* R15 narrow block in this file: `## 19. R15 premise-tier narrow attempt`
+  `:1971-2027` with `narrow_R15_closedForm_keeps :2009`,
+  `narrow_R15_residual_gap :2013`,
+  `narrow_R15_residual_is_mismatch :2017`,
+  `narrow_R15_deriv_keeps_67200 :2022`; R15 keeps `67200`, no chain.
+* R02 narrow block in this file: `## 6. R02 premise-tier narrowing via banked AO sups`
+  `:1241-1316` with `narrow_R02_deriv_162p96_of_banked :1274`,
+  `narrow_R02_deriv_163_of_banked :1281`,
+  `narrow_R02_sphere_40p74_of_banked :1288`, closed form
+  `40.74 / 0.25 = 162.96` `:1305`, residual `0.07 < 162.96` `:1309`.
+* Banked AO R16 chain search in `central_cover_assembly.lean` (no local chain):
+  pattern `AO_R16|AO_gamma_upper_disc_R16` returns no files; pattern
+  `R16_deriv|R16_uniform|R16.*sphere` returns no files;
+  pattern `namespace AO_` returns only `namespace AO_R02DiscUpdate :9968`
+  (R02 chain only, no `AO_R16` hit); pattern `R16_` returns only rect guards
+  `R16_x0/x1/y0/y1 :2916-2919`, `R16_width_eq :2921`,
+  `R16_strip_lo/hi :2924-2925`, `R16_dx_eq :2927`, `R16_dy_eq :2931`,
+  `R16_radius_eq :2935`, `R16_radius_lt :2940`, `R16_mem_gridFine :2943`,
+  `R16_leaf_obligations :2953`, `R16_fencing_of_bounds :2957`,
+  `R16_lowerBound_of_bounds :2961`, `R16_zeroFree_of_bounds :2966`,
+  `R16_nonvanishing_of_bounds :2971`, `R16_H_instance :2982`
+  (tier guards, not an AO chain);
+  pattern `R16_deriv_residual|R16.*residual` returns no files;
+  pattern `AO.*R16|R16.*AO|R16_gamma|R16_zeta` returns no files
+  (no leaf residual banked for R16); pattern `narrow_R16` in this file
+  returns no files (no prior R16 narrow).
+* Result below: no R16 mirror of the R02 shape exists locally, so R16 keeps
+  value `67200` (`16800 / 0.25`) with exact residual gap `0.06 < 67200`;
+  tier `0.06` stays open by the same mismatch as `premTier_R16_mismatch :566`.
+-/
+
+namespace Door3PremiseTier
+
+/-- R16 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no banked narrow chain exists locally. -/
+theorem narrow_R16_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R16 residual gap at the kept value: tier `0.06` stays open below `67200`. -/
+theorem narrow_R16_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R16 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R16_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R16 conditional deriv transfer still lands at `67200` from the ball premise
+(re-export for the narrow record). -/
+theorem narrow_R16_deriv_keeps_67200 (hBall : premBall_R16) (w : ℂ)
+    (hw : CentralCoverAssembly.R16.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  premDeriv_R16_of_ball hBall w hw
+
+end Door3PremiseTier
