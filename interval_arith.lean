@@ -37413,3 +37413,124 @@ theorem R25_banked_infeasible :
 #print axioms R25CenterAssembly.R25_banked_infeasible
 
 end R25CenterAssembly
+
+/-!
+## R26 center assembly with banked s-center + new poly floor (conditional, filed honest).
+
+Grep-first record (checked before writing, this file only):
+* `R25CenterAssembly.poly_lower_R25` (`0.41`, `:37361`) + `R25_threshold_eq`
+  (`0.2256`, `:37399`) + `R25_base_eq` (`0.205`, `:37402`) +
+  `R25_banked_infeasible` (`:37407`): prior route template mirrored here; R26
+  honestly uses its own tier (`eps = 0.15`, `M = 0.06`) per
+  `R26_leaf_obligations` (`central_cover_assembly.lean:3795-3797`), same values
+  as the R25 inner tier (`central_cover_assembly.lean:3711-3713`).
+* `R26GammaUpper.sR26` with `sR26_re = 0.2` (`:21682`) and `sR26_im = 1.25`
+  (`:21689`) (`R26_center_eq`, `:21666`; `R26.center = 1.25 + 0.3*I` from
+  `R26_x0/x1/y0/y1`, `central_cover_assembly.lean:3758-3761`): banked s-center
+  reused here; no `poly_lower_R26` existed, so the poly floor is newly closed
+  below from those banked re/im facts.
+* `CellUniform.pi_lower_of_re` (`:1752`) +
+  `CellUniform.center_bound_of_component_bounds` (`:1772`): generic bridge reused.
+* `R00GammaLower.gamma_const_pos` + `R00GammaLower.gamma_lower_center`
+  + `R00ZetaEM.etaCPartial_two_norm_ge`: cited only as shape witnesses, not as
+  discharged bounds; Gamma (`1/10000000`) and zeta (`1/26`) stay explicit open
+  premises.
+
+Shape: mirrors `R25CenterAssembly.R25_center_with_poly_pi_gamma` at the R26
+corner (`sR26 = 0.2 + 1.25 * I`), R26 tier (`eps = 0.15`, `M = 0.06`) via
+the generic `CellUniform.center_bound_of_component_bounds` bridge. Open component
+premises are exactly two: the Gamma remainder `hgam` and the zeta lower `hzeta`
+(`hrad`, `hGam_floor`, `hZeta_floor`, `hprod` are numeric side conditions).
+-/
+
+namespace R26CenterAssembly
+
+/-- Norm version of `polyPart` at the banked R26 s-center. -/
+theorem polyPart_norm_R26 :
+    ‖R00Enclosure.polyPart R26GammaUpper.sR26‖ =
+      (1 / 2) * ‖R26GammaUpper.sR26‖ * ‖R26GammaUpper.sR26 - 1‖ := by
+  unfold R00Enclosure.polyPart
+  rw [norm_mul, norm_mul, R00Numerics.norm_half]
+
+/-- `‖sR26‖ ≥ 1.26` (`1.26^2 = 1.5876 < 0.2^2 + 1.25^2 = 1.6025`). -/
+theorem norm_sR26_ge : (1.26 : ℝ) ≤ ‖R26GammaUpper.sR26‖ := by
+  have hsq : (1.26 : ℝ) ^ 2 ≤ ‖R26GammaUpper.sR26‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply,
+      R26GammaUpper.sR26_re, R26GammaUpper.sR26_im]
+    norm_num
+  calc (1.26 : ℝ) = Real.sqrt ((1.26 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖R26GammaUpper.sR26‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖R26GammaUpper.sR26‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- `‖sR26 - 1‖ ≥ 1.48` (`0.8^2 + 1.25^2 = 2.2025 > 1.48^2 = 2.1904`). -/
+theorem norm_sR26_sub_one_ge : (1.48 : ℝ) ≤ ‖R26GammaUpper.sR26 - 1‖ := by
+  have hr1 : (R26GammaUpper.sR26 - 1).re = -0.8 := by
+    simp only [Complex.sub_re, Complex.one_re, R26GammaUpper.sR26_re]
+    norm_num
+  have hi1 : (R26GammaUpper.sR26 - 1).im = 1.25 := by
+    simp only [Complex.sub_im, Complex.one_im, R26GammaUpper.sR26_im]
+    norm_num
+  have hsq : (1.48 : ℝ) ^ 2 ≤ ‖R26GammaUpper.sR26 - 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hr1, hi1]
+    norm_num
+  calc (1.48 : ℝ) = Real.sqrt ((1.48 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖R26GammaUpper.sR26 - 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖R26GammaUpper.sR26 - 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- ENCLOSURE (hypothesis-free): `0.93 ≤ ‖polyPart sR26‖`
+(`1.26 * 1.48 / 2 = 0.9324 ≥ 0.93`; true `≈ 0.939`, slack `≈ 0.009`). -/
+theorem poly_lower_R26 : (0.93 : ℝ) ≤ ‖R00Enclosure.polyPart R26GammaUpper.sR26‖ := by
+  have hprod : (1.26 : ℝ) * 1.48 ≤ ‖R26GammaUpper.sR26‖ * ‖R26GammaUpper.sR26 - 1‖ :=
+    mul_le_mul norm_sR26_ge norm_sR26_sub_one_ge (by norm_num) (norm_nonneg _)
+  rw [polyPart_norm_R26]
+  nlinarith [hprod]
+
+/-- Conditional R26 center assembly: banked s-center + new poly `0.93` and pi `1/2`
+floors are plugged into the generic bridge; the Gamma remainder and zeta lower stay
+explicit. The numeric check needs `Agam * Azeta ≥ (0.15 + 0.06 * 1.26) / 0.465`;
+at banked floors (`1/10000000`, `1/26`) it is infeasible, so this is filed as an
+honest conditional, not a closed bound. -/
+theorem R26_center_with_poly_pi_gamma (Agam Azeta : ℝ)
+    (hrad : CentralCoverAssembly.R26.radius ≤ 1.26)
+    (hGam_floor : (1 / 10000000 : ℝ) ≤ Agam)
+    (hgam : Agam ≤ ‖R00Enclosure.gammaPart R26GammaUpper.sR26‖)
+    (hZeta_floor : (1 / 26 : ℝ) ≤ Azeta)
+    (hzeta : Azeta ≤ ‖zeta R26GammaUpper.sR26‖)
+    (hprod : (0.15 : ℝ) + 0.06 * 1.26 ≤ 0.93 * (1 / 2) * Agam * Azeta) :
+    (0.15 : ℝ) + 0.06 * CentralCoverAssembly.R26.radius ≤
+      ‖xiShifted CentralCoverAssembly.R26.center‖ := by
+  have hpoly := poly_lower_R26
+  have hpi : (1 / 2 : ℝ) ≤ ‖R00Enclosure.piPart R26GammaUpper.sR26‖ :=
+    CellUniform.pi_lower_of_re (by rw [R26GammaUpper.sR26_re]; norm_num)
+  have _hG := R00GammaLower.gamma_lower_center
+  have _hS2 := R00ZetaEM.etaCPartial_two_norm_ge
+  have hC0 : (0 : ℝ) ≤ Agam :=
+    le_trans (le_of_lt R00GammaLower.gamma_const_pos) hGam_floor
+  have hD0 : (0 : ℝ) ≤ Azeta :=
+    le_trans (by norm_num) hZeta_floor
+  have harg : R26GammaUpper.sR26
+      = (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R26.center := rfl
+  rw [harg] at hpoly hpi hgam hzeta
+  exact CellUniform.center_bound_of_component_bounds
+    CentralCoverAssembly.R26 0.15 0.06 (by norm_num) hrad
+    0.93 (1 / 2) Agam Azeta (by norm_num) (by norm_num) hC0 hD0
+    hpoly hpi hgam hzeta hprod
+
+/-- Exact R26-tier threshold: `0.15 + 0.06 * 1.26 = 0.2256`. -/
+theorem R26_threshold_eq : (0.15 : ℝ) + 0.06 * 1.26 = 0.2256 := by norm_num
+
+/-- Exact banked base: `0.93 * (1/2) = 0.465`. -/
+theorem R26_base_eq : (0.93 : ℝ) * (1 / 2) = 0.465 := by norm_num
+
+/-- Exact residual: banked floors `0.465 / 260000000` do not clear `0.2256`
+(required `Agam * Azeta ≥ 0.2256 / 0.465 ≈ 0.48516`; banked `≈ 3.85e-09`;
+short by factor `≈ 126153846`, the ~8-order wall). -/
+theorem R26_banked_infeasible :
+    (0.93 : ℝ) * (1 / 2) * (1 / 10000000) * (1 / 26) < (0.15 : ℝ) + 0.06 * 1.26 := by norm_num
+
+#print axioms R26CenterAssembly.poly_lower_R26
+#print axioms R26CenterAssembly.R26_center_with_poly_pi_gamma
+#print axioms R26CenterAssembly.R26_threshold_eq
+#print axioms R26CenterAssembly.R26_banked_infeasible
+
+end R26CenterAssembly

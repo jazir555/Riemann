@@ -2257,3 +2257,74 @@ theorem tail_1099511627776_lt_549755813888 : (3 / 131072 : ℝ) < (24 / 741455 :
   norm_num
 
 end Door3TailEtaUpper
+
+namespace Door3TailEtaUpper
+
+/-- Rpow lower for the generic `M = 2199023255552` tail (`1482910 ≤ 2199023255552^{1/2}`;
+generic mirror of `M549755813888_rpow_ge` at `:2130` and latest exact
+`M1099511627776_rpow_eq` at `:2199`; honest floor via `1482910^2 = 2199022068100 ≤
+2199023255552` by `norm_num`; `2199023255552 = 2^41` so root `1048576·√2 ≈ 1482910.40`
+is NOT exact; lower gap `1187452`, upper witness `1482911^2 = 2199025033921 =
+2199023255552 + 1778369`). -/
+theorem M2199023255552_rpow_ge :
+    (1482910 : ℝ) ≤ ((((2199023255552 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))) := by
+  have hpow : ((1482910 : ℝ) ^ (2 : ℕ)) ≤ ((((2199023255552 : ℕ)) : ℝ)) := by norm_num
+  have hpow' : ((((((2199023255552 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))) ^ (2 : ℕ))) = ((((2199023255552 : ℕ)) : ℝ)) := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    have e : ((1 / 2 : ℝ)) * ((((2 : ℕ)) : ℝ)) = 1 := by norm_num
+    rw [e, Real.rpow_one]
+  rw [← hpow'] at hpow
+  exact le_of_pow_le_pow_left₀ (by norm_num)
+    (Real.rpow_pos_of_pos (by norm_num) _).le hpow
+
+/-- Generic `M = 2199023255552` tail-decay bound at `Re = 1/2`
+(`12·(M^{-1/2})/(1/2) = 24/1482910`; generic mirror of `r_549755813888_le`
+at `:2146` and latest exact `r_1099511627776_le` at `:2225`; decay recomputed honestly
+with `norm_num` via `M2199023255552_rpow_ge`; tightest honest `T = 24/1482910 ≈
+0.00001618` for the `1482910` root lower). -/
+theorem r_2199023255552_le :
+    (12 : ℝ) * ((((((2199023255552 : ℕ)) : ℝ) ^ (-(1 / 2 : ℝ)))) / (1 / 2 : ℝ)) ≤
+      (24 / 1482910 : ℝ) := by
+  have hMpos : (0 : ℝ) < ((((2199023255552 : ℕ)) : ℝ)) := by norm_num
+  have hApos : (0 : ℝ) < ((((2199023255552 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))) :=
+    Real.rpow_pos_of_pos hMpos _
+  have hA_ge := M2199023255552_rpow_ge
+  have hrw : ((((2199023255552 : ℕ)) : ℝ) ^ (-(1 / 2 : ℝ))) =
+      (((((2199023255552 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ :=
+    Real.rpow_neg (le_of_lt hMpos) _
+  rw [hrw]
+  have hInv_le : (((((2199023255552 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ ≤ (1482910 : ℝ)⁻¹ :=
+    (inv_le_inv₀ hApos (by norm_num)).mpr hA_ge
+  have hdiv_le : (((((2199023255552 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ / (1 / 2 : ℝ) ≤
+      (1482910 : ℝ)⁻¹ / (1 / 2 : ℝ) :=
+    div_le_div_of_nonneg_right hInv_le (by norm_num)
+  have hmul_le : (12 : ℝ) * ((((((2199023255552 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ /
+      (1 / 2 : ℝ)) ≤ (12 : ℝ) * ((1482910 : ℝ)⁻¹ / (1 / 2 : ℝ)) :=
+    mul_le_mul_of_nonneg_left hdiv_le (by norm_num)
+  have hnum : (12 : ℝ) * ((1482910 : ℝ)⁻¹ / (1 / 2 : ℝ)) ≤ (24 / 1482910 : ℝ) := by
+    norm_num
+  linarith
+
+/-- Generic paired tail at `M = 2199023255552` (`‖G - S4398046511104‖ ≤ 24/1482910`;
+generic mirror of `eta_tail_549755813888_le` at `:2173` and latest exact
+`eta_tail_1099511627776_le` at `:2241` — numerals use only `Re = 1/2` and
+`‖s‖ ≤ 12`). -/
+theorem eta_tail_2199023255552_le {s : ℂ} (hre : s.re = (1 / 2 : ℝ))
+    (hC : ‖s‖ ≤ (12 : ℝ)) :
+    ‖(∑' m, etaPairTerm s m) -
+      (∑ k ∈ Finset.range (2 * 2199023255552), etaDirichletTerm s k)‖ ≤
+      (24 / 1482910 : ℝ) := by
+  have hs : 0 < s.re := by rw [hre]; norm_num
+  have hgen := zetaCell_even_remainder_le hs hC (by norm_num) 2199023255552 (by norm_num)
+  have h2M : 2 * 2199023255552 = 4398046511104 := by norm_num
+  rw [h2M] at hgen
+  rw [hre] at hgen
+  have hr := r_2199023255552_le
+  linarith
+
+/-- The `M = 2199023255552` constant honestly improves on the banked `M = 1099511627776`
+constant (`24/1482910 ≈ 0.00001618 < 3/131072 ≈ 0.00002289`). -/
+theorem tail_2199023255552_lt_1099511627776 : (24 / 1482910 : ℝ) < (3 / 131072 : ℝ) := by
+  norm_num
+
+end Door3TailEtaUpper
