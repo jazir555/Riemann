@@ -1856,3 +1856,111 @@ def agree_ball25_zeta_open (Z : ℝ) : Prop :=
   Door3TopEdgeBall25.zeta_ball25_upper_residual Z
 
 end Door3TopEdgeAgreeExt
+
+/-! ## TOPEDGE-FINAL-LEDGER (append-only, proof-only, clean block).
+
+Grep (full tail read before filing, `Select-String ^(theorem|def)` + tail windows):
+* CLOSED engine/edge: `xiShiftedEntire_eq_xiShifted_top` (:12), `xiShiftedEntire_ne_zero_top`
+  (:50), `exists_top_edge_lower_bound` (:61), `xiShiftedEntire_eq_xiShifted_bottom` (:81),
+  `xiShiftedEntire_ne_zero_bottom` (:120), `exists_bottom_edge_lower_bound` (:170),
+  `exists_top_edge_local_strip` (:194), `exists_top_edge_uniform_strip` (:294),
+  `lower_boundary_nonvanishing_from_outer_bound` (:397),
+  `exists_bottom_edge_uniform_strip` (:445), `exists_top_edge_compact_lower_bound` (:546),
+  `exists_bottom_edge_compact_lower_bound` (:608), `exists_deriv_bound_on_closedBall` (:666),
+  `exists_top_edge_cauchy_data` (:707), `exists_bottom_edge_cauchy_data` (:764),
+  `exists_imaginary_axis_compact_lower_bound` (:824), `exists_two_edge_cauchy_data` (:877),
+  `exists_two_edge_open_cauchy_data` (:920).
+* CLOSED numerals: `Door3TopEdgeNeeds.lower_outer_point_half_at_zero` (:1010)
+  value `1/2`; `Door3TopEdgeBallSup.ballSup_poly_factor_ball12` (:1159) value `78`;
+  `ballSup_pi_factor_ball12` (:1210) value `4096`; `ballSup_polyPi_joint_ball12` (:1229)
+  value `319488`; `ballSup_joint_exceeds_1000` (:1245) `1000 < 319488`;
+  `ballSup_joint_exceeds_40` (:1248) `40 < 319488`;
+  `Door3TopEdgeBall25.ballSup_poly_factor_ball25` (:1570) value `675/8`;
+  `ballSup_pi_factor_ball25` (:1610) value `16384`;
+  `ballSup_polyPi_joint_ball25` (:1629) value `1382400`;
+  `ballSup_joint25_exceeds_1000` (:1646) `1000 < 1382400`;
+  `ballSup_joint25_exceeds_40` (:1649) `40 < 1382400`.
+* CLOSED conditionals/inclusions: `Door3TopEdgeNeeds.bottom_uniform_deriv_of_ballSup`
+  (:1069) `M = max C 1`; `Door3TopEdgeGammaGap.four_factor_joint_conditional_ball12`
+  (:1305) factor `319488 * G * Z`; `Door3TopEdgeZetaAttempt.pole_zero_mem_ball12_local`
+  (:1368), `pole_one_mem_ball12_local` (:1373), `entire_bound_of_shifted_factors` (:1378),
+  `bottom_ballSup_of_shifted_uppers` (:1393);
+  `Door3TopEdgeUniformLower.bottom_uniform_exist_lower_on_Icc10` (:1446),
+  `bottom_point_form_eq` (:1455); `Door3TopEdgeStrip.shift_norm_le_of_mem_ball12` (:1497)
+  bound `25/2`, `shift_mem_ball125_of_mem_ball12` (:1515) `12 -> 25/2`;
+  `Door3TopEdgeBall25.four_factor_joint_conditional_ball25` (:1652)
+  factor `1382400 * G * Z`, `bottom_ballSup_of_shifted_uppers_25` (:1694);
+  `Door3TopEdgeProduct.entire_eq_product_of_mem_strip` (:1744) strip-conditional,
+  `outer_point_mem_ball12` (:1761), `outer_point_im_eq` (:1769),
+  `outer_point_outside_strip` (:1773);
+  `Door3TopEdgeAgreeExt.agree_chain_on_strip` (:1823),
+  `agree_extension_blocked` (:1832), `agree_chain_stops_at_outer` (:1839).
+* OPEN gaps (exact Props, no numeral closed): `Door3TopEdgeNeeds.bottom_uniform_lower_residual`
+  (:1027) `∀ x ∈ Icc (-10) 10, 1/2 ≤ ‖xiShiftedEntire (x - I*(1/2))‖`;
+  `Door3TopEdgeNeeds.bottom_ballSup_residual C` (:1032)
+  `∀ z ∈ closedBall 0 12, ‖xiShiftedEntire z‖ ≤ C`;
+  `Door3TopEdgeNeeds.bottom_uniform_deriv_residual M` (:1036);
+  `Door3TopEdgeBallSup.ballSup_full_exact_gap_1000` (:1251) `= bottom_ballSup_residual 1000`;
+  `ballSup_full_exact_gap_40` (:1254) `= bottom_ballSup_residual 40`;
+  `Door3TopEdgeGammaGap.gamma_ball12_upper_residual G` (:1289);
+  `zeta_ball12_upper_residual Z` (:1293); `entire_eq_product_ball12_gap` (:1297);
+  `Door3TopEdgeUniformLower.uniform_half_open_gap` (:1461);
+  `ballSup_open_gap_40` (:1464); `ballSup_open_gap_1000` (:1467);
+  `Door3TopEdgeStrip.shift_invariance_12_gap` (:1521) `12 -> 12`;
+  `shift_invariance_12_open` (:1525); `Door3TopEdgeBall25.gamma_ball25_upper_residual` (:1686);
+  `zeta_ball25_upper_residual` (:1690); `Door3TopEdgeProduct.product_full_ball_open_gap` (:1778);
+  `gamma_ball12_open_gap` (:1781); `zeta_ball12_open_gap` (:1784);
+  `gamma_ball25_open_gap` (:1787); `zeta_ball25_open_gap` (:1790);
+  `Door3TopEdgeAgreeExt.agree_extension_open_gap` (:1843);
+  `agree_ball12_gamma_open` (:1846); `agree_ball12_zeta_open` (:1849);
+  `agree_ball25_gamma_open` (:1852); `agree_ball25_zeta_open` (:1855).
+
+Ledger verdict: NO remaining closable premise in this file under the proof-only
+constraint; every numeral above is banked, every residual above stays OPEN.
+Bottom `bottom_ballSup_residual` (C = 40 / 1000) stays OPEN for lack of full-ball
+Gamma/zeta uppers + full-ball product identity + `12 -> 12` shift invariance;
+uniform `1/2` lower over `Icc (-10) 10` stays OPEN (only pointwise `1/2` at `x = 0`
+plus existential lower are banked). Aliases below re-export the exact open Props.
+-/
+
+namespace Door3TopEdgeFinalLedger
+
+open Complex Real Set Topology
+
+def final_open_uniform_lower : Prop :=
+  Door3TopEdgeNeeds.bottom_uniform_lower_residual
+
+def final_open_ballSup (C : ℝ) : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual C
+
+def final_open_ballSup_40 : Prop :=
+  Door3TopEdgeBallSup.ballSup_full_exact_gap_40
+
+def final_open_ballSup_1000 : Prop :=
+  Door3TopEdgeBallSup.ballSup_full_exact_gap_1000
+
+def final_open_deriv (M : ℝ) : Prop :=
+  Door3TopEdgeNeeds.bottom_uniform_deriv_residual M
+
+def final_open_gamma12 (G : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.gamma_ball12_upper_residual G
+
+def final_open_zeta12 (Z : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.zeta_ball12_upper_residual Z
+
+def final_open_product12 : Prop :=
+  Door3TopEdgeGammaGap.entire_eq_product_ball12_gap
+
+def final_open_shift12 : Prop :=
+  Door3TopEdgeStrip.shift_invariance_12_gap
+
+def final_open_gamma25 (G : ℝ) : Prop :=
+  Door3TopEdgeBall25.gamma_ball25_upper_residual G
+
+def final_open_zeta25 (Z : ℝ) : Prop :=
+  Door3TopEdgeBall25.zeta_ball25_upper_residual Z
+
+def final_open_agree : Prop :=
+  Door3TopEdgeAgreeExt.agree_extension_open_gap
+
+end Door3TopEdgeFinalLedger

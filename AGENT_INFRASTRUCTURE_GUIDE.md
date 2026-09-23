@@ -6164,6 +6164,11 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 M45+TOPLEDGER+M27 (backgrounds `ses_f345a1d25`,
+  `ses_f3459bd25`, `ses_f345a6d53`, proof-only, grep-clean): M45 odd
+  floor 5931641 banked; topedge FINAL LEDGER (closed vs open
+  inventory); M27 tail → K0 19.93 reverses further (namespace-end
+  benign).
 - 2026-09-22 R17+R12C (backgrounds `ses_f345a1d25`,
   `ses_f345a1d28`, proof-only, grep-clean): R17 no chain keeps
   67200; R12 sup mirror + residual.
