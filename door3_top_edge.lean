@@ -2245,3 +2245,91 @@ def agree12_shift_gap : Prop :=
   Door3TopEdgeStrip.shift_invariance_12_gap
 
 end Door3TopEdgeAgree12
+
+/-! ## TOPEDGE-SHIFTCLOSE shift-12 premise honest attempt (append-only, value + exact gap).
+
+Grep tail first (this file only):
+* `Door3TopEdgeAgree12` (`:2214-2247`): `agree12_strip_chain`, `agree12_outer_blocked`,
+  `agree12_chain_stops_at_outer`, gaps `agree12_exact_gap`, `agree12_product_gap`,
+  `agree12_shift_gap` OPEN.
+* banked shift lemmas `Door3TopEdgeStrip.shift_norm_le_of_mem_ball12` (`:1497-1513`)
+  bound `25 / 2`, `shift_mem_ball125_of_mem_ball12` (`:1515-1519`) inclusion
+  `12 -> 25 / 2`; gap `shift_invariance_12_gap` (`:1521-1523`) `12 -> 12` OPEN.
+* ball-25/2 factors `Door3TopEdgeBall25` (`:1553-1721`) live at radius `25 / 2`.
+
+Value: `shift12_banked_chain` re-chains the banked `12 -> 25 / 2` inclusion;
+counterexample `-(I * 12)` is in `closedBall 0 12` but its shift
+`1 / 2 + I * z` equals `25 / 2` (norm `25 / 2 > 12`), so it lies outside
+`closedBall 0 12`; hence `shift_invariance_12_gap` (`12 -> 12`) is blocked.
+Gap (exact, OPEN): `shift12_exact_gap` below; hence `bottom_ballSup_residual`
+stays OPEN via the `12 -> 12` premise.
+-/
+
+namespace Door3TopEdgeShiftClose
+
+open Complex Real Set Topology
+
+theorem shift12_banked_chain {z : ℂ}
+    (hz : z ∈ Metric.closedBall (0 : ℂ) 12) :
+    ((1 / 2 : ℂ) + Complex.I * z) ∈ Metric.closedBall (0 : ℂ) (25 / 2) :=
+  Door3TopEdgeStrip.shift_mem_ball125_of_mem_ball12 hz
+
+theorem shift12_counterexample_mem :
+    (-(Complex.I * (((12 : ℝ)) : ℂ))) ∈ Metric.closedBall (0 : ℂ) 12 := by
+  rw [Metric.mem_closedBall, dist_zero_right]
+  have hmul : ‖-(Complex.I * ((((12 : ℝ))) : ℂ))‖ = ‖((((12 : ℝ))) : ℂ)‖ := by
+    rw [norm_neg, norm_mul, Complex.norm_I, one_mul]
+  rw [hmul, Complex.norm_real, Real.norm_eq_abs, abs_of_pos (by norm_num)]
+  norm_num
+
+theorem shift12_counterexample_mul :
+    Complex.I * (-(Complex.I * (((12 : ℝ)) : ℂ))) = (((12 : ℝ)) : ℂ) := by
+  have hI : Complex.I * Complex.I = (-1 : ℂ) := Complex.I_mul_I
+  calc Complex.I * (-(Complex.I * (((12 : ℝ)) : ℂ)))
+      = -(Complex.I * Complex.I * (((12 : ℝ)) : ℂ)) := by ring
+    _ = -((-1 : ℂ) * (((12 : ℝ)) : ℂ)) := by rw [hI]
+    _ = (((12 : ℝ)) : ℂ) := by ring
+
+theorem shift12_counterexample_image :
+    (1 / 2 : ℂ) + Complex.I * (-(Complex.I * (((12 : ℝ)) : ℂ))) =
+      (((25 / 2 : ℝ)) : ℂ) := by
+  have hhalf : (1 / 2 : ℂ) = ((((1 / 2 : ℝ))) : ℂ) := by
+    push_cast
+    ring
+  rw [hhalf, shift12_counterexample_mul, ← Complex.ofReal_add]
+  congr 1
+  norm_num
+
+theorem shift12_counterexample_outside :
+    (1 / 2 : ℂ) + Complex.I * (-(Complex.I * (((12 : ℝ)) : ℂ))) ∉
+      Metric.closedBall (0 : ℂ) 12 := by
+  rw [shift12_counterexample_image]
+  intro hmem
+  have hle : dist ((((25 / 2 : ℝ)) : ℂ)) (0 : ℂ) ≤ (12 : ℝ) :=
+    Metric.mem_closedBall.mp hmem
+  rw [dist_zero_right, Complex.norm_real, Real.norm_eq_abs,
+    abs_of_pos (by norm_num : (0 : ℝ) < 25 / 2)] at hle
+  norm_num at hle
+
+theorem shift12_gap_blocked :
+    ¬ Door3TopEdgeStrip.shift_invariance_12_gap := by
+  intro hshift
+  have hmem := shift12_counterexample_mem
+  have hout := hshift _ hmem
+  rw [shift12_counterexample_image] at hout
+  have hle : dist ((((25 / 2 : ℝ)) : ℂ)) (0 : ℂ) ≤ (12 : ℝ) :=
+    Metric.mem_closedBall.mp hout
+  rw [dist_zero_right, Complex.norm_real, Real.norm_eq_abs,
+    abs_of_pos (by norm_num : (0 : ℝ) < 25 / 2)] at hle
+  norm_num at hle
+
+def shift12_exact_gap : Prop :=
+  Door3TopEdgeStrip.shift_invariance_12_gap
+
+def shift12_open_ballSup_40 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 40
+
+def shift12_open_ballSup_1000 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 1000
+
+end Door3TopEdgeShiftClose

@@ -45526,3 +45526,232 @@ theorem R02_D3_K029_gap_19978 :
 #print axioms R02_D3_tail105_M29_le_1738
 #print axioms R02_D3_odd105_head29_le_2598
 #print axioms R02_D3_K029_gap_19978
+/-!
+## Door-3 strip endgame, step 39bo (zeta lane): M30 pair — `60/61` numerals.
+
+Grep shapes (called only, not edited):
+`R02_D3_rpow_116_le_2105` (`1.16 ≤ 21^0.05` base chain);
+`R02_D3_odd105_head29_le_2598` (head `≤ 2.598`);
+`R02_D3_K029_gap_19978` (`2.598 + 17.38 = 19.978` prior reversal);
+`R02_D3_K017_candidate_19689` (`2.309 + 17.38 = 19.689` current best).
+Closed forms mirror M29 block (`R02_D3_rpow58_neg105_le_0024` template).
+
+Honest witness check for this route: `60^1.05 ≥ 60*1.16 = 69.6`,
+`(69.6)⁻¹ = 0.01436… ≤ 0.024`; `61^1.05 ≥ 61*1.16 = 70.76`,
+`(70.76)⁻¹ = 0.01413… ≤ 0.024`; both cleared by `norm_num`.
+`60/61` banked for N=31; K0-30 uses only `59`.
+Residual after this block: `30^0.05` floor + integral/tail/head/K0-30.
+-/
+/-- Rpow lower: `1.16 ≤ 60^0.05` (chains `1.16 ≤ 21^0.05` with `21 ≤ 60`). -/
+theorem R02_D3_rpow_116_le_6005 : (1.16 : ℝ) ≤ (60 : ℝ) ^ (0.05 : ℝ) := by
+  have h1 := R02_D3_rpow_116_le_2105
+  have h2 : (21 : ℝ) ^ (0.05 : ℝ) ≤ (60 : ℝ) ^ (0.05 : ℝ) :=
+    Real.rpow_le_rpow (by norm_num) (by norm_num) (by norm_num)
+  exact le_trans h1 h2
+/-- Rpow lower: `1.16 ≤ 61^0.05` (chains `1.16 ≤ 21^0.05` with `21 ≤ 61`). -/
+theorem R02_D3_rpow_116_le_6105 : (1.16 : ℝ) ≤ (61 : ℝ) ^ (0.05 : ℝ) := by
+  have h1 := R02_D3_rpow_116_le_2105
+  have h2 : (21 : ℝ) ^ (0.05 : ℝ) ≤ (61 : ℝ) ^ (0.05 : ℝ) :=
+    Real.rpow_le_rpow (by norm_num) (by norm_num) (by norm_num)
+  exact le_trans h1 h2
+/-- Odd head term `((2*30+1):ℝ)^(-1.05) = 61^(-1.05)` (banked for N=31). -/
+theorem R02_D3_odd105_thirty_eq_61 :
+    ((((2 * 30 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) = (61 : ℝ) ^ (-1.05 : ℝ) := by
+  have e : ((((2 * 30 + 1 : ℕ)) : ℝ)) = (61 : ℝ) := by norm_num
+  rw [e]
+#print axioms R02_D3_rpow_116_le_6005
+#print axioms R02_D3_rpow_116_le_6105
+#print axioms R02_D3_odd105_thirty_eq_61
+/-!
+## Door-3 strip endgame, step 39bp (zeta lane): `60^(-1.05) ≤ 0.024`, `61^(-1.05) ≤ 0.024`.
+
+Mirror of 39bm (`R02_D3_rpow58_neg105_le_0024`): head numerals via
+`60^1.05 ≥ 69.6`, `61^1.05 ≥ 70.76` (both from `1.16 ≤ 21^0.05` chain).
+Closed numerals by `norm_num`. `60/61` banked for N=31; K0-30 uses only `59`.
+-/
+/-- Cleared-power head numeral `(60:ℝ)^(-1.05) ≤ 0.024`. -/
+theorem R02_D3_rpow60_neg105_le_0024 :
+    (60 : ℝ) ^ (-1.05 : ℝ) ≤ 0.024 := by
+  have hle := R02_D3_rpow_116_le_6005
+  have hpos : (0 : ℝ) < (60 : ℝ) ^ (1.05 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hadd : (60 : ℝ) ^ (1.05 : ℝ) = 60 * (60 : ℝ) ^ (0.05 : ℝ) := by
+    have e : (1.05 : ℝ) = 1 + 0.05 := by norm_num
+    rw [e, Real.rpow_add (by norm_num)]
+    rw [Real.rpow_one]
+  have hge : (69.6 : ℝ) ≤ (60 : ℝ) ^ (1.05 : ℝ) := by
+    rw [hadd]
+    have e2 : (69.6 : ℝ) = 60 * 1.16 := by norm_num
+    rw [e2]
+    exact mul_le_mul_of_nonneg_left hle (by norm_num)
+  have hneg : (60 : ℝ) ^ (-1.05 : ℝ) = ((60 : ℝ) ^ (1.05 : ℝ))⁻¹ := by
+    have e : (-1.05 : ℝ) = -(1.05 : ℝ) := by norm_num
+    rw [e, Real.rpow_neg (by norm_num)]
+  rw [hneg]
+  have hinv : ((60 : ℝ) ^ (1.05 : ℝ))⁻¹ ≤ (69.6 : ℝ)⁻¹ :=
+    (inv_le_inv₀ hpos (by norm_num)).mpr hge
+  have hnum : (69.6 : ℝ)⁻¹ ≤ 0.024 := by norm_num
+  exact le_trans hinv hnum
+/-- Cleared-power head numeral `(61:ℝ)^(-1.05) ≤ 0.024`. -/
+theorem R02_D3_rpow61_neg105_le_0024 :
+    (61 : ℝ) ^ (-1.05 : ℝ) ≤ 0.024 := by
+  have hle := R02_D3_rpow_116_le_6105
+  have hpos : (0 : ℝ) < (61 : ℝ) ^ (1.05 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hadd : (61 : ℝ) ^ (1.05 : ℝ) = 61 * (61 : ℝ) ^ (0.05 : ℝ) := by
+    have e : (1.05 : ℝ) = 1 + 0.05 := by norm_num
+    rw [e, Real.rpow_add (by norm_num)]
+    rw [Real.rpow_one]
+  have hge : (70.76 : ℝ) ≤ (61 : ℝ) ^ (1.05 : ℝ) := by
+    rw [hadd]
+    have e2 : (70.76 : ℝ) = 61 * 1.16 := by norm_num
+    rw [e2]
+    exact mul_le_mul_of_nonneg_left hle (by norm_num)
+  have hneg : (61 : ℝ) ^ (-1.05 : ℝ) = ((61 : ℝ) ^ (1.05 : ℝ))⁻¹ := by
+    have e : (-1.05 : ℝ) = -(1.05 : ℝ) := by norm_num
+    rw [e, Real.rpow_neg (by norm_num)]
+  rw [hneg]
+  have hinv : ((61 : ℝ) ^ (1.05 : ℝ))⁻¹ ≤ (70.76 : ℝ)⁻¹ :=
+    (inv_le_inv₀ hpos (by norm_num)).mpr hge
+  have hnum : (70.76 : ℝ)⁻¹ ≤ 0.024 := by norm_num
+  exact le_trans hinv hnum
+#print axioms R02_D3_rpow60_neg105_le_0024
+#print axioms R02_D3_rpow61_neg105_le_0024
+/-!
+## Door-3 strip endgame, step 39bq (zeta lane): `M = 30` shift-tail at -1.05.
+
+Mirror of step 39bn (`R02_D3_tail30_le_integral105_Ioi29`): antitone/integrable
+on `Ici/Ioi 30`, comparison `∑ n, (n+31)^(-1.05) ≤ ∫ Ioi 30`, closed form
+`30^(-0.05)/0.05`, floor `1.151 ≤ 30^0.05`, integral/tail `≤ 17.38`,
+head `≤ 2.622`, exact gap `20.002`.
+
+Honest K0 attempt: head `2.622 + 17.38 = 20.002 > 19.689` does not beat
+K0-17 best, reverses further than M29 `19.978`; so NO K0-30 candidate is
+composed here; exact gap only. Minimum stays at N=17 (`19.689`).
+`47`-linear bar `19.458` untouched.
+-/
+/-- Antitone majorant `x^(-1.05)` on `Ici 30`. -/
+theorem R02_D3_rpow105_antitone_Ici30 :
+    AntitoneOn (fun x : ℝ => x ^ (-1.05 : ℝ)) (Set.Ici ((((30 : ℕ)) : ℝ))) := by
+  apply (Real.antitoneOn_rpow_Ioi_of_exponent_nonpos (by norm_num : (-1.05 : ℝ) ≤ 0)).mono
+  intro x hx
+  simp only [Set.mem_Ici, Set.mem_Ioi] at hx ⊢
+  have h30 : (0 : ℝ) < ((((30 : ℕ)) : ℝ)) := by norm_num
+  linarith
+/-- Integrability of `x^(-1.05)` on `Ioi 30`. -/
+theorem R02_D3_rpow105_integrable_Ioi30 :
+    MeasureTheory.IntegrableOn (fun x : ℝ => x ^ (-1.05 : ℝ)) (Set.Ioi ((((30 : ℕ)) : ℝ))) := by
+  apply integrableOn_Ioi_rpow_of_lt (by norm_num : (-1.05 : ℝ) < -1)
+  norm_num
+/-- `M = 30` integral-tail comparison for the shifted tail. -/
+theorem R02_D3_tail31_le_integral105_Ioi30 :
+    (∑' n : ℕ, ((((n + 30 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) ≤
+      (∫ x : ℝ in Set.Ioi ((((30 : ℕ)) : ℝ)), x ^ (-1.05 : ℝ)) := by
+  exact AntitoneOn.tsum_comp_add_le_integral 30 R02_D3_rpow105_antitone_Ici30
+    R02_D3_rpow105_integrable_Ioi30 (fun t ht => Real.rpow_nonneg
+      (le_of_lt (lt_of_le_of_lt (Nat.cast_nonneg _) (Set.mem_Ioi.mp ht))) _)
+/-- Closed form `∫ x in Ioi 30, x^(-1.05) = 30^(-0.05)/0.05`. -/
+theorem R02_D3_integral105_Ioi30_eq :
+    (∫ x : ℝ in Set.Ioi (30 : ℝ), x ^ (-1.05 : ℝ)) =
+      (30 : ℝ) ^ (-0.05 : ℝ) / 0.05 := by
+  have hlt : (-1.05 : ℝ) < -1 := by norm_num
+  have hc : (0 : ℝ) < (30 : ℝ) := by norm_num
+  have h := integral_Ioi_rpow_of_lt hlt hc
+  have e1 : (-1.05 : ℝ) + 1 = -0.05 := by norm_num
+  rw [e1] at h
+  have e2 : (-(30 : ℝ) ^ (-0.05 : ℝ)) / (-0.05 : ℝ) =
+      (30 : ℝ) ^ (-0.05 : ℝ) / 0.05 := by ring
+  exact e2 ▸ h
+#print axioms R02_D3_rpow105_antitone_Ici30
+#print axioms R02_D3_rpow105_integrable_Ioi30
+#print axioms R02_D3_tail31_le_integral105_Ioi30
+#print axioms R02_D3_integral105_Ioi30_eq
+/-- Rpow lower: `1.151 ≤ 30^0.05` (chains `1.151 ≤ 17^0.05` with `17 ≤ 30`). -/
+theorem R02_D3_rpow_1151_le_3005 : (1.151 : ℝ) ≤ (30 : ℝ) ^ (0.05 : ℝ) := by
+  have h1 := R02_D3_rpow_1151_le_1705
+  have h2 : (17 : ℝ) ^ (0.05 : ℝ) ≤ (30 : ℝ) ^ (0.05 : ℝ) :=
+    Real.rpow_le_rpow (by norm_num) (by norm_num) (by norm_num)
+  exact le_trans h1 h2
+/-- Integral numeral `∫ x in Ioi 30, x^(-1.05) ≤ 17.38` (via `1.151 ≤ 30^0.05`). -/
+theorem R02_D3_integral105_Ioi30_le_1738 :
+    (∫ x : ℝ in Set.Ioi (30 : ℝ), x ^ (-1.05 : ℝ)) ≤ 17.38 := by
+  have heq := R02_D3_integral105_Ioi30_eq
+  have hfloor := R02_D3_rpow_1151_le_3005
+  have hpos : (0 : ℝ) < (30 : ℝ) ^ (0.05 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hneg : (30 : ℝ) ^ (-0.05 : ℝ) = ((30 : ℝ) ^ (0.05 : ℝ))⁻¹ := by
+    have e : (-0.05 : ℝ) = -(0.05 : ℝ) := by norm_num
+    rw [e, Real.rpow_neg (by norm_num)]
+  have hinv : ((30 : ℝ) ^ (0.05 : ℝ))⁻¹ ≤ (1.151 : ℝ)⁻¹ :=
+    (inv_le_inv₀ hpos (by norm_num)).mpr hfloor
+  have h087 : (1.151 : ℝ)⁻¹ ≤ 0.869 := by norm_num
+  have hhead : (30 : ℝ) ^ (-0.05 : ℝ) ≤ 0.869 := by
+    rw [hneg]
+    exact le_trans hinv h087
+  have hdiv : (30 : ℝ) ^ (-0.05 : ℝ) / 0.05 ≤ 0.869 / 0.05 := by
+    have e1 : (30 : ℝ) ^ (-0.05 : ℝ) / 0.05 =
+        (30 : ℝ) ^ (-0.05 : ℝ) * (0.05 : ℝ)⁻¹ := by ring
+    have e2 : (0.869 : ℝ) / 0.05 = 0.869 * (0.05 : ℝ)⁻¹ := by ring
+    rw [e1, e2]
+    exact mul_le_mul_of_nonneg_right hhead (by norm_num)
+  have h174 : (0.869 : ℝ) / 0.05 = 17.38 := by norm_num
+  calc (∫ x : ℝ in Set.Ioi (30 : ℝ), x ^ (-1.05 : ℝ))
+        = (30 : ℝ) ^ (-0.05 : ℝ) / 0.05 := heq
+      _ ≤ 0.869 / 0.05 := hdiv
+      _ = 17.38 := h174
+/-- Shift-tail numeral `∑' n, (n+31)^(-1.05) ≤ 17.38`. -/
+theorem R02_D3_tail105_M30_le_1738 :
+    (∑' n : ℕ, ((((n + 30 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) ≤ 17.38 := by
+  have ecast : ((((30 : ℕ)) : ℝ)) = (30 : ℝ) := by norm_num
+  have htail : (∑' n : ℕ, ((((n + 30 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) ≤
+      (∫ x : ℝ in Set.Ioi (30 : ℝ), x ^ (-1.05 : ℝ)) := by
+    have h := R02_D3_tail31_le_integral105_Ioi30
+    rw [ecast] at h
+    exact h
+  exact le_trans htail R02_D3_integral105_Ioi30_le_1738
+/-- Thirty-term head sum `∑ i in range 30, ((2i+1):ℝ)^(-1.05) ≤ 2.622`. -/
+theorem R02_D3_odd105_head30_le_2622 :
+    (∑ i ∈ Finset.range 30, ((((2 * i + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) ≤ 2.622 := by
+  have hhead29 := R02_D3_odd105_head29_le_2598
+  have h29 : ((((2 * 29 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) ≤ 0.024 := by
+    rw [R02_D3_odd105_twentynine_eq_59]; exact R02_D3_rpow59_neg105_le_0024
+  have hsplit : (∑ i ∈ Finset.range 30, ((((2 * i + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) =
+      (∑ i ∈ Finset.range 29, ((((2 * i + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) +
+      ((((2 * 29 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) := by
+    have h := Finset.sum_range_succ (fun i => ((((2 * i + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) 29
+    have e : (29 + 1 : ℕ) = 30 := by norm_num
+    rw [e] at h
+    exact h
+  rw [hsplit]
+  linarith
+/-- EXACT GAP: M30 sum `2.622 + 17.38 = 20.002` does not beat K0-17 best `19.689`;
+reverses further than M29 `19.978`, M28 `19.954`, M27 `19.93`, M26 `19.906`, M25 `19.882`, M24 `19.858`, M23 `19.834`, M22 `19.81`, M21 `19.786`, M20 `19.762`, M19 `19.738`, and M18 `19.714`. Minimum stays at N=17.
+`47`-linear bar `19.458` untouched. No K0-30 composed. -/
+theorem R02_D3_K030_gap_20002 :
+    ((∑ i ∈ Finset.range 30, ((((2 * i + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) +
+      (∑' n : ℕ, ((((n + 30 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ))) ≤ 20.002 ∧
+    (2.622 : ℝ) + 17.38 = 20.002 ∧ (19.689 : ℝ) < 20.002 ∧
+    (20.002 : ℝ) - 19.689 = 0.313 ∧ (19.978 : ℝ) < 20.002 ∧
+    (20.002 : ℝ) - 19.978 = 0.024 ∧ (19.954 : ℝ) < 20.002 ∧
+    (20.002 : ℝ) - 19.954 = 0.048 ∧ (19.93 : ℝ) < 20.002 ∧
+    (20.002 : ℝ) - 19.93 = 0.072 ∧ (19.906 : ℝ) < 20.002 ∧
+    (20.002 : ℝ) - 19.906 = 0.096 ∧ (19.882 : ℝ) < 20.002 ∧
+    (20.002 : ℝ) - 19.882 = 0.12 ∧ (19.858 : ℝ) < 20.002 ∧
+    (20.002 : ℝ) - 19.858 = 0.144 ∧ (19.834 : ℝ) < 20.002 ∧
+    (20.002 : ℝ) - 19.834 = 0.168 ∧ (19.81 : ℝ) < 20.002 ∧
+    (20.002 : ℝ) - 19.81 = 0.192 ∧ (19.786 : ℝ) < 20.002 ∧
+    (20.002 : ℝ) - 19.786 = 0.216 ∧ (19.762 : ℝ) < 20.002 ∧
+    (20.002 : ℝ) - 19.762 = 0.24 ∧ (19.738 : ℝ) < 20.002 ∧
+    (20.002 : ℝ) - 19.738 = 0.264 ∧ (19.714 : ℝ) < 20.002 ∧
+    (20.002 : ℝ) - 19.714 = 0.288 ∧ (19.802 : ℝ) < 20.002 ∧
+    (20.002 : ℝ) - 19.802 = 0.2 ∧
+    (47 : ℝ) * 0.414 = 19.458 ∧ (20.002 : ℝ) - 19.458 = 0.544 := by
+  have hadd := add_le_add R02_D3_odd105_head30_le_2622 R02_D3_tail105_M30_le_1738
+  have e : (2.622 : ℝ) + 17.38 = 20.002 := by norm_num
+  refine ⟨?_, by norm_num, by norm_num, by norm_num, by norm_num, by norm_num, by norm_num, by norm_num, by norm_num, by norm_num, by norm_num, by norm_num, by norm_num, by norm_num, by norm_num, by norm_num, by norm_num, by norm_num, by norm_num, by norm_num, by norm_num, by norm_num, by norm_num, by norm_num, by norm_num, by norm_num, by norm_num, by norm_num, by norm_num, by norm_num, by norm_num, by norm_num⟩
+  linarith
+#print axioms R02_D3_rpow_1151_le_3005
+#print axioms R02_D3_integral105_Ioi30_le_1738
+#print axioms R02_D3_tail105_M30_le_1738
+#print axioms R02_D3_odd105_head30_le_2622
+#print axioms R02_D3_K030_gap_20002
