@@ -10616,3 +10616,65 @@ theorem sCutOA11S7_gap : True := by
 #print axioms sCutOA11S7_gap
 
 end Door3OffAxis
+
+namespace Door3OffAxis
+open scoped BigOperators
+
+/-- OFFAXIS-MIDLOW grep-first record (read-only before append).
+
+S7 tail at `door3_off_axis_certificates.lean:10243-10616`: S7 diminishing
+(`OA11S7_norm_floor` `1999/1125`, `OA11S7_shortfall` `-727/2250`,
+`OA11S7_below_bar`, `OA11S7_diminishing_gap`); midlow pair spec
+`sCutOA11S7_midlow_block_pair_spec` (`192/1025`, via
+`sCutOA11S7_pair_midlow_uniform`, `sCutOA11S7_midlow_block_eq_pairs`,
+`sCutOA11S7_midlow_block_pair_bound`, `sCutOA11S7_inv32_1025_le`);
+exceeds-filed (`sCutOA11S7_midhigh_exceeds_S6leftover`,
+`sCutOA11S7_midlow_exceeds_S6leftover`); four-block triangle
+`sCutOA11S7_mid_four_block_triangle`; residual
+`sCutOA11S7_mid_low_residual`
+(`‖Ico 6 1024‖ ≤ 173/2250 - 6144/169015 - 6144/92205 - 192/1025`);
+conditional closer `sCutOA11S7_mid_close_of_residual`; verdict
+`sCutOA11S7_gap`.
+
+Attempt order per task: (1) tighter pair bounds would need to shrink the three
+banked pair specs themselves, not the open block; (2) alternative transfer on
+`Ico 6 1024` cannot help since even `‖Ico 6 1024‖ = 0` leaves the three-pair
+sum above budget (filed below); so the exact gap filed is residual-RHS
+negativity and impossibility by norms. -/
+theorem sCutOA11S7_mid_low_residual_rhs_neg :
+    (173 / 2250 - 6144 / 169015 - 6144 / 92205 - 192 / 1025 : ℝ) < 0 := by
+  norm_num
+
+/-- Three banked pair specs already exceed the S6 mid budget, so even a perfect
+`‖Ico 6 1024‖ = 0` cannot close the four-block triangle by this route. -/
+theorem sCutOA11S7_three_pair_exceeds_S6budget :
+    (173 / 2250 : ℝ) < 6144 / 169015 + 6144 / 92205 + 192 / 1025 := by
+  norm_num
+
+/-- The banked mid-low residual is unsatisfiable by norms (RHS negative). -/
+theorem sCutOA11S7_mid_low_residual_impossible :
+    ¬ sCutOA11S7_mid_low_residual := by
+  intro h
+  unfold sCutOA11S7_mid_low_residual at h
+  have hnn : (0 : ℝ) ≤
+      ‖∑ k in Finset.Ico 6 1024, etaDirichletTerm sCutOA11 k‖ :=
+    norm_nonneg _
+  have hneg : (173 / 2250 - 6144 / 169015 - 6144 / 92205 - 192 / 1025 : ℝ) < 0 := by
+    norm_num
+  linarith
+
+/-- Gap verdict (honest): S7 diminishing banked (`1999/1125`, shortfall
+`-727/2250`); midlow spec `192/1025` banked; three-pair sum exceeds S6 budget
+`173/2250`; residual `sCutOA11S7_mid_low_residual` is negative
+(`-50503672507/236646352250 ≈ -0.2134`) hence impossible by norms; whole-mid
+`‖Ico 6 4096‖ ≤ 173/2250` stays open modulo an alternative route (tighter banked
+pair bounds or a non-triangle transfer). No flat claim made. -/
+theorem sCutOA11S7_midlow_residual_gap : True := by
+  trivial
+
+#print axioms sCutOA11S7_mid_low_residual_rhs_neg
+#print axioms sCutOA11S7_three_pair_exceeds_S6budget
+#print axioms sCutOA11S7_mid_low_residual_impossible
+#print axioms sCutOA11S7_midlow_residual_gap
+
+end Door3OffAxis

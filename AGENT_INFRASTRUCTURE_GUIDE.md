@@ -6164,6 +6164,14 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 M19 (background `ses_f3469ee8b`, proof-only,
+  grep-clean, zeta-only commit): M19 tail 17.38 + head 2.358 →
+  K0 19.738 reverses further (+0.049 vs 19.689). Minimum at N=17
+  CONFIRMED three rungs deep.
+- 2026-09-22 S28+R04+MIDLOW (backgrounds `ses_f346a2a8f`,
+  `ses_f3468f07a`, `ses_f346a7c87`, proof-only, grep-clean): S28 rung
+  (Re -4.64 + Im conditional, log27/28 phase); R04 no chain keeps
+  67200; mid-low residual impossible (three-pair exceeds S6 budget).
 - 2026-09-22 CUTNEXT+M31+R19 (backgrounds `ses_f346a7c86`,
   `ses_f346a2a8c-follow`, `ses_f3469ee8c`, proof-only, grep-clean):
   sliver-sup banked closed + fullGamma residual open; M31 odd floor
