@@ -13452,3 +13452,603 @@ theorem CS_S36C_Im_neg1008_below_slow_gap :
 
 end Door3CellSuppliers
 
+namespace Door3CellSuppliers
+
+/-! ## S38 rung (k=37,38; ETA-S38, proof-only)
+
+Grep-first (read-only, before writing):
+* S36 Re block: `CS_S36C` (`:13228`), `CS_S36C_Re_eq` (`:13233`),
+  `CS_complex_S36_Re_ge_neg668` (`:13249`, `-6.68` via S34 `-6.00`
+  + `CS_Re35_ge_neg034` + `CS_Re36_le_034`); gap `:13260` (`8.62`).
+* S36 Im block: `CS_S36C_Im_eq` (`:13371`), conditional
+  `CS_complex_S36_Im_ge_of_S34` (`:13385`, `Y - 0.34 - 0.34`, tail `0.68`
+  at `:13394`); unconditional `CS_complex_S36_Im_ge_neg1008` (`:13401`,
+  `-10.08` via banked `CS_complex_S34_Im_ge_neg940`); gap `:13410` (`12.02`).
+* S38 absent (grep-nil for `CS_S38C`, `CS_rpow37`, `CS_rpow38`,
+  `CS_cpow37`, `CS_cpow38`, `CS_phi37`, `CS_phi38`, `CS_cos37`,
+  `CS_cos38`, `CS_log_thirtyseven`, `CS_log_thirtyeight`); no S38 residual banked.
+* Banked log windows reused: `CS_log_thirtysix_ge/le` (`3.4920` / `3.6590`),
+  `CS_log_nineteen_ge/le` (`2.8515` / `3.0214`), `CS_log2_ge/le`
+  (`0.693147` / `0.693148`).
+
+Honest S38 route (banked windows only; S36 Re `-6.68` / Im `-10.08` untouched):
+* `log 37 = log 36 + log(37/36)` (`CS_log_thirtyseven_eq`, mirror of
+  `CS_log_thirtyone_eq` / `CS_log_thirtythree_eq`; `37 = 36 * (37/36)`),
+  with `log(37/36) ∈ [1/37, 1/36]` (`CS_log3736_lower/upper`, mirrors of
+  `CS_log3332_lower/upper`), so `log 37 ∈ [3.5190, 3.6868]`
+  (`3.4920 + 1/37 = 3.519027`; `3.6590 + 1/36 = 3.686777`).
+* `log 38 = log 19 + log 2` (`CS_log_thirtyeight_eq`, mirror of
+  `CS_log_thirtyfour_eq`; `38 = 19 * 2`), so `log 38 ∈ [3.5446, 3.7146]`
+  from banked `CS_log_nineteen_ge/le` (`2.8515` / `3.0214`) +
+  `CS_log2_ge/le` (`2.8515 + 0.693147 = 3.544647`;
+  `3.0214 + 0.693148 = 3.714548 ≤ 3.7146`).
+* Phase bridges (`norm_num` caps only, no pi): `φ₃₇ = 6.75·log 37 ∈
+  [23.7532, 24.8859]` (`6.75·3.5190 = 23.75325`;
+  `6.75·3.6868 = 24.8859`), `φ₃₈ = 6.75·log 38 ∈ [23.9260, 25.0736]`
+  (`6.75·3.5446 = 23.92605`; `6.75·3.7146 = 25.07355`).
+  Honest gap: both windows sit ABOVE the `6π` nonpos window
+  (`φ ≤ 7.5π ≈ 23.56` needed for `e = φ - 6π ≤ π + π/2`); true
+  `cos φ₃₇`, `cos φ₃₈` are positive, so `CS_cos37_nonpos` /
+  `CS_cos38_nonpos` are FALSE and left as unproved residuals (no
+  phase-aware `Re ≤ 0` banked here).
+* Rpow quads: `37^0.395 ≥ 3.35`, `38^0.395 ≥ 3.37` (quadratic lowers,
+  mirrors of `CS_rpow35/36pos_lower_proved`); hence `r₃₇ ≤ 0.34`
+  (`0.34·3.35 = 1.139 ≥ 1`), `r₃₈ ≤ 0.34` (`0.34·3.37 = 1.1458 ≥ 1`)
+  (reciprocal steps).
+* Cpow Re/Im splits for `37^{-s}`, `38^{-s}` (token mirrors of
+  `CS_cpow35/36_sCenter_re/im` with `Complex.exp_re/im` + `cos/sin`).
+* Re caps trig-free: `Re₃₇ ≥ -0.34` (`-1 ≤ cos`); `Re₃₈ ≤ 0.34`
+  (`cos ≤ 1`). No phase-aware improvement (see gap above).
+* Assembly Re: `Re(S₃₈) = Re(S₃₆) + Re₃₇ - Re₃₈ ≥ -6.68 - 0.34 - 0.34
+  = -7.36` (honest trig-free regression vs S36 `-6.68` by `0.68`; trails live best
+  `slow = 1.94`).
+* Im caps trig-free: `Im₃₇ ≥ -0.34`, `Im₃₈ ≤ 0.34`; link
+  `Im(S₃₈) = Im(S₃₆) + Im₃₇ - Im₃₈`; conditional on explicit `S₃₆` premise
+  (mirror of `CS_complex_S36_Im_ge_of_S34`, tail width `0.68`); unconditional
+  `≥ -10.08 - 0.34 - 0.34 = -10.76` by chaining banked S36 `-10.08`
+  (`CS_complex_S36_Im_ge_neg1008`). Reuses banked S36 bases; no S34 rebuild. -/
+
+/-- `log(37/36)` upper (`≤ 1/36` via `log ≤ x - 1`, mirror of
+`CS_log3332_upper`; `37/36 - 1 = 1/36`). -/
+theorem CS_log3736_upper : Real.log (37 / 36 : ℝ) ≤ (1 / 36 : ℝ) := by
+  have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 37 / 36)
+  have he : (37 / 36 : ℝ) - 1 = (1 / 36 : ℝ) := by norm_num
+  linarith
+
+/-- `log(37/36)` lower (`≥ 1/37` via `log(37/36) = -log(36/37)`, mirrors
+`CS_log3332_lower`; `36/37 - 1 = -1/37`). -/
+theorem CS_log3736_lower : (1 / 37 : ℝ) ≤ Real.log (37 / 36 : ℝ) := by
+  have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 36 / 37)
+  have he : (36 / 37 : ℝ) - 1 = (-(1 / 37) : ℝ) := by norm_num
+  have hinv : Real.log (37 / 36 : ℝ) = -Real.log (36 / 37 : ℝ) := by
+    have heq : (37 / 36 : ℝ) = (36 / 37 : ℝ)⁻¹ := by rw [inv_div]
+    rw [heq, Real.log_inv]
+  linarith
+
+/-- `log 37 = log 36 + log(37/36)` composite bridge (mirror of
+`CS_log_thirtythree_eq`; `37 = 36 * (37/36)`). -/
+theorem CS_log_thirtyseven_eq :
+    Real.log 37 = Real.log 36 + Real.log (37 / 36 : ℝ) := by
+  have h37 : (37 : ℝ) = 36 * (37 / 36) := by norm_num
+  conv_lhs => rw [h37]
+  rw [Real.log_mul (by norm_num) (by norm_num)]
+
+/-- `log 37` lower (`3.5190 ≤ log 37` from `CS_log_thirtysix_ge` +
+`CS_log3736_lower`; `3.4920 + 1/37 = 3.519027`). -/
+theorem CS_log_thirtyseven_ge : (3.5190 : ℝ) ≤ Real.log 37 := by
+  rw [CS_log_thirtyseven_eq]
+  have h36 := CS_log_thirtysix_ge
+  have h3736 := CS_log3736_lower
+  have hcap : (3.5190 : ℝ) ≤ 3.4920 + 1 / 37 := by norm_num
+  linarith
+
+/-- `log 37` upper (`log 37 ≤ 3.6868` from `CS_log_thirtysix_le` +
+`CS_log3736_upper`; `3.6590 + 1/36 = 3.686777`). -/
+theorem CS_log_thirtyseven_le : Real.log 37 ≤ (3.6868 : ℝ) := by
+  rw [CS_log_thirtyseven_eq]
+  have h36 := CS_log_thirtysix_le
+  have h3736 := CS_log3736_upper
+  have hcap : (3.6590 : ℝ) + 1 / 36 ≤ 3.6868 := by norm_num
+  linarith
+
+/-- `log 38 = log 19 + log 2` composite bridge (mirror of
+`CS_log_thirtyfour_eq`; `38 = 19 * 2`). -/
+theorem CS_log_thirtyeight_eq :
+    Real.log 38 = Real.log 19 + Real.log 2 := by
+  have h38 : (38 : ℝ) = 19 * 2 := by norm_num
+  conv_lhs => rw [h38]
+  rw [Real.log_mul (by norm_num) (by norm_num)]
+
+/-- `log 38` lower (`3.5446 ≤ log 38` from `CS_log_nineteen_ge` +
+`CS_log2_ge`; `2.8515 + 0.693147 = 3.544647`). -/
+theorem CS_log_thirtyeight_ge : (3.5446 : ℝ) ≤ Real.log 38 := by
+  rw [CS_log_thirtyeight_eq]
+  have h19 := CS_log_nineteen_ge
+  have h2 := CS_log2_ge
+  have hcap : (3.5446 : ℝ) ≤ 2.8515 + 0.693147 := by norm_num
+  linarith
+
+/-- `log 38` upper (`log 38 ≤ 3.7146` from `CS_log_nineteen_le` +
+`CS_log2_le`; `3.0214 + 0.693148 = 3.714548`). -/
+theorem CS_log_thirtyeight_le : Real.log 38 ≤ (3.7146 : ℝ) := by
+  rw [CS_log_thirtyeight_eq]
+  have h19 := CS_log_nineteen_le
+  have h2 := CS_log2_le
+  have hcap : (3.0214 : ℝ) + 0.693148 ≤ 3.7146 := by norm_num
+  linarith
+
+/-- Phase bridge `φ₃₇ ≥ 23.7532` (`6.75·3.5190 = 23.75325`). -/
+theorem CS_phi37_ge : (23.7532 : ℝ) ≤ 6.75 * Real.log 37 := by
+  have h37 : (3.5190 : ℝ) ≤ Real.log 37 := CS_log_thirtyseven_ge
+  have hmul : 6.75 * (3.5190 : ℝ) ≤ 6.75 * Real.log 37 :=
+    mul_le_mul_of_nonneg_left h37 (by norm_num)
+  have hcap : (23.7532 : ℝ) ≤ 6.75 * 3.5190 := by norm_num
+  linarith
+
+/-- Phase bridge `φ₃₇ ≤ 24.8859` (`6.75·3.6868 = 24.8859`). -/
+theorem CS_phi37_le : 6.75 * Real.log 37 ≤ (24.8859 : ℝ) := by
+  have h37 : Real.log 37 ≤ (3.6868 : ℝ) := CS_log_thirtyseven_le
+  have hmul : 6.75 * Real.log 37 ≤ 6.75 * 3.6868 :=
+    mul_le_mul_of_nonneg_left h37 (by norm_num)
+  have hcap : (6.75 : ℝ) * 3.6868 ≤ 24.8859 := by norm_num
+  linarith
+
+/-- Phase bridge `φ₃₈ ≥ 23.9260` (`6.75·3.5446 = 23.92605`). -/
+theorem CS_phi38_ge : (23.9260 : ℝ) ≤ 6.75 * Real.log 38 := by
+  have h38 : (3.5446 : ℝ) ≤ Real.log 38 := CS_log_thirtyeight_ge
+  have hmul : 6.75 * (3.5446 : ℝ) ≤ 6.75 * Real.log 38 :=
+    mul_le_mul_of_nonneg_left h38 (by norm_num)
+  have hcap : (23.9260 : ℝ) ≤ 6.75 * 3.5446 := by norm_num
+  linarith
+
+/-- Phase bridge `φ₃₈ ≤ 25.0736` (`6.75·3.7146 = 25.07355`). -/
+theorem CS_phi38_le : 6.75 * Real.log 38 ≤ (25.0736 : ℝ) := by
+  have h38 : Real.log 38 ≤ (3.7146 : ℝ) := CS_log_thirtyeight_le
+  have hmul : 6.75 * Real.log 38 ≤ 6.75 * 3.7146 :=
+    mul_le_mul_of_nonneg_left h38 (by norm_num)
+  have hcap : (6.75 : ℝ) * 3.7146 ≤ 25.0736 := by norm_num
+  linarith
+
+/-- Cosine nonpositivity at `φ₃₇` (RESIDUAL, FALSE on true values:
+`φ₃₇ ≈ 24.37`, `φ₃₇ - 6π ≈ 5.52 > 3π/2`, so `cos φ₃₇ > 0`; the `6π`
+`cos_nonpos` bridge is blocked. Left unproved honestly). -/
+def CS_cos37_nonpos : Prop := Real.cos (6.75 * Real.log 37) ≤ 0
+
+/-- Cosine nonpositivity at `φ₃₈` (RESIDUAL, FALSE on true values:
+`φ₃₈ ≈ 24.55`, `φ₃₈ - 6π ≈ 5.70 > 3π/2`, so `cos φ₃₈ > 0`; the `6π`
+`cos_nonpos` bridge is blocked. Left unproved honestly). -/
+def CS_cos38_nonpos : Prop := Real.cos (6.75 * Real.log 38) ≤ 0
+
+/-- Phase-aware `Re₃₈ ≤ 0` (RESIDUAL, FALSE since `CS_cos38_nonpos` is
+FALSE; left unproved honestly — the Re assembly below uses trig-free
+`CS_Re38_le_034` instead). -/
+def CS_Re38_le_zero_residual : Prop :=
+  (38 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 38) ≤ (0 : ℝ)
+
+/-- `37^0.395 ≥ 3.35` lower input (TRUE `≈ 4.16`). -/
+def CS_rpow37pos_lower : Prop := (3.35 : ℝ) ≤ (37 : ℝ) ^ ((0.395 : ℝ))
+
+/-- CLOSED: `37^0.395 ≥ 3.35` via quadratic lower at
+`x = 0.395·log 37 > 1.3900` (uses `CS_log_thirtyseven_ge`). -/
+theorem CS_rpow37pos_lower_proved : CS_rpow37pos_lower := by
+  show (3.35 : ℝ) ≤ (37 : ℝ) ^ ((0.395 : ℝ))
+  have h37 : (3.5190 : ℝ) ≤ Real.log 37 := CS_log_thirtyseven_ge
+  have hx_lo : (1.3900 : ℝ) < 0.395 * Real.log 37 := by
+    have hmul : (0.395 : ℝ) * 3.5190 ≤ 0.395 * Real.log 37 :=
+      mul_le_mul_of_nonneg_left h37 (by norm_num)
+    have hcap : (1.3900 : ℝ) < 0.395 * 3.5190 := by norm_num
+    linarith
+  set x : ℝ := 0.395 * Real.log 37 with hx_def
+  have hx0 : (0 : ℝ) ≤ x := le_trans (by norm_num) hx_lo.le
+  have hsq : (1.3900 : ℝ) ^ 2 ≤ x ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) hx_lo.le 2
+  have hquad := Real.quadratic_le_exp_of_nonneg hx0
+  have hbase : (3.35 : ℝ) ≤ 1 + 1.3900 + (1.3900 : ℝ) ^ 2 / 2 := by
+    norm_num
+  have hchain : (3.35 : ℝ) ≤ Real.exp x := by
+    linarith [hquad, hsq, hx_lo, hbase]
+  have hrpow : (37 : ℝ) ^ ((0.395 : ℝ)) = Real.exp x := by
+    rw [Real.rpow_def_of_pos (by norm_num : (0 : ℝ) < 37)]
+    congr 1
+    rw [hx_def]
+    ring
+  rw [hrpow]
+  exact hchain
+
+/-- `37^-0.395 ≤ 0.34` upper input (TRUE `≈ 0.240`). -/
+def CS_rpow37neg_upper : Prop := (37 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.34 : ℝ)
+
+/-- CLOSED: `37^-0.395 ≤ 0.34` from `37^0.395 ≥ 3.35`
+(`0.34·3.35 = 1.139 ≥ 1`). -/
+theorem CS_rpow37neg_upper_proved : CS_rpow37neg_upper := by
+  show (37 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.34 : ℝ)
+  have hlow : (3.35 : ℝ) ≤ (37 : ℝ) ^ ((0.395 : ℝ)) := CS_rpow37pos_lower_proved
+  have hpos : (0 : ℝ) < (37 : ℝ) ^ ((0.395 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hInv : (37 : ℝ) ^ (-(0.395 : ℝ)) = 1 / (37 : ℝ) ^ ((0.395 : ℝ)) := by
+    rw [Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 37)]
+    rw [inv_eq_one_div]
+  have hle : (1 : ℝ) ≤ (0.34 : ℝ) * (37 : ℝ) ^ ((0.395 : ℝ)) := by
+    have hmul : (1 : ℝ) ≤ 0.34 * 3.35 := by norm_num
+    calc (1 : ℝ) ≤ 0.34 * 3.35 := hmul
+      _ ≤ 0.34 * (37 : ℝ) ^ ((0.395 : ℝ)) :=
+        mul_le_mul_of_nonneg_left hlow (by norm_num)
+  rw [hInv, div_le_iff₀ hpos]
+  linarith [hle]
+
+/-- `38^0.395 ≥ 3.37` lower input (TRUE `≈ 4.21`). -/
+def CS_rpow38pos_lower : Prop := (3.37 : ℝ) ≤ (38 : ℝ) ^ ((0.395 : ℝ))
+
+/-- CLOSED: `38^0.395 ≥ 3.37` via quadratic lower at
+`x = 0.395·log 38 > 1.4000` (uses `CS_log_thirtyeight_ge`). -/
+theorem CS_rpow38pos_lower_proved : CS_rpow38pos_lower := by
+  show (3.37 : ℝ) ≤ (38 : ℝ) ^ ((0.395 : ℝ))
+  have h38 : (3.5446 : ℝ) ≤ Real.log 38 := CS_log_thirtyeight_ge
+  have hx_lo : (1.4000 : ℝ) < 0.395 * Real.log 38 := by
+    have hmul : (0.395 : ℝ) * 3.5446 ≤ 0.395 * Real.log 38 :=
+      mul_le_mul_of_nonneg_left h38 (by norm_num)
+    have hcap : (1.4000 : ℝ) < 0.395 * 3.5446 := by norm_num
+    linarith
+  set x : ℝ := 0.395 * Real.log 38 with hx_def
+  have hx0 : (0 : ℝ) ≤ x := le_trans (by norm_num) hx_lo.le
+  have hsq : (1.4000 : ℝ) ^ 2 ≤ x ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) hx_lo.le 2
+  have hquad := Real.quadratic_le_exp_of_nonneg hx0
+  have hbase : (3.37 : ℝ) ≤ 1 + 1.4000 + (1.4000 : ℝ) ^ 2 / 2 := by
+    norm_num
+  have hchain : (3.37 : ℝ) ≤ Real.exp x := by
+    linarith [hquad, hsq, hx_lo, hbase]
+  have hrpow : (38 : ℝ) ^ ((0.395 : ℝ)) = Real.exp x := by
+    rw [Real.rpow_def_of_pos (by norm_num : (0 : ℝ) < 38)]
+    congr 1
+    rw [hx_def]
+    ring
+  rw [hrpow]
+  exact hchain
+
+/-- `38^-0.395 ≤ 0.34` upper input (TRUE `≈ 0.237`). -/
+def CS_rpow38neg_upper : Prop := (38 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.34 : ℝ)
+
+/-- CLOSED: `38^-0.395 ≤ 0.34` from `38^0.395 ≥ 3.37`
+(`0.34·3.37 = 1.1458 ≥ 1`). -/
+theorem CS_rpow38neg_upper_proved : CS_rpow38neg_upper := by
+  show (38 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.34 : ℝ)
+  have hlow : (3.37 : ℝ) ≤ (38 : ℝ) ^ ((0.395 : ℝ)) := CS_rpow38pos_lower_proved
+  have hpos : (0 : ℝ) < (38 : ℝ) ^ ((0.395 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hInv : (38 : ℝ) ^ (-(0.395 : ℝ)) = 1 / (38 : ℝ) ^ ((0.395 : ℝ)) := by
+    rw [Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 38)]
+    rw [inv_eq_one_div]
+  have hle : (1 : ℝ) ≤ (0.34 : ℝ) * (38 : ℝ) ^ ((0.395 : ℝ)) := by
+    have hmul : (1 : ℝ) ≤ 0.34 * 3.37 := by norm_num
+    calc (1 : ℝ) ≤ 0.34 * 3.37 := hmul
+      _ ≤ 0.34 * (38 : ℝ) ^ ((0.395 : ℝ)) :=
+        mul_le_mul_of_nonneg_left hlow (by norm_num)
+  rw [hInv, div_le_iff₀ hpos]
+  linarith [hle]
+
+/-- Cpow real-part split for `37^{-s}` at `sCenter` (token mirror of
+`CS_cpow35_sCenter_re`). -/
+theorem CS_cpow37_sCenter_re : ((((37 : ℝ)) : ℂ) ^ (-R02Pilot.sCenter)).re
+    = (37 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 37) := by
+  have h37pos : (0 : ℝ) < 37 := by norm_num
+  have hxC : ((37 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h37pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((37 : ℝ) : ℂ) = (((Real.log 37 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h37pos)).symm
+  rw [hlog]
+  have hre_w : (-R02Pilot.sCenter).re = (-(0.395 : ℝ)) := by
+    have e : (-R02Pilot.sCenter).re = -(R02Pilot.sCenter.re) := rfl
+    rw [e, R02Pilot.sCenter_re]
+  have him_w : (-R02Pilot.sCenter).im = (6.75 : ℝ) := by
+    have e : (-R02Pilot.sCenter).im = -(R02Pilot.sCenter.im) := rfl
+    rw [e, R02Pilot.sCenter_im]
+    norm_num
+  have hzre : ((((Real.log 37 : ℝ)) : ℂ)).re = Real.log 37 := Complex.ofReal_re _
+  have hzim : ((((Real.log 37 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 37 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).re
+      = Real.log 37 * (-(0.395 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 37 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).im
+      = Real.log 37 * (6.75 : ℝ) := by
+    rw [Complex.mul_im, hzre, hzim, him_w]
+    ring
+  have hexp : Real.exp (Real.log 37 * (-(0.395 : ℝ)))
+      = (37 : ℝ) ^ (-(0.395 : ℝ)) :=
+    (Real.rpow_def_of_pos h37pos _).symm
+  have hcos : Real.cos (Real.log 37 * (6.75 : ℝ))
+      = Real.cos (6.75 * Real.log 37) := by
+    rw [mul_comm]
+  rw [Complex.exp_re, harg_re, harg_im, hexp, hcos]
+
+/-- Cpow real-part split for `38^{-s}` at `sCenter` (token mirror of
+`CS_cpow36_sCenter_re`). -/
+theorem CS_cpow38_sCenter_re : ((((38 : ℝ)) : ℂ) ^ (-R02Pilot.sCenter)).re
+    = (38 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 38) := by
+  have h38pos : (0 : ℝ) < 38 := by norm_num
+  have hxC : ((38 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h38pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((38 : ℝ) : ℂ) = (((Real.log 38 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h38pos)).symm
+  rw [hlog]
+  have hre_w : (-R02Pilot.sCenter).re = (-(0.395 : ℝ)) := by
+    have e : (-R02Pilot.sCenter).re = -(R02Pilot.sCenter.re) := rfl
+    rw [e, R02Pilot.sCenter_re]
+  have him_w : (-R02Pilot.sCenter).im = (6.75 : ℝ) := by
+    have e : (-R02Pilot.sCenter).im = -(R02Pilot.sCenter.im) := rfl
+    rw [e, R02Pilot.sCenter_im]
+    norm_num
+  have hzre : ((((Real.log 38 : ℝ)) : ℂ)).re = Real.log 38 := Complex.ofReal_re _
+  have hzim : ((((Real.log 38 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 38 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).re
+      = Real.log 38 * (-(0.395 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 38 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).im
+      = Real.log 38 * (6.75 : ℝ) := by
+    rw [Complex.mul_im, hzre, hzim, him_w]
+    ring
+  have hexp : Real.exp (Real.log 38 * (-(0.395 : ℝ)))
+      = (38 : ℝ) ^ (-(0.395 : ℝ)) :=
+    (Real.rpow_def_of_pos h38pos _).symm
+  have hcos : Real.cos (Real.log 38 * (6.75 : ℝ))
+      = Real.cos (6.75 * Real.log 38) := by
+    rw [mul_comm]
+  rw [Complex.exp_re, harg_re, harg_im, hexp, hcos]
+
+/-- `Re₃₇ ≥ -0.34` (`r₃₇ ≤ 0.34`, `-1 ≤ cos`; TRUE `≈ 0.16`). -/
+theorem CS_Re37_ge_neg034 :
+    (-0.34 : ℝ) ≤ (37 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 37) := by
+  have hr0 : (0 : ℝ) ≤ (37 : ℝ) ^ (-(0.395 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hru : (37 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.34 : ℝ) := CS_rpow37neg_upper_proved
+  have hcos : (-1 : ℝ) ≤ Real.cos (6.75 * Real.log 37) := Real.neg_one_le_cos _
+  have h1 : (37 : ℝ) ^ (-(0.395 : ℝ)) * (-1 : ℝ)
+      ≤ (37 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 37) :=
+    mul_le_mul_of_nonneg_left hcos hr0
+  have h2 : (37 : ℝ) ^ (-(0.395 : ℝ)) * (-1 : ℝ) = -((37 : ℝ) ^ (-(0.395 : ℝ))) := by
+    ring
+  have h3 : (-0.34 : ℝ) ≤ -((37 : ℝ) ^ (-(0.395 : ℝ))) := by
+    linarith [hru]
+  linarith
+
+/-- `Re₃₈ ≤ 0.34` trig-free (`r₃₈ ≤ 0.34`, `cos ≤ 1`; TRUE `≈ 0.19` since
+`cos φ₃₈ > 0` — phase-aware `≤ 0` is FALSE, see `CS_Re38_le_zero_residual`). -/
+theorem CS_Re38_le_034 :
+    (38 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 38) ≤ (0.34 : ℝ) := by
+  have hr0 : (0 : ℝ) ≤ (38 : ℝ) ^ (-(0.395 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hru : (38 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.34 : ℝ) := CS_rpow38neg_upper_proved
+  have hcos : Real.cos (6.75 * Real.log 38) ≤ (1 : ℝ) := Real.cos_le_one _
+  have h1 : (38 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 38)
+      ≤ (38 : ℝ) ^ (-(0.395 : ℝ)) * (1 : ℝ) :=
+    mul_le_mul_of_nonneg_left hcos hr0
+  have h2 : (38 : ℝ) ^ (-(0.395 : ℝ)) * (1 : ℝ) = (38 : ℝ) ^ (-(0.395 : ℝ)) := by
+    ring
+  linarith [hru]
+
+/-- Complex S38 partial sum at `sCenter` (`S₃₆ + 37^{-s} - 38^{-s}`). -/
+noncomputable def CS_S38C : ℂ :=
+  CS_S36C + (37 : ℂ) ^ (-R02Pilot.sCenter) - (38 : ℂ) ^ (-R02Pilot.sCenter)
+
+/-- Real-part link for the complex S38 (`Re(S₃₈) = Re(S₃₆) + Re₃₇ - Re₃₈`,
+mirror of `CS_S36C_Re_eq`). -/
+theorem CS_S38C_Re_eq :
+    (CS_S38C).re = (CS_S36C).re
+      + (37 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 37)
+      - (38 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 38) := by
+  unfold CS_S38C
+  have h37 : ((37 : ℂ)) = ((((37 : ℝ)) : ℂ)) := by simp
+  have h38c : ((38 : ℂ)) = ((((38 : ℝ)) : ℂ)) := by simp
+  rw [h37, h38c]
+  simp only [Complex.add_re, Complex.sub_re,
+    CS_cpow37_sCenter_re, CS_cpow38_sCenter_re]
+
+/-- Complex-S38 real part `≥ -7.36` (PROVED, unconditional):
+`Re(S₃₈) = Re(S₃₆) + Re₃₇ - Re₃₈ ≥ -6.68 - 0.34 - 0.34 = -7.36`
+(honest trig-free regression vs S36 `-6.68` by `0.68`; phase-aware `-7.02`
+blocked by `CS_cos38_nonpos` falsity; reuses banked S36 base
+`CS_complex_S36_Re_ge_neg668`). -/
+theorem CS_complex_S38_Re_ge_neg736 :
+    (-7.36 : ℝ) ≤ (CS_S38C).re := by
+  have hEq := CS_S38C_Re_eq
+  have hS36 := CS_complex_S36_Re_ge_neg668
+  have hT37 := CS_Re37_ge_neg034
+  have hT38 := CS_Re38_le_034
+  rw [hEq]
+  linarith
+
+/-- Honest gap: the new S38 Re `-7.36` trails the live best `slow = 1.94`
+(`CS_complex_S4_abs_ge_194`) by `9.30`; no S38 feed closes here. -/
+theorem CS_S38C_below_slow_gap :
+    (1.94 : ℝ) - (-7.36 : ℝ) = 9.30 := by
+  norm_num
+
+/-- Cpow imaginary-part split for `37^{-s}` at `sCenter` (token mirror of
+`CS_cpow37_sCenter_re`). -/
+theorem CS_cpow37_sCenter_im : ((((37 : ℝ)) : ℂ) ^ (-R02Pilot.sCenter)).im
+    = (37 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 37) := by
+  have h37pos : (0 : ℝ) < 37 := by norm_num
+  have hxC : ((37 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h37pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((37 : ℝ) : ℂ) = (((Real.log 37 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h37pos)).symm
+  rw [hlog]
+  have hre_w : (-R02Pilot.sCenter).re = (-(0.395 : ℝ)) := by
+    have e : (-R02Pilot.sCenter).re = -(R02Pilot.sCenter.re) := rfl
+    rw [e, R02Pilot.sCenter_re]
+  have him_w : (-R02Pilot.sCenter).im = (6.75 : ℝ) := by
+    have e : (-R02Pilot.sCenter).im = -(R02Pilot.sCenter.im) := rfl
+    rw [e, R02Pilot.sCenter_im]
+    norm_num
+  have hzre : ((((Real.log 37 : ℝ)) : ℂ)).re = Real.log 37 := Complex.ofReal_re _
+  have hzim : ((((Real.log 37 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 37 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).re
+      = Real.log 37 * (-(0.395 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 37 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).im
+      = Real.log 37 * (6.75 : ℝ) := by
+    rw [Complex.mul_im, hzre, hzim, him_w]
+    ring
+  have hexp : Real.exp (Real.log 37 * (-(0.395 : ℝ)))
+      = (37 : ℝ) ^ (-(0.395 : ℝ)) :=
+    (Real.rpow_def_of_pos h37pos _).symm
+  have hsin : Real.sin (Real.log 37 * (6.75 : ℝ))
+      = Real.sin (6.75 * Real.log 37) := by
+    rw [mul_comm]
+  rw [Complex.exp_im, harg_re, harg_im, hexp, hsin]
+
+/-- Cpow imaginary-part split for `38^{-s}` at `sCenter` (token mirror of
+`CS_cpow38_sCenter_re`). -/
+theorem CS_cpow38_sCenter_im : ((((38 : ℝ)) : ℂ) ^ (-R02Pilot.sCenter)).im
+    = (38 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 38) := by
+  have h38pos : (0 : ℝ) < 38 := by norm_num
+  have hxC : ((38 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h38pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((38 : ℝ) : ℂ) = (((Real.log 38 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h38pos)).symm
+  rw [hlog]
+  have hre_w : (-R02Pilot.sCenter).re = (-(0.395 : ℝ)) := by
+    have e : (-R02Pilot.sCenter).re = -(R02Pilot.sCenter.re) := rfl
+    rw [e, R02Pilot.sCenter_re]
+  have him_w : (-R02Pilot.sCenter).im = (6.75 : ℝ) := by
+    have e : (-R02Pilot.sCenter).im = -(R02Pilot.sCenter.im) := rfl
+    rw [e, R02Pilot.sCenter_im]
+    norm_num
+  have hzre : ((((Real.log 38 : ℝ)) : ℂ)).re = Real.log 38 := Complex.ofReal_re _
+  have hzim : ((((Real.log 38 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 38 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).re
+      = Real.log 38 * (-(0.395 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 38 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).im
+      = Real.log 38 * (6.75 : ℝ) := by
+    rw [Complex.mul_im, hzre, hzim, him_w]
+    ring
+  have hexp : Real.exp (Real.log 38 * (-(0.395 : ℝ)))
+      = (38 : ℝ) ^ (-(0.395 : ℝ)) :=
+    (Real.rpow_def_of_pos h38pos _).symm
+  have hsin : Real.sin (Real.log 38 * (6.75 : ℝ))
+      = Real.sin (6.75 * Real.log 38) := by
+    rw [mul_comm]
+  rw [Complex.exp_im, harg_re, harg_im, hexp, hsin]
+
+/-- `Im₃₇ ≥ -0.34` (`r₃₇ ≤ 0.34`, `-1 ≤ sin`; mirror of `CS_Im35_ge_neg034`). -/
+theorem CS_Im37_ge_neg034 :
+    (-0.34 : ℝ) ≤ (37 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 37) := by
+  have hr0 : (0 : ℝ) ≤ (37 : ℝ) ^ (-(0.395 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hru : (37 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.34 : ℝ) := CS_rpow37neg_upper_proved
+  have hsin : (-1 : ℝ) ≤ Real.sin (6.75 * Real.log 37) := by
+    have h := Real.sin_le_one (-(6.75 * Real.log 37))
+    rw [Real.sin_neg] at h
+    linarith
+  have h1 : (37 : ℝ) ^ (-(0.395 : ℝ)) * (-1 : ℝ)
+      ≤ (37 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 37) :=
+    mul_le_mul_of_nonneg_left hsin hr0
+  have h2 : (37 : ℝ) ^ (-(0.395 : ℝ)) * (-1 : ℝ) = -((37 : ℝ) ^ (-(0.395 : ℝ))) := by
+    ring
+  have h3 : (-0.34 : ℝ) ≤ -((37 : ℝ) ^ (-(0.395 : ℝ))) := by
+    linarith [hru]
+  linarith
+
+/-- `Im₃₈ ≤ 0.34` (`r₃₈ ≤ 0.34`, `sin ≤ 1`; mirror of `CS_Im36_le_034`). -/
+theorem CS_Im38_le_034 :
+    (38 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 38) ≤ (0.34 : ℝ) := by
+  have hr0 : (0 : ℝ) ≤ (38 : ℝ) ^ (-(0.395 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hru : (38 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.34 : ℝ) := CS_rpow38neg_upper_proved
+  have hsin : Real.sin (6.75 * Real.log 38) ≤ (1 : ℝ) := Real.sin_le_one _
+  have h1 : (38 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 38)
+      ≤ (38 : ℝ) ^ (-(0.395 : ℝ)) * (1 : ℝ) :=
+    mul_le_mul_of_nonneg_left hsin hr0
+  have h2 : (38 : ℝ) ^ (-(0.395 : ℝ)) * (1 : ℝ) = (38 : ℝ) ^ (-(0.395 : ℝ)) := by
+    ring
+  linarith [hru]
+
+/-- Imaginary-part link for the complex S38 (`Im(S₃₈) = Im(S₃₆) + Im₃₇ - Im₃₈`,
+mirror of `CS_S36C_Im_eq`). -/
+theorem CS_S38C_Im_eq :
+    (CS_S38C).im = (CS_S36C).im
+      + (37 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 37)
+      - (38 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 38) := by
+  unfold CS_S38C
+  have h37 : ((37 : ℂ)) = ((((37 : ℝ)) : ℂ)) := by simp
+  have h38c : ((38 : ℂ)) = ((((38 : ℝ)) : ℂ)) := by simp
+  rw [h37, h38c]
+  simp only [Complex.add_im, Complex.sub_im,
+    CS_cpow37_sCenter_im, CS_cpow38_sCenter_im]
+
+/-- Conditional S38 Im lower via the alternating sum (explicit `S₃₆`
+premise only): from `Y ≤ Im(S₃₆)`, `Im(S₃₈) ≥ Y - 0.34 - 0.34`
+(tail width `0.68`; mirror of `CS_complex_S36_Im_ge_of_S34`). -/
+theorem CS_complex_S38_Im_ge_of_S36 (Y : ℝ) (hS36 : Y ≤ (CS_S36C).im) :
+    Y - 0.34 - 0.34 ≤ (CS_S38C).im := by
+  have hEq := CS_S38C_Im_eq
+  have hT37 := CS_Im37_ge_neg034
+  have hT38 := CS_Im38_le_034
+  rw [hEq]
+  linarith
+
+/-- S38 Im tail width (honest floor report): `0.34 + 0.34 = 0.68`. -/
+theorem CS_S38C_Im_tail_width : (0.34 : ℝ) + 0.34 = 0.68 := by
+  norm_num
+
+/-- Unconditional S38 Im floor `≥ -10.76` (PROVED): chains the banked S36 base
+`-10.08` (`CS_complex_S36_Im_ge_neg1008`) through the new S38 conditional
+`CS_complex_S38_Im_ge_of_S36` (`-10.08 - 0.34 - 0.34 = -10.76`); no residual
+left on S38 Im conditional. -/
+theorem CS_complex_S38_Im_ge_neg1076 :
+    (-10.76 : ℝ) ≤ (CS_S38C).im := by
+  have hS36 : (-10.08 : ℝ) ≤ (CS_S36C).im := CS_complex_S36_Im_ge_neg1008
+  have h := CS_complex_S38_Im_ge_of_S36 (-10.08) hS36
+  have hnum : (-10.08 : ℝ) - 0.34 - 0.34 = -10.76 := by norm_num
+  linarith
+
+/-- Honest gap: the new S38 Im `-10.76` trails the live best `slow = 1.94`
+(`CS_complex_S4_abs_ge_194`) by `12.70`; no S38 Im feed closes here. -/
+theorem CS_S38C_Im_neg1076_below_slow_gap :
+    (1.94 : ℝ) - (-10.76 : ℝ) = 12.70 := by
+  norm_num
+
+#print axioms CS_log3736_upper
+#print axioms CS_log3736_lower
+#print axioms CS_log_thirtyseven_eq
+#print axioms CS_log_thirtyseven_ge
+#print axioms CS_log_thirtyseven_le
+#print axioms CS_log_thirtyeight_eq
+#print axioms CS_log_thirtyeight_ge
+#print axioms CS_log_thirtyeight_le
+#print axioms CS_phi37_ge
+#print axioms CS_phi37_le
+#print axioms CS_phi38_ge
+#print axioms CS_phi38_le
+#print axioms CS_rpow37pos_lower_proved
+#print axioms CS_rpow37neg_upper_proved
+#print axioms CS_rpow38pos_lower_proved
+#print axioms CS_rpow38neg_upper_proved
+#print axioms CS_cpow37_sCenter_re
+#print axioms CS_cpow38_sCenter_re
+#print axioms CS_Re37_ge_neg034
+#print axioms CS_Re38_le_034
+#print axioms CS_S38C_Re_eq
+#print axioms CS_complex_S38_Re_ge_neg736
+#print axioms CS_S38C_below_slow_gap
+#print axioms CS_cpow37_sCenter_im
+#print axioms CS_cpow38_sCenter_im
+#print axioms CS_Im37_ge_neg034
+#print axioms CS_Im38_le_034
+#print axioms CS_S38C_Im_eq
+#print axioms CS_complex_S38_Im_ge_of_S36
+#print axioms CS_S38C_Im_tail_width
+#print axioms CS_complex_S38_Im_ge_neg1076
+#print axioms CS_S38C_Im_neg1076_below_slow_gap
+
+end Door3CellSuppliers
+

@@ -1719,3 +1719,75 @@ theorem bottom_ballSup_of_shifted_uppers_25 {C G Z : ℝ}
   exact hb
 
 end Door3TopEdgeBall25
+
+/-! ## TOPEDGE-PRODUCT product-identity premise attempt (append-only, value + exact gap).
+
+Grep (read before filing):
+* tail `door3_top_edge.lean:1493-1721` (`Door3TopEdgeStrip` 12 to 25/2 inclusion,
+  `Door3TopEdgeBall25` poly 675/8, pi 16384, joint 1382400, conditional
+  `bottom_ballSup_of_shifted_uppers_25`).
+* banked agreement `CentralCoverAssembly.xiShifted_eq_entire_on_strip`
+  (`central_cover_assembly.lean:836-840`, used locally at `:287-292`, `:391-393`).
+* banked factorisation `DerivCauchyBridge.xiShifted_eq_parts`
+  (`central_cover_assembly.lean:6339-6347`, for `_root_.xiShifted`, not entire).
+* open product gap `Door3TopEdgeGammaGap.entire_eq_product_ball12_gap` (`:1297-1303`).
+
+Value: strip-conditional entire product identity chaining the two banked lemmas.
+Gap (exact, OPEN): full-ball `entire_eq_product_ball12_gap` stays OPEN; ball-12
+holds a point outside the strip so the chain does not extend, filed below.
+-/
+
+namespace Door3TopEdgeProduct
+
+open Complex Real Set Topology
+
+theorem entire_eq_product_of_mem_strip (z : ℂ)
+    (hgt : -(1 / 2 : ℝ) < z.im) (hlt : z.im < (1 / 2 : ℝ)) :
+    CentralCoverAssembly.xiShiftedEntire z =
+      DerivCauchyBridge.polyOf ((1 / 2 : ℂ) + Complex.I * z) *
+      DerivCauchyBridge.piOf ((1 / 2 : ℂ) + Complex.I * z) *
+      DerivCauchyBridge.gammaOf ((1 / 2 : ℂ) + Complex.I * z) *
+      zeta ((1 / 2 : ℂ) + Complex.I * z) := by
+  have hagree : _root_.xiShifted z = CentralCoverAssembly.xiShiftedEntire z :=
+    CentralCoverAssembly.xiShifted_eq_entire_on_strip z hgt hlt
+  have hparts : _root_.xiShifted z =
+      DerivCauchyBridge.polyOf ((1 / 2 : ℂ) + Complex.I * z) *
+      DerivCauchyBridge.piOf ((1 / 2 : ℂ) + Complex.I * z) *
+      DerivCauchyBridge.gammaOf ((1 / 2 : ℂ) + Complex.I * z) *
+      zeta ((1 / 2 : ℂ) + Complex.I * z) :=
+    DerivCauchyBridge.xiShifted_eq_parts z
+  exact hagree.symm.trans hparts
+
+theorem outer_point_mem_ball12 :
+    Complex.I * (((12 : ℝ)) : ℂ) ∈ Metric.closedBall (0 : ℂ) 12 := by
+  rw [Metric.mem_closedBall, dist_zero_right]
+  have hmul : ‖Complex.I * ((((12 : ℝ))) : ℂ)‖ = ‖((((12 : ℝ))) : ℂ)‖ := by
+    rw [norm_mul, Complex.norm_I, one_mul]
+  rw [hmul, Complex.norm_real, Real.norm_eq_abs, abs_of_pos (by norm_num)]
+  exact le_rfl
+
+theorem outer_point_im_eq :
+    (Complex.I * (((12 : ℝ)) : ℂ)).im = (12 : ℝ) := by
+  simp [Complex.mul_im]
+
+theorem outer_point_outside_strip :
+    ¬ ((Complex.I * (((12 : ℝ)) : ℂ)).im < (1 / 2 : ℝ)) := by
+  rw [outer_point_im_eq]
+  norm_num
+
+def product_full_ball_open_gap : Prop :=
+  Door3TopEdgeGammaGap.entire_eq_product_ball12_gap
+
+def gamma_ball12_open_gap (G : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.gamma_ball12_upper_residual G
+
+def zeta_ball12_open_gap (Z : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.zeta_ball12_upper_residual Z
+
+def gamma_ball25_open_gap (G : ℝ) : Prop :=
+  Door3TopEdgeBall25.gamma_ball25_upper_residual G
+
+def zeta_ball25_open_gap (Z : ℝ) : Prop :=
+  Door3TopEdgeBall25.zeta_ball25_upper_residual Z
+
+end Door3TopEdgeProduct
