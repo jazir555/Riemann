@@ -2168,3 +2168,75 @@ theorem cutR10_fullGamma_gap_filed (s : ℂ)
   hProdCap
 
 end Door3CutR10BallSup
+
+/-! # APPEND-8 (fullGamma rechain + zeta honest chain-or-gap; append-only tail; LF):
+
+Grep record (read before writing):
+* Gamma gate `:898-902` + `:1409-1414` identity on `hProdCap`; banked half
+  `cutR10_gamma_sup_half_closed :1358` (`≤ 1 / 2` via domination + two-step
+  shift + real cap + denom lower); rechain `:2143-2147`
+  (`cutR10_fullGamma_best_banked_half`), ratio `:2150-2152` (`= 50`).
+* Zeta banked CLOSED: `cutR10_hDom_closed :1056`, `cutR10_hReal_closed :1068`,
+  `cutR10_zeta_rightSliver_closed :1073` (`Re ≥ 3/2 → ≤ 3`),
+  `cutR10_zeta_rightEdge_two_closed :1640` (`Re ≥ 2 → ≤ 2`),
+  `cutR10_reflected_Euler_two_closed :1920`, conditional bridge
+  `cutR10_zeta_of_chi_reflected :1930`, sliver `cutR10_hFE_sliver_of_chi :1948`.
+* Zeta open: full-rect `≤ 6` via `cutR10_zeta_sup_six_of_FE :1701` gated on
+  `hFE : ∀ t ... → ‖zeta t‖ ≤ 3 * 2`; chi `≤ 3` plus middle `≤ 2` open
+  (`cutR10_hFE_of_chi_and_middle :1962`).
+
+Verdict here:
+* Gamma: best banked stays `≤ 1 / 2` (rechain below by direct call); `1 / 100`
+  stays gated on single explicit `hProdCap` (shortfall `50x`).
+* Zeta: best banked CLOSED on edges rechained below (`≤ 3` at `Re ≥ 3/2`,
+  `≤ 2` at `Re ≥ 2`); full-rect `≤ 6` stays gated on explicit `hFE`
+  (chi `≤ 3` times reflected `≤ 2`), filed exactly below.
+No new imports; nothing else touched.
+-/
+
+namespace Door3CutR10BallSup
+
+/-- FullGamma best banked half rechain (`≤ 1 / 2`). -/
+theorem cutR10_fullGamma_half_rechain8 (s : ℂ)
+    (hlo : (-1.06 : ℝ) ≤ s.re) (hhi : s.re ≤ (2.06 : ℝ))
+    (hilo : (8.44 : ℝ) ≤ s.im) (hihi : s.im ≤ (11.56 : ℝ)) :
+    ‖Complex.Gamma (s / 2)‖ ≤ 1 / 2 :=
+  cutR10_gamma_sup_half_closed s hlo hhi hilo hihi
+
+/-- FullGamma gap: `1 / 100` gated on single explicit `hProdCap`. -/
+theorem cutR10_fullGamma_hundred_gap8 (s : ℂ)
+    (hlo : (-1.06 : ℝ) ≤ s.re) (hhi : s.re ≤ (2.06 : ℝ))
+    (hilo : (8.44 : ℝ) ≤ s.im) (hihi : s.im ≤ (11.56 : ℝ))
+    (hProdCap : ‖Complex.Gamma (s / 2)‖ ≤ 1 / 100) :
+    ‖Complex.Gamma (s / 2)‖ ≤ 1 / 100 :=
+  hProdCap
+
+/-- Zeta best banked edge rechain: `Re ≥ 3/2 → ≤ 3` CLOSED. -/
+theorem cutR10_zeta_sliver_three_rechain8 (s : ℂ) (hs : 3 / 2 ≤ s.re) :
+    ‖zeta s‖ ≤ 3 :=
+  cutR10_zeta_rightSliver_closed s hs
+
+/-- Zeta best banked edge rechain: `Re ≥ 2 → ≤ 2` CLOSED. -/
+theorem cutR10_zeta_edge_two_rechain8 (s : ℂ) (hs : (2 : ℝ) ≤ s.re) :
+    ‖zeta s‖ ≤ 2 :=
+  cutR10_zeta_rightEdge_two_closed s hs
+
+/-- Zeta exact gap filed: full-rect `≤ 6` gated on explicit `hFE`
+(`3 * 2` chi-times-reflected shape). -/
+theorem cutR10_zeta_six_gap8 (s : ℂ)
+    (hlo : (-1.06 : ℝ) ≤ s.re) (hhi : s.re ≤ (2.06 : ℝ))
+    (hilo : (8.44 : ℝ) ≤ s.im) (hihi : s.im ≤ (11.56 : ℝ))
+    (hFE : ∀ t : ℂ, (-1.06 : ℝ) ≤ t.re → t.re ≤ (3 / 2 : ℝ) →
+      (8.44 : ℝ) ≤ t.im → t.im ≤ (11.56 : ℝ) → ‖zeta t‖ ≤ 3 * 2) :
+    ‖zeta s‖ ≤ 6 :=
+  cutR10_zeta_sup_six_of_FE s hlo hhi hilo hihi hFE
+
+/-- Joint honest value with fully banked halves: poly `67` times pi `16/5`
+times Gamma `1/2` times zeta `2` gives `1072/5` on the `Re ≥ 2` sliver. -/
+theorem cutR10_joint_banked_sliver_value8 (z : ℂ)
+    (hz : z ∈ Metric.closedBall CutR10.center (CutR10.radius + 1))
+    (hs2 : (2 : ℝ) ≤ (shiftedS z).re) :
+    ‖xiShiftedEntire z‖ ≤ (1072 / 5 : ℝ) :=
+  cutR10_sliver_sup_banked_closed z hz hs2
+
+end Door3CutR10BallSup

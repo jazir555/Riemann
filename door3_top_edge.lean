@@ -1255,3 +1255,85 @@ def ballSup_full_exact_gap_40 : Prop :=
   Door3TopEdgeNeeds.bottom_ballSup_residual 40
 
 end Door3TopEdgeBallSup
+
+/-! ## TOPEDGE-GAMMA full-ball Gamma/zeta upper attempt (append-only, value + exact gap).
+
+Grep (read before filing):
+* tail `door3_top_edge.lean:1155-1257` (`Door3TopEdgeBallSup`: poly-78
+  `ballSup_poly_factor_ball12`, pi-4096 `ballSup_pi_factor_ball12`,
+  joint-319488 `ballSup_polyPi_joint_ball12`, exceed numerals,
+  `ballSup_full_exact_gap_1000/40` as `bottom_ballSup_residual` aliases).
+* local Gamma uses in this file are only nonvanishing
+  (`Complex.Gamma_ne_zero` at `:34-39`, `:103-109`, `:159-165`); no norm
+  upper `‖Complex.Gamma (_ / 2)‖ ≤ G` on `closedBall 0 12` is present here.
+* sliver residual `door3_sliver_edge.lean:1111-1116` records Gamma/zeta
+  uppers absent on ball-12 with pole obstruction at `s = 0` (Gamma pole
+  for `s / 2 = 0`) and `s = 1` (zeta pole), both points in the ball.
+* product identity `CentralCoverAssembly.xiShifted_eq_parts`
+  (`central_cover_assembly.lean:6339-6347`) factors `xiShifted`, not
+  `xiShiftedEntire`; agreement `xiShifted_eq_entire_on_strip` holds only
+  on the open strip, so no full-ball transfer to `xiShiftedEntire` is
+  available in-tree.
+
+Value: conditional four-factor composition on `closedBall 0 12` from the
+locally rebuilt joint-319488 plus hypothetical Gamma/zeta uppers.
+Gap (exact, OPEN): `gamma_ball12_upper_residual`, `zeta_ball12_upper_residual`,
+and `entire_eq_product_ball12_gap` below; hence `bottom_ballSup_residual`
+for `xiShiftedEntire` stays OPEN.
+-/
+
+namespace Door3TopEdgeGammaGap
+
+open Complex Real Set Topology
+
+def gamma_ball12_upper_residual (G : ℝ) : Prop :=
+  ∀ s ∈ Metric.closedBall (0 : ℂ) 12,
+    ‖CentralCoverAssembly.gammaOf s‖ ≤ G
+
+def zeta_ball12_upper_residual (Z : ℝ) : Prop :=
+  ∀ s ∈ Metric.closedBall (0 : ℂ) 12,
+    ‖zeta s‖ ≤ Z
+
+def entire_eq_product_ball12_gap : Prop :=
+  ∀ z ∈ Metric.closedBall (0 : ℂ) 12,
+    CentralCoverAssembly.xiShiftedEntire z =
+      CentralCoverAssembly.polyOf ((1 / 2 : ℂ) + Complex.I * z) *
+      CentralCoverAssembly.piOf ((1 / 2 : ℂ) + Complex.I * z) *
+      CentralCoverAssembly.gammaOf ((1 / 2 : ℂ) + Complex.I * z) *
+      zeta ((1 / 2 : ℂ) + Complex.I * z)
+
+theorem four_factor_joint_conditional_ball12 {s : ℂ} {G Z : ℝ}
+    (hs : s ∈ Metric.closedBall (0 : ℂ) 12)
+    (hGnn : 0 ≤ G) (hZnn : 0 ≤ Z)
+    (hG : ‖CentralCoverAssembly.gammaOf s‖ ≤ G)
+    (hZ : ‖zeta s‖ ≤ Z) :
+    ‖CentralCoverAssembly.polyOf s * CentralCoverAssembly.piOf s *
+      CentralCoverAssembly.gammaOf s * zeta s‖ ≤ 319488 * G * Z := by
+  have hPP := Door3TopEdgeBallSup.ballSup_polyPi_joint_ball12 hs
+  have hPPnn : (0 : ℝ) ≤
+      ‖CentralCoverAssembly.polyOf s * CentralCoverAssembly.piOf s‖ :=
+    norm_nonneg _
+  have hGnn0 : (0 : ℝ) ≤ ‖CentralCoverAssembly.gammaOf s‖ :=
+    norm_nonneg _
+  have hZnn0 : (0 : ℝ) ≤ ‖zeta s‖ := norm_nonneg _
+  have h319nn : (0 : ℝ) ≤ (319488 : ℝ) := by norm_num
+  have h319Gnn : (0 : ℝ) ≤ (319488 : ℝ) * G :=
+    mul_nonneg h319nn hGnn
+  have h1 : ‖CentralCoverAssembly.polyOf s * CentralCoverAssembly.piOf s‖ *
+      ‖CentralCoverAssembly.gammaOf s‖ ≤ (319488 : ℝ) * G :=
+    mul_le_mul hPP hG hGnn0 h319nn
+  have h2 : (‖CentralCoverAssembly.polyOf s * CentralCoverAssembly.piOf s‖ *
+      ‖CentralCoverAssembly.gammaOf s‖) * ‖zeta s‖ ≤
+      ((319488 : ℝ) * G) * Z :=
+    mul_le_mul h1 hZ hZnn0 h319Gnn
+  have hnorm : ‖CentralCoverAssembly.polyOf s * CentralCoverAssembly.piOf s *
+      CentralCoverAssembly.gammaOf s * zeta s‖ =
+      (‖CentralCoverAssembly.polyOf s * CentralCoverAssembly.piOf s‖ *
+      ‖CentralCoverAssembly.gammaOf s‖) * ‖zeta s‖ := by
+    rw [norm_mul, norm_mul]
+  have hassoc : (319488 : ℝ) * G * Z = ((319488 : ℝ) * G) * Z := by
+    ring
+  rw [hnorm, hassoc]
+  exact h2
+
+end Door3TopEdgeGammaGap
