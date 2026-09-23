@@ -6164,6 +6164,9 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 ZETA-M25 (background `ses_f345ee9b`, proof-only,
+  grep-clean, zeta-only commit): M25 tail → K0 19.882 reverses
+  further (minimum at N=17 stands).
 - 2026-09-22 OFFAXIS-S13 (background `ses_f345f5d55`,
   proof-only, grep-clean, offaxis-only commit): S13 diminishing
   verdict (floor below bar, triangle transfer).
