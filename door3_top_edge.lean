@@ -2005,3 +2005,48 @@ def close_open_zeta12 (Z : ℝ) : Prop :=
   Door3TopEdgeGammaGap.zeta_ball12_upper_residual Z
 
 end Door3TopEdgeClose
+
+/-! ## TOPEDGE-UNIFORM chain exist-lower to residual form (append-only, value + exact gap).
+
+Grep (read before filing):
+* tail `door3_top_edge.lean:1984-2007` (`Door3TopEdgeClose`: `ballSup_40_to_1000`
+  monotone 40 to 1000, open gaps re-exported).
+* banked lower bounds in this file: `Door3TopEdge.exists_bottom_edge_lower_bound`
+  (`:170-188`, existential over any `Icc`),
+  `Door3TopEdgeUniformLower.bottom_uniform_exist_lower_on_Icc10` (`:1446-1453`,
+  existential over `Icc (-10) 10`),
+  `Door3TopEdgeUniformLower.bottom_point_form_eq` (`:1455-1459`, rewrites
+  `x - I / 2` to residual point form), pointwise `1 / 2` at `x = 0`
+  (`Door3TopEdgeNeeds.lower_outer_point_half_at_zero` `:1010-1025`).
+* residual `Door3TopEdgeNeeds.bottom_uniform_lower_residual` (`:1027-1030`)
+  demands `1 / 2` uniformly over `Icc (-10) 10`; no banked lemma supplies
+  `1 / 2` away from `x = 0`.
+
+Value: `bottom_uniform_exist_lower_residual_form` chains the banked
+existential Icc10 lower into residual point form.
+Gap (exact, OPEN): `uniform_half_exact_gap` alias of
+`bottom_uniform_lower_residual`; hence uniform `1 / 2` stays OPEN.
+-/
+
+namespace Door3TopEdgeUniformChain
+
+open Complex Real Set Topology
+
+theorem bottom_uniform_exist_lower_residual_form :
+    ∃ ε : ℝ, 0 < ε ∧
+      ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+        ε ≤ ‖CentralCoverAssembly.xiShiftedEntire
+          ((x : ℂ) - Complex.I * (((1 / 2 : ℝ)) : ℂ))‖ := by
+  obtain ⟨ε, hε, h⟩ :=
+    Door3TopEdgeUniformLower.bottom_uniform_exist_lower_on_Icc10
+  refine ⟨ε, hε, ?_⟩
+  intro x hx
+  have hlo := h x hx
+  have heq := Door3TopEdgeUniformLower.bottom_point_form_eq x
+  rw [heq] at hlo
+  exact hlo
+
+def uniform_half_exact_gap : Prop :=
+  Door3TopEdgeNeeds.bottom_uniform_lower_residual
+
+end Door3TopEdgeUniformChain
