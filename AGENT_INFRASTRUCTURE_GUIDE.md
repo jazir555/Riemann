@@ -6164,6 +6164,9 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 M46+FINAL16 (backgrounds `ses_f3458d94a`,
+  `ses_f3459bd27`, proof-only, grep-clean): M46 exact (sqrt
+  8388608); cutR10 FINAL16 ledger (closed vs gaps inventory).
 - 2026-09-22 R18+TOPCLOSE (backgrounds `ses_f34592b29`,
   `ses_f3458d948`, proof-only, grep-clean): R18 no chain keeps
   67200 (R17 whitespace touch, content intact); 40→1000 monotone

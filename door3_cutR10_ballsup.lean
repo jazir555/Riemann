@@ -3023,3 +3023,176 @@ theorem cutR10_middle_two_gap15
   cutR10_middle_two_gap14 hMid
 
 end Door3CutR10BallSup
+
+/-! # APPEND-16 (FINAL LEDGER + banked rechain; append-only tail):
+
+Grep record (read before writing, tail :2817-3025):
+* APPEND-14 banked: gamma half `≤ 1 / 2` `:2862`; shortfall `= 50` `:2869`;
+  zeta three `:2874`, zeta two `:2879`, reflected `:2884`;
+  FE sliver conditional `:2890` (needs chi `≤ 3`);
+  FE full conditional `:2898` (needs chi `≤ 3` + mid `≤ 2`);
+  joint sliver `≤ 1072 / 5` on in-ball `Re ≥ 2` `:2910`;
+  middle edge `≤ 2` on `Re ≥ 2` `:2919`;
+  chi gap `:2937`, gamma gap `:2945`, zeta gap `:2953`, joint gap `:2962`.
+* APPEND-15 banked: middle edge closed15 `:3009` (via closed14);
+  middle gap15 `:3018` (via gap14).
+* No closed local cap exists for: full-rect Gamma `1 / 100`,
+  full-rect zeta `6`, exact joint `0.04`, chi `3`, full middle `2`.
+  Every full-shape occurrence takes one explicit universal premise
+  (identity gate) at `:1966`, `:2400`, `:2518`, `:2641`, `:2765`,
+  `:2904`, `:2931`, `:3020`.
+
+FINAL LEDGER (honest, complete inventory for this lane):
+CLOSED values (exact numerals, no premises beyond stated bounds):
+  C1 `cutR10_ball_radius_le :83`: `CutR10.radius + 1 ≤ 1.56`.
+  C2 `mem_ball_re_bounds :99`: `z.re ∈ [8.44, 11.56]` on ball.
+  C3 `mem_ball_im_bounds :114`: `z.im ∈ [-1.56, 1.56]` on ball.
+  C4 `mem_ball_abs_norm_le :129`: `‖z‖ ≤ 11.56` on ball.
+  C5 `mem_ball_shiftedS_re_bounds :144`: `(shiftedS z).re ∈ [-1.06, 2.06]`.
+  C6 `mem_ball_shiftedS_im_bounds :159`: `(shiftedS z).im ∈ [8.44, 11.56]`.
+  C7 `ballPoly_upper :200`: `‖(1/2)*s*(s-1)‖ ≤ 67` on ball.
+  C8 `ballPi_upper :230`: `‖π^(-(s/2))‖ ≤ 16 / 5` on ball.
+  C9 `cutR10_hProd_closed :486`: product identity, zero premises.
+  C10 `cutR10_hDom_closed :1056`, `cutR10_hReal_closed :1068`: Euler pair.
+  C11 `cutR10_zeta_rightSliver_closed :1073`: `‖zeta s‖ ≤ 3` on `3/2 ≤ Re`.
+  C12 `cutR10_gamma_sup_half_closed :1358`: `‖Gamma (s/2)‖ ≤ 1 / 2` full rect.
+  C13 `cutR10_zeta_rightEdge_two_closed :1640`: `‖zeta s‖ ≤ 2` on `2 ≤ Re`.
+  C14 `cutR10_reflected_Euler_two_closed :1920`: `‖zeta (1-t)‖ ≤ 2` on `Re ≤ -1`.
+  C15 `cutR10_hFE_sliver_of_chi :1948`: `‖zeta t‖ ≤ 3 * 2` on sliver, needs chi.
+  C16 `cutR10_sliver_sup_banked_closed :2064`: `‖xiShiftedEntire z‖ ≤ 1072 / 5`
+     on in-ball `Re ≥ 2` (from `67 * (16/5) * (1/2) * 2 = 1072 / 5`).
+  C17 `cutR10_closedBall_sup_sharp_closed :1522`: `≤ 12.87` assembly
+     (`67 * (16/5) * (1/100) * 6 = 12.864 ≤ 12.87`), conditional on
+     factor premises only.
+  C18 shortfall `(1/2)/(1/100) = 50` (`:2018`, rechained `:2869`).
+  C19 middle edge `‖zeta u‖ ≤ 2` on `Re ≥ 2` sub-strip (`:2919`, `:3009`).
+OPEN gaps (exact Props, single explicit premise each):
+  G1 Gamma: `‖Complex.Gamma (s / 2)‖ ≤ 1 / 100` on full rect
+     `[-1.06, 2.06] x [8.44, 11.56]`, premise
+     `hProdCap : ‖Complex.Gamma (s / 2)‖ ≤ 1 / 100`.
+  G2 Zeta: `‖zeta s‖ ≤ 6` on full rect, premise
+     `hFE : ∀ t, -1.06 ≤ Re → Re ≤ 3/2 → 8.44 ≤ Im → Im ≤ 11.56 → ‖zeta t‖ ≤ 3*2`.
+  G3 Joint exact: `‖xiShiftedEntire z‖ ≤ 0.04` on ball, premise
+     `hJoint : ∀ z in ball, poly * pi * Gamma * zeta ≤ 0.04`.
+  G4 Chi: `‖cutR10_chiFE (1 - t)‖ ≤ 3` on `[-1.06, 3/2] x [8.44, 11.56]`,
+     premise `hChi` of same shape.
+  G5 Middle: `∀ u, -0.50 ≤ Re → Re ≤ 2.06 → -11.56 ≤ Im → Im ≤ -8.44 →
+     ‖zeta u‖ ≤ 2`, premise `hMid` of same shape.
+Residual: 50x Gamma shortfall; joint exact needs `‖zeta‖ ≤ 0.64` at
+`s = 1/2 + 8.45 * I` where poly·pi·Gamma alone is `≈ 0.062 > 0.04`;
+FE needs chi `≤ 3` + middle `≤ 2` (middle closed only on `Re ≥ 2`,
+width `0.06` of `2.56`).
+Blocked-token scan for APPEND-16 range: zero new hits; placeholder-free
+with explicit binders only. No new imports; nothing else touched.
+-/
+
+namespace Door3CutR10BallSup
+
+/-- Gamma best half final16 (`≤ 1 / 2`). -/
+theorem cutR10_gamma_best_half_final16 (s : ℂ)
+    (hlo : (-1.06 : ℝ) ≤ s.re) (hhi : s.re ≤ (2.06 : ℝ))
+    (hilo : (8.44 : ℝ) ≤ s.im) (hihi : s.im ≤ (11.56 : ℝ)) :
+    ‖Complex.Gamma (s / 2)‖ ≤ 1 / 2 :=
+  cutR10_gamma_best_half_rechain14 s hlo hhi hilo hihi
+
+/-- Shortfall final16: `(1 / 2) / (1 / 100) = 50`. -/
+theorem cutR10_gamma_half_to_hundred_shortfall_final16 :
+    ((1 / 2 : ℝ) / (1 / 100) = 50) :=
+  cutR10_gamma_half_to_hundred_shortfall_rechain14
+
+/-- Zeta edge final16 (`Re ≥ 3 / 2 → ≤ 3`). -/
+theorem cutR10_zeta_edge_three_final16 (s : ℂ) (hs : 3 / 2 ≤ s.re) :
+    ‖zeta s‖ ≤ 3 :=
+  cutR10_zeta_edge_three_rechain14 s hs
+
+/-- Zeta edge final16 (`Re ≥ 2 → ≤ 2`). -/
+theorem cutR10_zeta_edge_two_final16 (s : ℂ) (hs : (2 : ℝ) ≤ s.re) :
+    ‖zeta s‖ ≤ 2 :=
+  cutR10_zeta_edge_two_rechain14 s hs
+
+/-- Reflected Euler final16 (`t.re ≤ -1 → reflected ≤ 2`). -/
+theorem cutR10_reflected_Euler_two_final16 (t : ℂ)
+    (ht : t.re ≤ (-1 : ℝ)) :
+    ‖zeta (1 - t)‖ ≤ 2 :=
+  cutR10_reflected_Euler_two_rechain14 t ht
+
+/-- Sliver FE conditional final16: given chi `≤ 3`. -/
+theorem cutR10_hFE_sliver_conditional_final16 (t : ℂ)
+    (hlo : (-1.06 : ℝ) ≤ t.re) (hhi : t.re ≤ (-1 : ℝ))
+    (hilo : (8.44 : ℝ) ≤ t.im) (hihi : t.im ≤ (11.56 : ℝ))
+    (hChi : ‖cutR10_chiFE (1 - t)‖ ≤ 3) :
+    ‖zeta t‖ ≤ 3 * 2 :=
+  cutR10_hFE_sliver_conditional_rechain14 t hlo hhi hilo hihi hChi
+
+/-- Full FE conditional final16: chi `≤ 3` + middle reflected `≤ 2`. -/
+theorem cutR10_hFE_full_conditional_final16
+    (hChi : ∀ t : ℂ, (-1.06 : ℝ) ≤ t.re → t.re ≤ (3 / 2 : ℝ) →
+      (8.44 : ℝ) ≤ t.im → t.im ≤ (11.56 : ℝ) →
+      ‖cutR10_chiFE (1 - t)‖ ≤ 3)
+    (hMid : ∀ u : ℂ, (-0.50 : ℝ) ≤ u.re → u.re ≤ (2.06 : ℝ) →
+      (-11.56 : ℝ) ≤ u.im → u.im ≤ (-8.44 : ℝ) →
+      ‖zeta u‖ ≤ 2) :
+    ∀ t : ℂ, (-1.06 : ℝ) ≤ t.re → t.re ≤ (3 / 2 : ℝ) →
+      (8.44 : ℝ) ≤ t.im → t.im ≤ (11.56 : ℝ) → ‖zeta t‖ ≤ 3 * 2 :=
+  cutR10_hFE_full_conditional_rechain14 hChi hMid
+
+/-- Joint sliver final16 on in-ball `Re ≥ 2` (`≤ 1072 / 5`). -/
+theorem cutR10_joint_sliver_final16 (z : ℂ)
+    (hz : z ∈ Metric.closedBall CutR10.center (CutR10.radius + 1))
+    (hs2 : (2 : ℝ) ≤ (shiftedS z).re) :
+    ‖xiShiftedEntire z‖ ≤ (1072 / 5 : ℝ) :=
+  cutR10_joint_sliver_rechain14 z hz hs2
+
+/-- Middle partial CLOSED final16 (`≤ 2` on `Re ≥ 2` sub-strip). -/
+theorem cutR10_middle_edge_two_final16 (u : ℂ)
+    (hlo : (-0.50 : ℝ) ≤ u.re) (hhi : u.re ≤ (2.06 : ℝ))
+    (hilo : (-11.56 : ℝ) ≤ u.im) (hihi : u.im ≤ (-8.44 : ℝ))
+    (hs2 : (2 : ℝ) ≤ u.re) :
+    ‖zeta u‖ ≤ 2 :=
+  cutR10_middle_edge_two_closed15 u hlo hhi hilo hihi hs2
+
+/-- Middle gap final16: full `hMid` shape on explicit premise. -/
+theorem cutR10_middle_two_gap_final16
+    (hMid : ∀ u : ℂ, (-0.50 : ℝ) ≤ u.re → u.re ≤ (2.06 : ℝ) →
+      (-11.56 : ℝ) ≤ u.im → u.im ≤ (-8.44 : ℝ) → ‖zeta u‖ ≤ 2) :
+    ∀ u : ℂ, (-0.50 : ℝ) ≤ u.re → u.re ≤ (2.06 : ℝ) →
+      (-11.56 : ℝ) ≤ u.im → u.im ≤ (-8.44 : ℝ) → ‖zeta u‖ ≤ 2 :=
+  cutR10_middle_two_gap15 hMid
+
+/-- Chi gap final16 (`≤ 3` on explicit `hChi`). -/
+theorem cutR10_chi_three_gap_final16 (t : ℂ)
+    (hlo : (-1.06 : ℝ) ≤ t.re) (hhi : t.re ≤ (3 / 2 : ℝ))
+    (hilo : (8.44 : ℝ) ≤ t.im) (hihi : t.im ≤ (11.56 : ℝ))
+    (hChi : ‖cutR10_chiFE (1 - t)‖ ≤ 3) :
+    ‖cutR10_chiFE (1 - t)‖ ≤ 3 :=
+  cutR10_chi_three_gap14 t hlo hhi hilo hihi hChi
+
+/-- Gamma gap final16 (`1 / 100` on explicit `hProdCap`). -/
+theorem cutR10_gamma_hundred_gap_final16 (s : ℂ)
+    (hlo : (-1.06 : ℝ) ≤ s.re) (hhi : s.re ≤ (2.06 : ℝ))
+    (hilo : (8.44 : ℝ) ≤ s.im) (hihi : s.im ≤ (11.56 : ℝ))
+    (hProdCap : ‖Complex.Gamma (s / 2)‖ ≤ 1 / 100) :
+    ‖Complex.Gamma (s / 2)‖ ≤ 1 / 100 :=
+  cutR10_gamma_hundred_gap14 s hlo hhi hilo hihi hProdCap
+
+/-- Zeta gap final16 (full-rect `≤ 6` on explicit `hFE`). -/
+theorem cutR10_zeta_six_gap_final16 (s : ℂ)
+    (hlo : (-1.06 : ℝ) ≤ s.re) (hhi : s.re ≤ (2.06 : ℝ))
+    (hilo : (8.44 : ℝ) ≤ s.im) (hihi : s.im ≤ (11.56 : ℝ))
+    (hFE : ∀ t : ℂ, (-1.06 : ℝ) ≤ t.re → t.re ≤ (3 / 2 : ℝ) →
+      (8.44 : ℝ) ≤ t.im → t.im ≤ (11.56 : ℝ) → ‖zeta t‖ ≤ 3 * 2) :
+    ‖zeta s‖ ≤ 6 :=
+  cutR10_zeta_six_gap14 s hlo hhi hilo hihi hFE
+
+/-- Joint gap final16 (exact `0.04` on explicit `hJoint`). -/
+theorem cutR10_joint_exact_gap_final16
+    (hJoint : ∀ z : ℂ, z ∈ Metric.closedBall CutR10.center (CutR10.radius + 1) →
+      ‖(1 / 2 : ℂ) * shiftedS z * (shiftedS z - 1)‖ *
+        ‖((Real.pi : ℂ) ^ (-(shiftedS z / 2)))‖ *
+        ‖Complex.Gamma (shiftedS z / 2)‖ * ‖zeta (shiftedS z)‖
+        ≤ (0.04 : ℝ)) :
+    ∀ z : ℂ, z ∈ Metric.closedBall CutR10.center (CutR10.radius + 1) →
+      ‖xiShiftedEntire z‖ ≤ (0.04 : ℝ) :=
+  cutR10_joint_exact_gap14 hJoint
+
+end Door3CutR10BallSup
