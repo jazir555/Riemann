@@ -9965,3 +9965,184 @@ this turn). -/
 def premGamma_E06_N22_next : Prop :=
   (1823946635529627008000.0 : ℝ) / 2881757864297938399120 < 0.66
 end Door3PremiseGamma
+
+namespace Door3PremiseGamma
+
+/-! ## GAMMA-N22-E06: E06 N = 22 HONEST achievable finite lower (gap, filed).
+
+Mirrors the E06 `N = 21` honest block
+(`premGamma_E06_rpow21_frac_lower`, `premGamma_E06_rpow21_Re_lower`,
+`premGamma_E06_cpow21_norm_lower`, `premGamma_E06shift_add21_norm_le`,
+`premGamma_E06_factorial21`, `premGamma_E06_N21_denom_step_arith`,
+`premGamma_E06_N21_numer_arith`, `premGamma_E06_GammaSeq21_link`,
+`premGamma_E06_GammaSeq21_rate_needed`,
+`premGamma_E06_N21_honest_ceiling_below_gate`,
+`premGamma_E06_N21_honest_ceiling_lt_0643`,
+`premGamma_E06_N21_gap_exact`, `premGamma_E06_N21_gap_arith`,
+`premGamma_E06_N21_rate_adjusted_gap`).
+
+Audit (exact arithmetic, banked windows only — no estimate fixed):
+At E06 shifted `s = w_E06 + 1` (`Re s = 1.1975`, `Im s = 0.625`):
+* cpow lower: `‖(22 : ℂ) ^ s‖ = 22 ^ 1.1975 ≥ 37.40` (TRUE `≈ 40.51`) via
+  `Complex.norm_cpow_eq_rpow_re_of_pos` plus `22 ^ 1.1975 = 22 * 22 ^ 0.1975 ≥
+  22 * 22 ^ (5/26) ≥ 22 * 1.70 = 37.40` (`5/26 ≤ 0.1975`; `1.70^26 ≤ 22^5`,
+  all `norm_num`).
+* denominator step: `‖s+22‖ ≤ 23.21`
+  (`23.1975^2 + 0.625^2 = 538.51463125 ≤ 23.21^2 = 538.7041`);
+  product step `2881757864297938399120 * 23.21 ≤ 66885600030355150243576`
+  (closed numerals, `norm_num`).
+* quotient: `37.40 * 1124000727777607680000 / 66885600030355150243576 =
+  42037627218882527232000.0 / 66885600030355150243576 ≈ 0.62850 < 0.66`
+  — honest gap (`0.66 * 66885600030355150243576 = 44144496020034399160759.632`,
+  numerator below). Tighter cap `< 0.643` gives exact gap `0.017`:
+  `quotient + 0.017 < 0.66` banked.
+* verdict: GAP vs `0.66` at `GammaSeq` level (gap `0.017` banked in-file).
+  Gamma closure even further open after the `0.014` rate. Do NOT force:
+  file `N = 23` as next rung; no `N = 23` numerals are banked this turn.
+-/
+
+/-- E06 `22 ^ (5/26)` integer-root lower: `1.70 ≤ 22 ^ (5/26)`. -/
+theorem premGamma_E06_rpow22_frac_lower :
+    (1.70 : ℝ) ≤ (22 : ℝ) ^ ((5 / 26 : ℝ)) := by
+  have hR : (((22 : ℝ) ^ ((5 / 26) : ℝ)) ^ (26 : ℕ)) = (22 : ℝ) ^ (5 : ℕ) := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 22)]
+    have e : (5 / 26 : ℝ) * (((26 : ℕ)) : ℝ) = ((5 : ℕ) : ℝ) := by norm_num
+    rw [e, Real.rpow_natCast]
+  have hint : (1.70 : ℝ) ^ (26 : ℕ) ≤ (((22 : ℝ) ^ ((5 / 26) : ℝ)) ^ (26 : ℕ)) := by
+    rw [hR]
+    norm_num
+  exact le_of_pow_le_pow_left₀ (by norm_num : 26 ≠ 0)
+    (Real.rpow_nonneg (by norm_num : (0 : ℝ) ≤ 22) _) hint
+
+/-- E06 `22 ^ 1.1975` lower: `37.40 ≤ 22 ^ 1.1975` (TRUE `≈ 40.51`).
+Splits `1.1975 = 1 + 0.1975`, uses `5/26 ≤ 0.1975` monotonicity plus the
+fraction lower above (`22 * 1.70 = 37.40`). -/
+theorem premGamma_E06_rpow22_Re_lower :
+    (37.40 : ℝ) ≤ (22 : ℝ) ^ ((1.1975 : ℝ)) := by
+  have hexp : (1.1975 : ℝ) = 1 + 0.1975 := by norm_num
+  have hfrac : (5 / 26 : ℝ) ≤ 0.1975 := by norm_num
+  have hmono : (22 : ℝ) ^ ((5 / 26) : ℝ) ≤ (22 : ℝ) ^ ((0.1975) : ℝ) :=
+    Real.rpow_le_rpow_of_exponent_le (by norm_num : (1 : ℝ) ≤ 22) hfrac
+  have h170 : (1.70 : ℝ) ≤ (22 : ℝ) ^ ((0.1975) : ℝ) :=
+    le_trans premGamma_E06_rpow22_frac_lower hmono
+  have h3740 : (37.40 : ℝ) = 22 * 1.70 := by norm_num
+  rw [hexp, Real.rpow_add (show (0 : ℝ) < 22 by norm_num), Real.rpow_one, h3740]
+  exact mul_le_mul_of_nonneg_left h170 (by norm_num : (0 : ℝ) ≤ 22)
+
+/-- E06 shifted cpow norm lower: `37.40 ≤ ‖(22 : ℂ) ^ s‖` at `s = w_E06 + 1`. -/
+theorem premGamma_E06_cpow22_norm_lower :
+    (37.40 : ℝ) ≤ ‖(((22 : ℂ) ^ ((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)))))‖ := by
+  have hre : ((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1))).re
+      = (1.1975 : ℝ) := by
+    rw [Complex.add_re, Complex.div_ofNat_re,
+      show (Complex.mk (0.395 : ℝ) (1.25 : ℝ)).re = (0.395 : ℝ) from rfl,
+      Complex.one_re]
+    norm_num
+  have hbase : ((22 : ℝ) : ℂ) = (22 : ℂ) := by simp
+  have hcn := Complex.norm_cpow_eq_rpow_re_of_pos (show (0 : ℝ) < 22 by norm_num)
+    ((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)))
+  rw [← hbase, hcn, hre]
+  exact premGamma_E06_rpow22_Re_lower
+
+/-- Cpow-upper requirement at `N = 22` (filed, not proved): sound
+`‖(22 : ℂ) ^ s‖ ≤ 40.70` at E06 shifted `s` (TRUE `≈ 40.51`).
+Filed ONLY at `N = 22`. -/
+def premGamma_E06_cpow22_upper_needed : Prop :=
+  ‖(((22 : ℂ) ^ ((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)))))‖ ≤
+    (40.70 : ℝ)
+
+/-- E06 shifted `s+22` norm: `‖s + 22‖ ≤ 23.21`
+(TRUE `≈ 23.20592`; `23.1975^2 + 0.625^2 = 538.51463125 ≤ 23.21^2`). -/
+theorem premGamma_E06shift_add22_norm_le :
+    ‖((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1)‖ ≤ (23.21 : ℝ) := by
+  have hre : (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1)).re
+      = (23.1975 : ℝ) := by
+    rw [Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re, Complex.div_ofNat_re,
+      show (Complex.mk (0.395 : ℝ) (1.25 : ℝ)).re = (0.395 : ℝ) from rfl,
+      Complex.one_re]
+    norm_num
+  have him : (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1)).im
+      = (0.625 : ℝ) := by
+    rw [Complex.add_im, Complex.add_im, Complex.add_im, Complex.add_im, Complex.add_im, Complex.add_im, Complex.add_im, Complex.add_im, Complex.add_im, Complex.add_im, Complex.add_im, Complex.add_im, Complex.add_im, Complex.add_im, Complex.add_im, Complex.add_im, Complex.add_im, Complex.add_im, Complex.add_im, Complex.add_im, Complex.add_im, Complex.add_im, Complex.add_im, Complex.div_ofNat_im,
+      show (Complex.mk (0.395 : ℝ) (1.25 : ℝ)).im = ((1.25 : ℝ)) from rfl,
+      Complex.one_im]
+    norm_num
+  have h2 : ‖((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1)‖ ^ 2
+      ≤ (23.21 : ℝ) ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  have hnn : (0 : ℝ) ≤ (23.21 : ℝ) := by norm_num
+  have habs := abs_le_of_sq_le_sq h2 hnn
+  rwa [abs_of_nonneg (norm_nonneg _)] at habs
+
+/-- `22! = 1124000727777607680000` (verified numeral for the `N = 22` link numerator). -/
+theorem premGamma_E06_factorial22 :
+    Nat.factorial 22 = 1124000727777607680000 := by
+  decide
+
+/-- E06 `N = 22` denominator product step (finite-product extension):
+`2881757864297938399120 * 23.21 ≤ 66885600030355150243576` (closed numerals). -/
+theorem premGamma_E06_N22_denom_step_arith :
+    (2881757864297938399120 : ℝ) * 23.21 ≤ 66885600030355150243576 := by
+  norm_num
+
+/-- E06 `N = 22` numerator arithmetic:
+`37.40 * 1124000727777607680000 = 42037627218882527232000.0` (closed numerals). -/
+theorem premGamma_E06_N22_numer_arith :
+    (37.40 : ℝ) * 1124000727777607680000 = (42037627218882527232000.0 : ℝ) := by
+  norm_num
+
+/-- Missing link L1 at `N = 22` (filed, not proved): `GammaSeq s 22` norm identity
+at E06 shifted `s = w_E06 + 1`, extending the `N = 21` spec shape
+(`premGamma_E06_GammaSeq21_link` with `22 ! = 1124000727777607680000` and one more
+denominator factor `‖s+22‖`). Filed ONLY at `N = 22`. -/
+def premGamma_E06_GammaSeq22_link : Prop :=
+  ‖Complex.GammaSeq (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)) 22‖ =
+    ‖(((22 : ℂ) ^ ((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)))))‖ * 1124000727777607680000 /
+      ((2881757864297938399120 : ℝ) * 23.21)
+
+/-- Missing rate L2 at `N = 22` (filed, not proved): quantitative `GammaSeq`
+convergence at E06 shifted point with budget `0.014` (same host-leaf shape as
+`premGamma_E06_GammaSeq21_rate_needed`). Host: a Stirling-disc / Binet-enclosure
+leaf or an explicit `GammaSeq` rate lemma; NOT this file. Filed ONLY at `N = 22`. -/
+def premGamma_E06_GammaSeq22_rate_needed : Prop :=
+  ‖Complex.GammaSeq (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)) 22 -
+    Complex.Gamma (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1))‖ ≤
+    (0.014 : ℝ)
+
+/-- E06 `N = 22` honest-ceiling gap: `42037627218882527232000.0 / 66885600030355150243576 < 0.66`
+(`≈ 0.62850 < 0.66`). The honest achievable quotient misses the gate at `GammaSeq`
+level (Gamma closure further open after the `0.014` rate). -/
+theorem premGamma_E06_N22_honest_ceiling_below_gate :
+    (42037627218882527232000.0 : ℝ) / 66885600030355150243576 < (0.66 : ℝ) := by
+  norm_num
+
+/-- E06 `N = 22` tighter cap: quotient `< 0.643` (exact gap carrier). -/
+theorem premGamma_E06_N22_honest_ceiling_lt_0643 :
+    (42037627218882527232000.0 : ℝ) / 66885600030355150243576 < (0.643 : ℝ) := by
+  norm_num
+
+/-- E06 `N = 22` exact gap banked in-file: `quotient + 0.017 < 0.66`. -/
+theorem premGamma_E06_N22_gap_exact :
+    (42037627218882527232000.0 : ℝ) / 66885600030355150243576 + 0.017 < (0.66 : ℝ) := by
+  norm_num
+
+/-- E06 `N = 22` gap arithmetic carrier: `0.643 + 0.017 = 0.66` exact. -/
+theorem premGamma_E06_N22_gap_arith :
+    (0.643 : ℝ) + 0.017 = 0.66 := by
+  norm_num
+
+/-- E06 `N = 22` rate-adjusted gap: even the honest quotient minus the `0.014`
+rate stays below `0.66` (`≈ 0.614 < 0.66` carrier via the `0.643` cap). -/
+theorem premGamma_E06_N22_rate_adjusted_gap :
+    (42037627218882527232000.0 : ℝ) / 66885600030355150243576 - 0.014 < (0.66 : ℝ) := by
+  norm_num
+
+/-- E06 `N = 23` next rung (filed, not fixed): the `N = 22` honest quotient
+`≈ 0.62850` misses `0.66` at `GammaSeq` level (gap `0.017` banked above), and
+minus the `0.014` rate leaves `≈ 0.614 < 0.66`, so sufficiency is NOT closed
+here. Do NOT force; the ladder moves to `N = 23` (no `N = 23` numerals banked
+this turn). -/
+def premGamma_E06_N23_next : Prop :=
+  (42037627218882527232000.0 : ℝ) / 66885600030355150243576 < 0.66
+end Door3PremiseGamma
