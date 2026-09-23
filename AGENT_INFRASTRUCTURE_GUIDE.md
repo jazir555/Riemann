@@ -6164,6 +6164,9 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 ZETA-M24 (background `ses_f346086de`, proof-only,
+  grep-clean, zeta-only commit): M24 tail → K0 19.858 reverses
+  further (minimum at N=17 stands).
 - 2026-09-22 QUAD-D (backgrounds `ses_f34614cfd`,
   `ses_f346086e0`, `ses_f3460c029`, `ses_f3460ff89`, proof-only,
   grep-clean): R11 keeps 67200; M40 exact (sqrt 1048576); ball-25/2
