@@ -6164,6 +6164,13 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 SUPPLIERS-VERIFY (background `ses_f347417a1`, build owner):
+  BUILD-EXIT=0 GREEN (8688 jobs, log 165547). Covers doc-fixes + S-ladder
+  through S24 + Im routes. MILESTONE: third GREEN module. S22IM-compose
+  post-dates; re-verify later.
+- 2026-09-22 OFFAXIS-S6FEED (background `ses_f34724f44`, proof-only,
+  grep-clean, off_axis-only commit): S6 surplus composed (budget 173/2250,
+  gain 1/45 over S5). Mid residual (4090 terms) open.
 - 2026-09-22 RH-FINAL (background `ses_f3472a834`, proof-only,
   grep-clean*, RH-only commit): FINAL wiring (cover+4 tail routes) +
   residual list. Distance instance open. RH lane COMPLETE-conditional.

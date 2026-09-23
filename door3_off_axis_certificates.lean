@@ -10144,5 +10144,77 @@ theorem sCutOA11BIGS_S6_gap : True := by
 #print axioms OA11BIGS_S6_re_add_im_ge
 #print axioms OA11BIGS_S6_norm_ge
 #print axioms sCutOA11BIGS_S6_closed
+#print axioms sCutOA11BIGS_S6_mid_budget
+#print axioms sCutOA11BIGS_S4096_transfer_triangle
+#print axioms sCutOA11BIGS_S4096_feeder_of_mid_le
+
+end Door3OffAxis
+
+namespace Door3OffAxis
+open scoped BigOperators
+
+/-- OFFAXIS-S6FEED grep-first record (read-only before append).
+
+S6 shapes at `door3_off_axis_certificates.lean:10020-10090`:
+`OA11BIGS_S6_eq` (range 6 = range 5 + term 5), `OA11BIGS_S6_re_add_im_ge`
+(`2449/750`), `OA11BIGS_S6_norm_ge` (`2449/1125`), closed
+`sCutOA11BIGS_S6_closed` (`21/10`), surplus `sCutOA11BIGS_S6_surplus`
+(`173/2250`), budget `sCutOA11BIGS_S6_mid_budget` (`173/2250`).
+S4096 feeder at `:9247`: `sCutOA11_S4096_feeder_of_mid_le` (S5 base,
+budget `41/750`) + transfer `sCutOA11_S4096_transfer_triangle` + residual
+`sCutOA11_S4096_mid_residual` + hEnough `sCutOA11_S4096_hEnough_of_residual`.
+Composition below replaces the S5 base with the S6 base (bigger surplus
+`173/2250 = 123/2250 + 50/2250` over S5 `41/750`, so bigger budget, same
+`21/10` bar); whole-mid `<= 173/2250` stays open and is filed as a named
+residual. -/
+theorem sCutOA11BIGS_S6_budget_gt_S5 :
+    (41 / 750 : ℝ) < (173 / 2250 : ℝ) := by norm_num
+
+/-- Joint `hEnough` closure conditional on the S6 named residual (S6-base
+composition: S6 feeder then `7/5 + 7/10 = 21/10`). -/
+theorem sCutOA11BIGS_S4096_hEnough_of_residual
+    (hres : sCutOA11BIGS_S6_mid_residual) :
+    (7 / 5 : ℝ) + (7 / 10 : ℝ) ≤
+      ‖∑ k ∈ Finset.range 4096, etaDirichletTerm sCutOA11 k‖ := by
+  have hslow := sCutOA11BIGS_S4096_feeder_of_mid_le hres
+  linarith
+
+/-- S6 mid-block difference as one interval sum (4090 terms, `6 ≤ 4096`). -/
+theorem sCutOA11BIGS_mid_eq_Ico :
+    (∑ k ∈ Finset.range 4096, etaDirichletTerm sCutOA11 k) -
+      (∑ k ∈ Finset.range 6, etaDirichletTerm sCutOA11 k) =
+      ∑ k ∈ Finset.Ico 6 4096, etaDirichletTerm sCutOA11 k := by
+  have h := Finset.sum_range_add_sum_Ico (fun k => etaDirichletTerm sCutOA11 k)
+    (show 6 ≤ 4096 by norm_num)
+  rw [← h]
+  abel
+
+/-- Norm form of the S6 mid-block identity. -/
+theorem sCutOA11BIGS_mid_norm_eq :
+    ‖(∑ k ∈ Finset.range 4096, etaDirichletTerm sCutOA11 k) -
+      (∑ k ∈ Finset.range 6, etaDirichletTerm sCutOA11 k)‖ =
+      ‖∑ k ∈ Finset.Ico 6 4096, etaDirichletTerm sCutOA11 k‖ := by
+  rw [sCutOA11BIGS_mid_eq_Ico]
+
+/-- S6 mid-block term count (`4096 - 6 = 4090`). -/
+theorem sCutOA11BIGS_mid_card_4090 : (Finset.Ico 6 4096).card = 4090 := by
+  rw [Nat.card_Ico]
+  norm_num
+
+/-- Honest composition verdict: S6 surplus `173/2250` strictly exceeds S5
+`41/750`, so the S6 feeder budget is strictly looser; `S4096 ≥ 21/10`
+and hence joint `hEnough` both follow conditionally on
+`sCutOA11BIGS_S6_mid_residual`. No whole-mid `≤ 173/2250` enclosure is
+banked here, so the residual stays open. Value banked is `2449/1125`;
+gap versus S5 is narrowed by `50/2250 = 1/45` of budget only. -/
+theorem sCutOA11BIGS_S6_feed_composition_gap : True := by
+  trivial
+
+#print axioms sCutOA11BIGS_S6_budget_gt_S5
+#print axioms sCutOA11BIGS_S4096_hEnough_of_residual
+#print axioms sCutOA11BIGS_mid_eq_Ico
+#print axioms sCutOA11BIGS_mid_norm_eq
+#print axioms sCutOA11BIGS_mid_card_4090
+#print axioms sCutOA11BIGS_S6_feed_composition_gap
 
 end Door3OffAxis
