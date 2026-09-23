@@ -6164,6 +6164,9 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 CUTGAMMA (background `ses_f3468b01b`, proof-only,
+  grep-clean, cutR10-only commit): fullGamma best-banked-half +
+  ratio + gap filed. Next premise next.
 - 2026-09-22 QUAD56 (backgrounds `ses_f346a7c89`,
   `ses_f3468b019-follow`, `ses_f346a2a8b-retry`, `ses_f3468b018`,
   proof-only, grep-clean): 8-leg F33 assembly below-bar + k35/36

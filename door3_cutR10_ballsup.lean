@@ -2106,3 +2106,65 @@ theorem cutR10_fullGamma_residual_open (s : ℂ)
   hProdCap
 
 end Door3CutR10BallSup
+
+/-! # APPEND-7 (fullGamma honest chain-or-gap; append-only tail; LF):
+
+Grep record (read before writing):
+* APPEND-5 `:1998-2030`: gate `:898-902` on `hProdCap`, banked chain
+  `:691 :743 :771 :808 :839 :871 :1316 :1328 :1358` reaching `1 / 2`,
+  rechain `:2011-2015`, shortfall `:2018-2020` (`(1/2)/(1/100) = 50`),
+  gated restatement `:2023-2028`.
+* APPEND-6 `:2032-2108`: sliver closed `:2064-2095`
+  (`cutR10_sliver_sup_banked_closed`, `1072 / 5` from `cutR10_hProd_closed`
+  + `ballPoly_upper (67)` + `ballPi_upper (16/5)`
+  + `cutR10_gamma_sup_half_closed (1/2)`
+  + `cutR10_zeta_rightEdge_two_closed (2)`), residual `:2101-2106`
+  (`cutR10_fullGamma_residual_open`, identity on `hProdCap`).
+* Sup shapes needing `1 / 100`: `:279 :931 :1724 :1766`
+  (`67 * (16/5) * (1/100) * 6 = 12.864`).
+
+Verdict here:
+* Best banked rebuild below reaches `1 / 2` only, by direct call to
+  `cutR10_gamma_sup_half_closed :1358` (which itself chains domination
+  + two-step shift + real cap + denom lower). No banked lemma gives the
+  `pi / 2` rate or a `20`-factor product, so `1 / 100` is NOT closed.
+* Shortfall pinned arithmetically: `(1/2) / (1/100) = 50`.
+* Exact gap filed: `1 / 100` stays gated on the single explicit Prop
+  `hProdCap`; full `0.04` stays gated on `hJoint`.
+No new imports; nothing else touched.
+-/
+
+namespace Door3CutR10BallSup
+
+/-- Honest best banked Gamma chain on the rectangle: `≤ 1 / 2`, by direct
+rebuild from the landed `cutR10_gamma_sup_half_closed` (which chains
+`cutR10_Gamma_norm_le_real` + `cutR10_gamma_shift_two` +
+`cutR10_Real_Gamma_mid_le_six` + `cutR10_gamma_denom_lower`). -/
+theorem cutR10_fullGamma_best_banked_half (s : ℂ)
+    (hlo : (-1.06 : ℝ) ≤ s.re) (hhi : s.re ≤ (2.06 : ℝ))
+    (hilo : (8.44 : ℝ) ≤ s.im) (hihi : s.im ≤ (11.56 : ℝ)) :
+    ‖Complex.Gamma (s / 2)‖ ≤ 1 / 2 :=
+  cutR10_gamma_sup_half_closed s hlo hhi hilo hihi
+
+/-- Shortfall factor from the banked `1 / 2` to the needed `1 / 100`. -/
+theorem cutR10_fullGamma_half_to_hundred_ratio :
+    ((1 / 2 : ℝ) / (1 / 100) = 50) := by
+  norm_num
+
+/-- Banked half bound is `50` times the target hundred bound. -/
+theorem cutR10_fullGamma_half_le_fifty_smul_hundred :
+    ((1 / 2 : ℝ) ≤ 50 * (1 / 100 : ℝ)) := by
+  norm_num
+
+/-- Exact gap filed: the `1 / 100` shape stays gated on the single explicit
+Prop `hProdCap`. This records non-closure from banked premises alone;
+closure would need the `pi / 2` rate or a `20`-factor product, neither
+present locally. -/
+theorem cutR10_fullGamma_gap_filed (s : ℂ)
+    (hlo : (-1.06 : ℝ) ≤ s.re) (hhi : s.re ≤ (2.06 : ℝ))
+    (hilo : (8.44 : ℝ) ≤ s.im) (hihi : s.im ≤ (11.56 : ℝ))
+    (hProdCap : ‖Complex.Gamma (s / 2)‖ ≤ 1 / 100) :
+    ‖Complex.Gamma (s / 2)‖ ≤ 1 / 100 :=
+  hProdCap
+
+end Door3CutR10BallSup
