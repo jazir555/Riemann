@@ -10811,3 +10811,137 @@ theorem OA11S8_diminishing_gap : True := by
 #print axioms OA11S8_diminishing_gap
 
 end Door3OffAxis
+
+namespace Door3OffAxis
+open scoped BigOperators
+
+/-- OFFAXIS-S9 grep-first record (read-only before append).
+
+S6 live at `door3_off_axis_certificates.lean:10038-10090`: `OA11BIGS_S6_norm_ge`
+(`2449/1125`), `sCutOA11BIGS_S6_closed` (`21/10`), surplus and budget
+`sCutOA11BIGS_S6_surplus` / `sCutOA11BIGS_S6_mid_budget` (`173/2250`).
+S7 diminishing at `:10322-10343`: `OA11S7_norm_floor` (`1999/1125`),
+`OA11S7_shortfall` (`-727/2250`), `OA11S7_below_bar`, `OA11S7_diminishing_gap`.
+S8 tail at `:10704-10811`: `sCutOA11S8_sqrt8_ge`, `sCutOA11S8_amp8_le`,
+`OA11S8_eta_term7_eq`, `OA11S8_eta_term7_norm_le` (`1/2`),
+`OA11S8_S8_eq`, `OA11S8_transfer_triangle`, `OA11S8_norm_floor`
+(`2873/2250`), `OA11S8_shortfall` (`-1852/2250`), `OA11S8_below_bar`,
+`OA11S8_diminishing_gap`.
+Mid-low impossibility at `:10644-10664` (`sCutOA11S7_mid_low_residual_rhs_neg`,
+`sCutOA11S7_three_pair_exceeds_S6budget`,
+`sCutOA11S7_mid_low_residual_impossible`): three banked pair specs already
+exceed the S6 budget, lowest-block residual RHS negative.
+
+Attempt order per task: S9 partial via flat amplitude triangle
+(`‖t8‖ ≤ 1/3` from `3 ≤ sqrt 9`, no trig needed), then floor and bar check.
+Honest outcome filed below: S9 floor below the `21/10` bar, so S6 stays live. -/
+theorem sCutOA11S9_sqrt9_ge :
+    (3 : ℝ) ≤ (9 : ℝ) ^ ((1 / 2 : ℝ)) := by
+  have e9 : ((((9 : ℝ) ^ ((1 / 2 : ℝ))) ^ (2 : ℕ))) = 9 := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    have e2 : ((1 / 2 : ℝ)) * ((((2 : ℕ))) : ℝ) = 1 := by norm_num
+    rw [e2, Real.rpow_one]
+  have hsq : ((3 : ℝ) ^ (2 : ℕ)) ≤
+      ((((9 : ℝ) ^ ((1 / 2 : ℝ))) ^ (2 : ℕ))) := by
+    rw [e9]
+    norm_num
+  exact le_of_pow_le_pow_left₀ (by norm_num)
+    (Real.rpow_nonneg (by norm_num) _) hsq
+
+/-- Amplitude cap `9 ^ (-(1/2)) ≤ 1/3` via `3 ≤ sqrt 9`. -/
+theorem sCutOA11S9_amp9_le : (9 : ℝ) ^ (-(1 / 2 : ℝ)) ≤ (1 / 3 : ℝ) := by
+  have hsqrt := sCutOA11S9_sqrt9_ge
+  have hpos : (0 : ℝ) < (9 : ℝ) ^ ((1 / 2 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (9 : ℝ) ^ (-(1 / 2 : ℝ)) = (((9 : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [hrw, show (1 / 3 : ℝ) = (((3 : ℝ)))⁻¹ by norm_num]
+  exact (inv_le_inv₀ hpos (by norm_num)).mpr hsqrt
+
+/-- OA11 eta term 8 in closed form (`term 8 = (9^s)⁻¹`, since `(-1)^8 = 1`). -/
+theorem OA11S9_eta_term8_eq :
+    etaDirichletTerm sCutOA11 8 = ((((9 : ℕ)) : ℂ) ^ sCutOA11)⁻¹ := by
+  have e1 : (8 + 1 : ℕ) = 9 := rfl
+  have hcast : ((((8 + 1 : ℕ)) : ℂ)) = ((((9 : ℕ)) : ℂ)) := by
+    rw [e1]
+  have hneg : (-1 : ℂ) ^ (8 : ℕ) = 1 := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hneg, one_div]
+
+/-- OA11 term 8 norm cap (`‖t8‖ ≤ 1/3` from `3 ≤ sqrt 9`). -/
+theorem OA11S9_eta_term8_norm_le :
+    ‖etaDirichletTerm sCutOA11 8‖ ≤ (1 / 3 : ℝ) := by
+  have h9cast : ((((9 : ℕ)) : ℂ)) = (((9 : ℝ) : ℂ)) := by norm_num
+  have h9norm : ‖((((9 : ℕ)) : ℂ) ^ sCutOA11)‖ = (9 : ℝ) ^ sCutOA11.re := by
+    rw [h9cast]
+    exact Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num) _
+  have heq := OA11S9_eta_term8_eq
+  have hamp := sCutOA11S9_amp9_le
+  have hrw : (9 : ℝ) ^ (-(1 / 2 : ℝ)) = (((9 : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [heq, norm_inv, h9norm, sCutOA11_re, ← hrw]
+  exact hamp
+
+/-- Nine-term split (`S9 = S8 + t8`). -/
+theorem OA11S9_S9_eq :
+    (∑ k ∈ Finset.range 9, etaDirichletTerm sCutOA11 k) =
+      (∑ k ∈ Finset.range 8, etaDirichletTerm sCutOA11 k) +
+      etaDirichletTerm sCutOA11 8 := by
+  rw [show (9 : ℕ) = 8 + 1 by norm_num, Finset.sum_range_succ]
+
+/-- Transfer triangle for the `S8 -> S9` step. -/
+theorem OA11S9_transfer_triangle :
+    ‖∑ k ∈ Finset.range 9, etaDirichletTerm sCutOA11 k‖ ≥
+      ‖∑ k ∈ Finset.range 8, etaDirichletTerm sCutOA11 k‖ -
+        ‖etaDirichletTerm sCutOA11 8‖ := by
+  have htri : ‖∑ k ∈ Finset.range 8, etaDirichletTerm sCutOA11 k‖ ≤
+      ‖∑ k ∈ Finset.range 9, etaDirichletTerm sCutOA11 k‖ +
+        ‖etaDirichletTerm sCutOA11 8‖ := by
+    have h := norm_sub_le
+      (∑ k ∈ Finset.range 9, etaDirichletTerm sCutOA11 k)
+      (etaDirichletTerm sCutOA11 8)
+    have heq : (∑ k ∈ Finset.range 9, etaDirichletTerm sCutOA11 k) -
+        (etaDirichletTerm sCutOA11 8) =
+        (∑ k ∈ Finset.range 8, etaDirichletTerm sCutOA11 k) := by
+      rw [OA11S9_S9_eq]
+      abel
+    rw [heq] at h
+    exact h
+  linarith
+
+/-- S9 flat-triangle floor (`2123/2250 = 2873/2250 - 1/3`). -/
+theorem OA11S9_norm_floor :
+    (2123 / 2250 : ℝ) ≤ ‖∑ k ∈ Finset.range 9, etaDirichletTerm sCutOA11 k‖ := by
+  have hS8 := OA11S8_norm_floor
+  have ht8 := OA11S9_eta_term8_norm_le
+  have htri := OA11S9_transfer_triangle
+  have hle : (2123 / 2250 : ℝ) = 2873 / 2250 - 1 / 3 := by norm_num
+  linarith
+
+/-- Exact S9 shortfall numeral (`2123/2250 - 21/10 = -2602/2250`). -/
+theorem OA11S9_shortfall :
+    ((2123 / 2250 : ℝ) - 21 / 10) = (-2602 / 2250 : ℝ) := by norm_num
+
+/-- S9 floor misses the slow bar (diminishing: `2123/2250 < 21/10`). -/
+theorem OA11S9_below_bar :
+    (2123 / 2250 : ℝ) < (21 / 10 : ℝ) := by norm_num
+
+/-- Option-S9 verdict (honest): the S9 flat-triangle partial is strictly worse
+than S8 (`2123/2250 < 2873/2250`) and worse than S6 (`2449/1125`), shortfall
+falls from `-1852/2250` to `-2602/2250`, so no bigger surplus is banked; S6
+stays the live partial and the mid-low triangle impossibility above stands. -/
+theorem OA11S9_diminishing_gap : True := by
+  trivial
+
+#print axioms sCutOA11S9_sqrt9_ge
+#print axioms sCutOA11S9_amp9_le
+#print axioms OA11S9_eta_term8_eq
+#print axioms OA11S9_eta_term8_norm_le
+#print axioms OA11S9_S9_eq
+#print axioms OA11S9_transfer_triangle
+#print axioms OA11S9_norm_floor
+#print axioms OA11S9_shortfall
+#print axioms OA11S9_below_bar
+#print axioms OA11S9_diminishing_gap
+
+end Door3OffAxis

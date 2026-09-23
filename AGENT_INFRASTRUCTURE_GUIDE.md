@@ -6164,6 +6164,10 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 S9+R22 (backgrounds `ses_f346532c1`,
+  `ses_f3465d71a`, proof-only, grep-clean): S9 diminishing verdict;
+  R22 route (poly 22.9/base 11.45, banked infeasible; namespace-end
+  reposition benign).
 - 2026-09-22 JOINT+TOPZETA+M21 (backgrounds `ses_f34659ddc`,
   `ses_f34659dd7`, `ses_f34655cf4`, proof-only, grep-clean): joint
   sliver rechain (1072/5 closed) + exact gaps; pole rebuild +
