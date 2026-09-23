@@ -6164,6 +6164,11 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 FIVE-LANE (backgrounds `ses_f346c3ad2/1/0`,
+  `ses_f346b28d5`, `ses_f347082a5-follow`, proof-only, grep-clean):
+  S26 rung (Re -4.30 + Im conditional, log25/26 phase); CERTS
+  zeta0064 sufficiency chain; TIER R02 narrow 67200→162.96 (ceil 163,
+  412x); M30 exact (sqrt 32768); TOPEDGE bottom-uniform-deriv.
 - 2026-09-22 SCUT55 (background `ses_f347bb15b`, proof-only,
   grep-clean, pilot-only commit): 7-leg assembly floors (eta10/12/15/
   17/27/29/31) + below-bar verdicts + k33/34 log-phase bridges

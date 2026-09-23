@@ -1040,3 +1040,91 @@ def bottom_uniform_deriv_residual (M : ℝ) : Prop :=
         ((x : ℂ) + Complex.I * (v : ℂ))‖ ≤ M
 
 end Door3TopEdgeNeeds
+
+/-! ## TOPEDGE-NEXT uniform-deriv conditional (append-only).
+
+Grep:
+* `h_bottom` at `door3_top_edge.lean:400` (engine premise) and value
+  `lower_outer_point_half_at_zero` (`Door3TopEdgeNeeds`, closes `x = 0`,
+  `eps = 1 / 2` for `xiShiftedEntire`).
+* residuals `bottom_uniform_lower_residual`, `bottom_ballSup_residual`,
+  `bottom_uniform_deriv_residual` (same file, `Door3TopEdgeNeeds` block).
+
+Value: `bottom_uniform_deriv_of_ballSup` reduces the uniform-deriv residual
+to the closed-ball sup residual, rebuilding the Cauchy sphere-in-ball argument
+used in `exists_bottom_edge_uniform_strip` (sphere radius `1` over the bottom
+strip lies in `closedBall 0 12` since `|x| + |v| ≤ 11`), via
+`Complex.norm_deriv_le_of_forall_mem_sphere_norm_le` and
+`CentralCoverAssembly.xiShiftedEntire_differentiable.diffContOnCl`.
+With `M = max C 1`, the interval `Icc (-1/2) (-1/2 + (1/2)/M)` stays inside
+`|v| ≤ 1`, so the bound `C / 1 = C ≤ M` applies.
+Remaining gap: `bottom_ballSup_residual` (explicit `C` on `closedBall 0 12`)
+and `bottom_uniform_lower_residual` stay OPEN.
+-/
+
+namespace Door3TopEdgeNeeds
+
+open Complex Real Set Topology
+
+theorem bottom_uniform_deriv_of_ballSup {C : ℝ}
+    (hC : bottom_ballSup_residual C) :
+    bottom_uniform_deriv_residual (max C 1) := by
+  unfold bottom_uniform_deriv_residual
+  intro x hx v hv
+  obtain ⟨hx1, hx2⟩ := hx
+  obtain ⟨hv1, hv2⟩ := hv
+  have hMpos : (0 : ℝ) < max C 1 :=
+    lt_of_lt_of_le (by norm_num) (le_max_right _ _)
+  have hM1 : (1 : ℝ) ≤ max C 1 := le_max_right _ _
+  have hCM : C ≤ max C 1 := le_max_left _ _
+  have hdiv : (1 / 2 : ℝ) / max C 1 ≤ 1 / 2 := by
+    rw [div_le_iff₀ hMpos]
+    linarith [hM1]
+  have hxabs : |x| ≤ 10 := by
+    rw [abs_le]
+    constructor <;> linarith
+  have hvabs : |v| ≤ 1 := by
+    rw [abs_le]
+    constructor <;> linarith
+  have hw_norm : ‖((x : ℂ) + Complex.I * ((v : ℝ) : ℂ))‖ ≤ 10 + 1 := by
+    calc
+      ‖((x : ℂ) + Complex.I * ((v : ℝ) : ℂ))‖ ≤
+          ‖(x : ℂ)‖ + ‖Complex.I * ((v : ℝ) : ℂ)‖ := norm_add_le _ _
+      _ = |x| + |v| := by
+        rw [Complex.norm_real, Real.norm_eq_abs, norm_mul, Complex.norm_I,
+          one_mul, Complex.norm_real, Real.norm_eq_abs]
+      _ ≤ 10 + 1 := by linarith [hxabs, hvabs]
+  have hsphere : ∀ z ∈ Metric.sphere ((x : ℂ) + Complex.I * ((v : ℝ) : ℂ)) (1 : ℝ),
+      z ∈ Metric.closedBall (0 : ℂ) 12 := by
+    intro z hz
+    have hzw : dist z ((x : ℂ) + Complex.I * ((v : ℝ) : ℂ)) = (1 : ℝ) :=
+      Metric.mem_sphere.mp hz
+    have htri : dist z 0 ≤
+        dist z ((x : ℂ) + Complex.I * ((v : ℝ) : ℂ)) +
+          dist ((x : ℂ) + Complex.I * ((v : ℝ) : ℂ)) 0 :=
+      dist_triangle _ _ _
+    have hw0 : dist ((x : ℂ) + Complex.I * ((v : ℝ) : ℂ)) 0 =
+        ‖((x : ℂ) + Complex.I * ((v : ℝ) : ℂ))‖ := by
+      simp [dist_eq_norm]
+    rw [hzw, hw0] at htri
+    rw [Metric.mem_closedBall]
+    linarith [htri, hw_norm]
+  have hDC : DiffContOnCl ℂ CentralCoverAssembly.xiShiftedEntire
+      (Metric.ball ((x : ℂ) + Complex.I * ((v : ℝ) : ℂ)) (1 : ℝ)) :=
+    CentralCoverAssembly.xiShiftedEntire_differentiable.diffContOnCl
+  have hsphere_bound : ∀ z ∈ Metric.sphere
+      ((x : ℂ) + Complex.I * ((v : ℝ) : ℂ)) (1 : ℝ),
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ C := by
+    intro z hz
+    exact hC z (hsphere z hz)
+  have hbound : ‖deriv CentralCoverAssembly.xiShiftedEntire
+      ((x : ℂ) + Complex.I * ((v : ℝ) : ℂ))‖ ≤ C / 1 :=
+    Complex.norm_deriv_le_of_forall_mem_sphere_norm_le (by norm_num) hDC
+      hsphere_bound
+  calc
+    ‖deriv CentralCoverAssembly.xiShiftedEntire
+        ((x : ℂ) + Complex.I * ((v : ℝ) : ℂ))‖ ≤ C / 1 := hbound
+    _ = C := by ring
+    _ ≤ max C 1 := hCM
+
+end Door3TopEdgeNeeds

@@ -1237,3 +1237,80 @@ theorem premSphere_R40_of_ball (hBall : premBall_R40) (w : ℂ)
     CentralCoverAssembly.R40 0.25 w hw hz)
 
 end Door3PremiseTier
+
+/-! ## 6. R02 premise-tier narrowing via banked AO sups (append-only wave).
+
+Grep record (verified before writing via `default.grep`):
+* Tier shapes in this file: `premDeriv_RXX_of_ball` with shape
+  `premBall_RXX → ∀ w, RXX.mem w → ‖deriv xiShifted w‖ ≤ 67200`,
+  e.g. `premDeriv_R00_of_ball :134-145`; all 41 cells share the `≤ 67200`
+  shape via `DerivCauchyBridge.uniform_deriv_of_closedBall_bound`
+  with `C = 16800`, `r = 0.25` (`16800 / 0.25 = 67200`).
+* Banked narrowing chain in `central_cover_assembly.lean`,
+  `namespace AO_R02DiscUpdate :9968-10264`:
+  `AO_gamma_upper_disc_R02_obligation :9975` (landed gamma cap `≤ 0.097`),
+  `AO_sphere_sup_eq :9981` (`42 * 1 * 0.097 * 10 = 40.74`),
+  `AO_M_eq :9985` (`40.74 / 0.25 = 162.96`),
+  `AO_sphere_improvement :9989` (`40.74 < 16800`),
+  `AO_deriv_improvement :9993` (`162.96 < 67200`),
+  `AO_entire_upper_of_zeta_upper_R02 :10038`,
+  `AO_R02_uniform_sphere_bound :10051` (sphere sup `40.74` from
+  poly `≤ 42` + pi `≤ 1` + gamma `≤ 0.097` + zeta `≤ 10`),
+  `AO_R02_deriv_bound_of_zeta_upper :10063` (`‖deriv‖ ≤ 162.96`),
+  `AO_R02_deriv_bound_163_of_zeta_upper :10078` (`‖deriv‖ ≤ 163`).
+  Zeta supplier: `DerivCauchyBridge.R02_zeta_upper_obligation :6493`
+  (`‖zeta‖ ≤ 10` on the R02 disc rect).
+* Result below: R02 deriv premise narrows `67200 → 162.96` (ceil `163`)
+  under exactly the two banked obligations above. Tier `0.07` stays open
+  (`0.07 < 162.96`); the other 40 cells keep the `67200` value with the
+  mismatch gap recorded in sections 2-5.
+-/
+
+namespace Door3PremiseTier
+
+/-- R02 narrowed deriv bound `162.96` chained directly from the banked AO
+disc update (sphere `40.74 / 0.25`); premises are exactly the banked
+gamma (`≤ 0.097`) plus zeta (`≤ 10`) obligations. -/
+theorem narrow_R02_deriv_162p96_of_banked
+    (hG : AO_R02DiscUpdate.AO_gamma_upper_disc_R02_obligation)
+    (hZ : DerivCauchyBridge.R02_zeta_upper_obligation) :
+    ∀ (w : ℂ), CentralCoverAssembly.R02.mem w → ‖deriv xiShifted w‖ ≤ (162.96 : ℝ) :=
+  AO_R02DiscUpdate.AO_R02_deriv_bound_of_zeta_upper hG hZ
+
+/-- Integer-ceil form of the narrowed R02 bound (`163` covers `162.96`). -/
+theorem narrow_R02_deriv_163_of_banked
+    (hG : AO_R02DiscUpdate.AO_gamma_upper_disc_R02_obligation)
+    (hZ : DerivCauchyBridge.R02_zeta_upper_obligation) :
+    ∀ (w : ℂ), CentralCoverAssembly.R02.mem w → ‖deriv xiShifted w‖ ≤ (163 : ℝ) :=
+  AO_R02DiscUpdate.AO_R02_deriv_bound_163_of_zeta_upper hG hZ
+
+/-- Banked narrowed sphere sup `40.74` re-exported for the R02 premise tier. -/
+theorem narrow_R02_sphere_40p74_of_banked
+    (hG : AO_R02DiscUpdate.AO_gamma_upper_disc_R02_obligation)
+    (hZ : DerivCauchyBridge.R02_zeta_upper_obligation) :
+    ∀ (w : ℂ), CentralCoverAssembly.R02.mem w → ∀ (z : ℂ),
+      z ∈ Metric.sphere w (0.25 : ℝ) →
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ (40.74 : ℝ) :=
+  AO_R02DiscUpdate.AO_R02_uniform_sphere_bound hG hZ
+
+/-- Narrowed deriv value strictly improves on the premise-tier `67200`. -/
+theorem narrow_R02_deriv_improves : (162.96 : ℝ) < 67200 :=
+  AO_R02DiscUpdate.AO_deriv_improvement
+
+/-- Narrowed sphere sup strictly improves on the premise-tier `16800`. -/
+theorem narrow_R02_sphere_improves : (40.74 : ℝ) < 16800 :=
+  AO_R02DiscUpdate.AO_sphere_improvement
+
+/-- Narrowed Cauchy closed form (`40.74 / 0.25 = 162.96`). -/
+theorem narrow_R02_closedForm : (40.74 : ℝ) / 0.25 = 162.96 := by
+  norm_num
+
+/-- Residual gap: tier `0.07` remains open below the narrowed `162.96`. -/
+theorem narrow_R02_residual_gap : (0.07 : ℝ) < 162.96 := by
+  norm_num
+
+/-- Ceil `163` covers the exact narrowed value `162.96`. -/
+theorem narrow_R02_163_covers : (162.96 : ℝ) ≤ 163 := by
+  norm_num
+
+end Door3PremiseTier

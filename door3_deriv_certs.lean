@@ -1367,3 +1367,90 @@ theorem R00_xi_tier_needs_zeta007 {Z : ℝ} (h : 770.944 * Z ≤ 0.05) :
 #print axioms R00_deriv_tier_of_sup
 #print axioms R00_xi_deriv_of_gamma152_zeta
 #print axioms R00_xi_tier_needs_zeta007
+
+/-!
+## Door-3 ZETA007 tail (exact Z spec for the xi-shape tier)
+
+Grep shapes (verified before append):
+* `R00SupSpec` (`door3_deriv_certs.lean:1321-1324`): generic spec
+  (`DiffContOnCl` + ball sup `qB` + `qB ≤ 1 / 40`).
+* `R00_deriv_tier_of_sup` (`1329-1335`): generic closure CALLING
+  `R00_deriv_bound_of_sup` + `R00_deriv_meets_outer_tier`.
+* `R00_xi_deriv_of_gamma152_zeta` (`1341-1352`): xi-shape chain
+  (`385.472 * Z` sup via `deriv_xiFourShapeAt_sup_of_gamma152`, margin `1/2`
+  gives `385.472 * Z / (1/2) = 770.944 * Z`).
+* `R00_xi_tier_needs_zeta007` (`1356-1364`): necessary gap
+  (`770.944 * Z ≤ 0.05` forces `Z ≤ 0.00007`).
+* `ZetaSupCond` (`527-528`) / `JointGZSupCond` (`843-844`): conditional props only.
+  Repo-wide grep for numeral instances (`ZetaSupCond <num>`,
+  `JointGZSupCond <num>`) returns no unconditional zeta sup on `sImageRect`;
+  the only banked zeta uppers elsewhere are `O(1)`-to-`O(1000)` scale
+  (conditional `≤ 10`, unconditional `≤ 934` / `≤ 1012` on disjoint rects),
+  and the true `|ζ| ~ 1` scale on this rectangle exceeds the tier need by
+  ~5 orders. So the Z premise cannot be chained from banked sups.
+
+Banked here (placeholder-free, direct tactics only):
+* `R00_xi_tier_needs_zeta0065`: tightened necessary gap
+  (`770.944 * Z ≤ 0.05` forces `Z ≤ 0.000065`;
+  `770.944 * 0.000065 = 0.05011136 > 0.05`).
+* `R00_xi_tier_sufficient_of_zeta0064`: sufficient cap
+  (`Z ≤ 0.000064` gives `770.944 * Z ≤ 0.05`;
+  `770.944 * 0.000064 = 0.049340416 ≤ 0.05`).
+* `R00XiTierZetaSpec`: exact missing xi-tier zeta spec
+  (`ZetaSupCond Z ∧ Z ≤ 0.000064`).
+* `R00_xi_tier_of_zeta0064`: conditional tier closure CALLING
+  `R00_xi_deriv_of_gamma152_zeta` + `R00_xi_tier_sufficient_of_zeta0064`.
+
+Value-or-gap: VALUE = tightened necessary `0.000065` + sufficient `0.000064`
+  + conditional closure above; GAP = unconditional `ZetaSupCond Z` with
+  `Z ≤ 0.000064` (zeta majorant ~5 orders below the true `|ζ| ~ 1` scale,
+  absent from Mathlib).
+Residual (exact): supply `ZetaSupCond Z` with `Z ≤ 0.000064` (or
+  `JointGZSupCond J` with `J ≤ 0.0001` via
+  `R00_deriv_meets_tier_of_joint_conds`) plus
+  `DiffContOnCl ℂ xiFourShapeAt (ball R00c 2)`.
+-/
+
+/-- Tightened necessary xi gap: the deriv tier (`770.944 * Z ≤ 0.05`) forces
+`Z ≤ 0.000065` (`770.944 * 0.000065 = 0.05011136 > 0.05`). -/
+theorem R00_xi_tier_needs_zeta0065 {Z : ℝ} (h : 770.944 * Z ≤ 0.05) :
+    Z ≤ 0.000065 := by
+  by_contra hc
+  push_neg at hc
+  have hpos : (0 : ℝ) < 770.944 := by norm_num
+  have h2 : (770.944 : ℝ) * 0.000065 < 770.944 * Z :=
+    mul_lt_mul_of_pos_left hc hpos
+  norm_num at h2
+  linarith
+
+/-- Sufficient xi cap: `Z ≤ 0.000064` gives `770.944 * Z ≤ 0.05`
+(`770.944 * 0.000064 = 0.049340416 ≤ 0.05`). -/
+theorem R00_xi_tier_sufficient_of_zeta0064 {Z : ℝ} (h : Z ≤ 0.000064) :
+    770.944 * Z ≤ 0.05 := by
+  have hpos : (0 : ℝ) ≤ 770.944 := by norm_num
+  have h2 : (770.944 : ℝ) * Z ≤ 770.944 * 0.000064 :=
+    mul_le_mul_of_nonneg_left h hpos
+  have e : (770.944 : ℝ) * 0.000064 ≤ 0.05 := by norm_num
+  linarith
+
+/-- Exact missing xi-tier zeta spec: a `ZetaSupCond Z` numeral at or below
+the sufficient cap `0.000064`. -/
+def R00XiTierZetaSpec (Z : ℝ) : Prop :=
+  ZetaSupCond Z ∧ Z ≤ 0.000064
+
+/-- Conditional xi-tier closure at the sufficient cap: under any
+`ZetaSupCond Z` with `Z ≤ 0.000064`, `‖deriv xiFourShapeAt w‖ ≤ 0.05` on
+`R00Rect` (by CALLING `R00_xi_deriv_of_gamma152_zeta` +
+`R00_xi_tier_sufficient_of_zeta0064`). -/
+theorem R00_xi_tier_of_zeta0064 {Z : ℝ} (hZ0 : 0 ≤ Z) (hZ : ZetaSupCond Z)
+    (hb : Z ≤ 0.000064)
+    (hd : DiffContOnCl ℂ xiFourShapeAt (ball R00c 2)) {w : ℂ} (hw : R00Rect w) :
+    ‖deriv xiFourShapeAt w‖ ≤ 0.05 := by
+  have hderiv := R00_xi_deriv_of_gamma152_zeta hZ0 hZ hd hw
+  have hle : (770.944 : ℝ) * Z ≤ 0.05 := R00_xi_tier_sufficient_of_zeta0064 hb
+  linarith
+
+#print axioms R00_xi_tier_needs_zeta0065
+#print axioms R00_xi_tier_sufficient_of_zeta0064
+#print axioms R00XiTierZetaSpec
+#print axioms R00_xi_tier_of_zeta0064
