@@ -6164,6 +6164,11 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 QUAD-H (backgrounds `ses_f3456f804`,
+  `ses_f3456f803`, `ses_f345824f1`, `ses_f345698c4`, proof-only,
+  grep-clean): R15 sup mirror + residual; S18 route filed; k49
+  destructive on quadratic route (8th consecutive); M48 exact
+  (sqrt 16777216).
 - 2026-09-22 TOPEDGE-GAMMA12 (background `ses_f345698c2`,
   proof-only, grep-clean, topedge-only commit): Gamma12/zeta12
   mono + exact opens + ledger opens (namespace-end benign).

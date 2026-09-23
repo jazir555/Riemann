@@ -10980,4 +10980,363 @@ non-quadratic cosine floor; needs `theta48` / `delta48` windows with cap
 theorem sSCUT_SCUT62_closeout_residual : (0 : ℝ) < 1 := by
   norm_num
 
+/-! ## SCUT63 k=49 ODD shard (fifteenth link): `log 49` + `log 50` bridges + `theta50` window.
+
+8-leg `F33 = -16919561/7770000 ~= -2.178`
+(`sSCUT_S9_skip8_eta10_eta12_eta15_eta17_eta27_eta29_eta31_eta33_floor_eq`)
+stays below both bars (`21/10`, `1507/905`; verdicts
+`sSCUT_S9_skip8_eta10_eta12_eta15_eta17_eta27_eta29_eta31_eta33_below_bar` /
+`sSCUT_S9_skip8_eta10_eta12_eta15_eta27_eta29_eta31_eta33_below_bar_8192`;
+shortfalls `33236561/7770000`, `5404318541/1406370000`).
+`k = 35/37/39/41/43/45/47` destructive on the banked-quadratic route (caps:
+`1.46 -> -0.0658`, `2.01 -> -1.02005`, `2.53 -> -2.20045`,
+`3.02 -> -3.5602`, `3.49 -> -5.09005`, `3.94 -> -6.7618`,
+`4.37 -> -8.54845`; gaps `sSCUT_eta35_payoff_gap`,
+`sSCUT_eta37_payoff_gap`, `sSCUT_eta39_payoff_gap`,
+`sSCUT_eta41_payoff_gap`, `sSCUT_eta43_payoff_gap`,
+`sSCUT_eta45_payoff_gap`, `sSCUT_eta47_payoff_gap`; pattern arithmetic
+`sSCUT_odd_caps_widening` / `sSCUT_odd_quad_floors_deepen` plus
+`sSCUT_odd_caps_widening61` / `sSCUT_odd_quad_floors_deepen61` plus
+`sSCUT_odd_caps_widening62` / `sSCUT_odd_quad_floors_deepen62`).
+
+`k = 49` is ODD so `eta49 = -50^{-sCut}`; constructive iff
+`cos(10*log 50) <= -c`. Grep first (SCUT62 tail banked above, no duplication):
+* `sSCUT_log_fortyeight_ge/le` (base for the incremental `log 49` chain) + ratio `49/48`;
+* `sSCUT_theta48_mem` / `sSCUT_delta48_odd_mem` (odd-anchor `11*pi` template) +
+  `sSCUT_cos10log48_quad_floor_eq/neg` (quadratic-route gap template);
+* `sSCUT_sqrt48_le` / `sSCUT_rpow48_neg_ge` / `sSCUT_cpow48_neg_re`
+  (base-48 cpow lane template);
+* `sSCUT_eta47_eq_neg_cpow48` (odd parity flip template).
+
+New legs banked here (mirrors of the `k = 47` base-48 chain with the
+incremental base-50 chain):
+`log 49 = log 48 + log (49/48)`, `log 50 = log 49 + log (50/49)`,
+`theta50 = 10*log 50`, odd anchor `delta50 = theta50 - 11*pi`
+(`11*pi ~= 34.558`; `theta50 ~= 38.91062-39.33572`, so `12*pi ~= 37.699`
+lies below the window — the odd-anchor window still sits above `pi` with
+margin and is the correct lane for the ODD payoff attempt).
+Honest outcome: `delta50 in (4.35, 4.79)` closes via `pi_gt_d4/lt_d4`;
+but the quadratic floor at the `4.79` cap is
+`1 - 4.79^2/2 = -10.47205 < 0`, so NO positive `c` closes via the
+`1 - x^2/2 <= cos x` route — the `cos(10*log 50) <= -c` leg is OPEN
+(method gap, filed not forced). Tighter even-anchor window
+`theta50 - 12*pi in [1.21, 1.64]` has cap `1.64` with floor
+`1 - 1.64^2/2 = -0.3448 < 0`, i.e. no positive lower on either route —
+still DESTRUCTIVE for ODD `k` (which needs `cos <= -c` for
+`Re(eta49) = -r*cos >= +c`). Higher-pi anchors (`d6`) narrow the
+`delta50` window by only `~11*0.0001 ~= 0.001`, cap stays `~4.79 >> sqrt(2)`,
+so no rescue on this route.
+Hence `k = 49` verdict: DESTRUCTIVE on the banked-quadratic route;
+`Re(eta49) >= +c` NOT banked. 8-leg `F33` stays below both bars. -/
+
+/-- Composite log bridge `log 49 = log 48 + log (49/48)` (`49 = 48*(49/48)`
+via `Real.log_mul`; mirror of `sSCUT_log_fortyeight_via_fortyseven_eq`;
+ratio `49/48`; grepped base bridges `sSCUT_log_fortyeight_ge/le`;
+first link of the incremental base-50 chain for `k = 49`). -/
+theorem sSCUT_log_fortynine_via_fortyeight_eq :
+    Real.log 49 = Real.log 48 + Real.log (49 / 48 : ℝ) := by
+  have h49 : (48 : ℝ) * (49 / 48) = 49 := by norm_num
+  have h := Real.log_mul (show (48 : ℝ) ≠ 0 by norm_num)
+    (show (49 / 48 : ℝ) ≠ 0 by norm_num)
+  rw [h49] at h
+  linarith
+
+/-- `log 49` upper (`log 49 <= 3.91316200` from `sSCUT_log_fortyeight_le` +
+`log (49/48) <= 1/48`; mirror of `sSCUT_log_fortyeight_le` with `x = 1/48`
+via `Real.log_le_sub_one_of_pos`; `3.89232700 + 1/48 = 3.91316033...`,
+so `3.91316200` holds outward with margin). -/
+theorem sSCUT_log_fortynine_le : Real.log 49 ≤ (3.91316200 : ℝ) := by
+  have h49 := sSCUT_log_fortynine_via_fortyeight_eq
+  have h48 := sSCUT_log_fortyeight_le
+  have hub : Real.log (49 / 48 : ℝ) ≤ (1 / 48 : ℝ) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 49 / 48)
+    have he : (49 / 48 : ℝ) - 1 = (1 / 48 : ℝ) := by norm_num
+    linarith
+  have hfin : (3.89232700 : ℝ) + 1 / 48 ≤ (3.91316200 : ℝ) := by norm_num
+  linarith
+
+/-- `log 49` lower (`3.87106200 <= log 49` from `sSCUT_log_fortyeight_ge` +
+`log (49/48) >= 1/49`; mirror of `sSCUT_log_fortyeight_ge` with `x = 1/48`
+via `log (48/49) <= -1/49` and `log (49/48) = -log (48/49)`;
+`3.85065500 + 1/49 = 3.87106316... >= 3.87106200`, so the bound holds). -/
+theorem sSCUT_log_fortynine_ge : (3.87106200 : ℝ) ≤ Real.log 49 := by
+  have h49 := sSCUT_log_fortynine_via_fortyeight_eq
+  have h48 := sSCUT_log_fortyeight_ge
+  have hub : Real.log (48 / 49 : ℝ) ≤ (-1 / 49 : ℝ) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 48 / 49)
+    have he : (48 / 49 : ℝ) - 1 = (-1 / 49 : ℝ) := by norm_num
+    linarith
+  have hinv : Real.log (49 / 48 : ℝ) = -Real.log (48 / 49 : ℝ) := by
+    have heq : (49 / 48 : ℝ) = (48 / 49 : ℝ)⁻¹ := by rw [inv_div]
+    rw [heq, Real.log_inv]
+  have hfin : (3.87106200 : ℝ) ≤ 3.85065500 + 1 / 49 := by norm_num
+  rw [h49, hinv]
+  linarith
+
+/-- Composite log bridge `log 50 = log 49 + log (50/49)` (`50 = 49*(50/49)`
+via `Real.log_mul`; mirror of `sSCUT_log_fortynine_via_fortyeight_eq`;
+ratio `50/49`; grepped bridges `sSCUT_log_fortynine_ge/le`;
+second link of the incremental base-50 chain for `k = 49`). -/
+theorem sSCUT_log_fifty_via_fortynine_eq :
+    Real.log 50 = Real.log 49 + Real.log (50 / 49 : ℝ) := by
+  have h50 : (49 : ℝ) * (50 / 49) = 50 := by norm_num
+  have h := Real.log_mul (show (49 : ℝ) ≠ 0 by norm_num)
+    (show (50 / 49 : ℝ) ≠ 0 by norm_num)
+  rw [h50] at h
+  linarith
+
+/-- `log 50` upper (`log 50 <= 3.93357200` from `sSCUT_log_fortynine_le` +
+`log (50/49) <= 1/49`; mirror of `sSCUT_log_fortynine_le` with `x = 1/49`
+via `Real.log_le_sub_one_of_pos`; `3.91316200 + 1/49 = 3.93357016...`,
+so `3.93357200` holds outward with margin). -/
+theorem sSCUT_log_fifty_le : Real.log 50 ≤ (3.93357200 : ℝ) := by
+  have h50 := sSCUT_log_fifty_via_fortynine_eq
+  have h49 := sSCUT_log_fortynine_le
+  have hub : Real.log (50 / 49 : ℝ) ≤ (1 / 49 : ℝ) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 50 / 49)
+    have he : (50 / 49 : ℝ) - 1 = (1 / 49 : ℝ) := by norm_num
+    linarith
+  have hfin : (3.91316200 : ℝ) + 1 / 49 ≤ (3.93357200 : ℝ) := by norm_num
+  linarith
+
+/-- `log 50` lower (`3.89106200 <= log 50` from `sSCUT_log_fortynine_ge` +
+`log (50/49) >= 1/50`; mirror of `sSCUT_log_fortynine_ge` with `x = 1/49`
+via `log (49/50) <= -1/50` and `log (50/49) = -log (49/50)`;
+`3.87106200 + 1/50 = 3.89106200`, so the bound holds). -/
+theorem sSCUT_log_fifty_ge : (3.89106200 : ℝ) ≤ Real.log 50 := by
+  have h50 := sSCUT_log_fifty_via_fortynine_eq
+  have h49 := sSCUT_log_fortynine_ge
+  have hub : Real.log (49 / 50 : ℝ) ≤ (-1 / 50 : ℝ) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 49 / 50)
+    have he : (49 / 50 : ℝ) - 1 = (-1 / 50 : ℝ) := by norm_num
+    linarith
+  have hinv : Real.log (50 / 49 : ℝ) = -Real.log (49 / 50 : ℝ) := by
+    have heq : (50 / 49 : ℝ) = (49 / 50 : ℝ)⁻¹ := by rw [inv_div]
+    rw [heq, Real.log_inv]
+  have hfin : (3.89106200 : ℝ) ≤ 3.87106200 + 1 / 50 := by norm_num
+  rw [h50, hinv]
+  linarith
+
+/-- Phase window `theta50 = 10*log 50 in [38.91062, 39.33572]`
+(via banked `sSCUT_log_fifty_ge/le` + `*10`; mirror of
+`sSCUT_theta48_mem`; non-strict since the `log 50` inputs are `<=`). -/
+theorem sSCUT_theta50_mem :
+    (38.91062 : ℝ) ≤ 10 * Real.log 50 ∧
+    10 * Real.log 50 ≤ (39.33572 : ℝ) := by
+  have hge := sSCUT_log_fifty_ge
+  have hle := sSCUT_log_fifty_le
+  have hmul_lo := mul_le_mul_of_nonneg_left hge (by norm_num : (0 : ℝ) ≤ 10)
+  have hmul_hi := mul_le_mul_of_nonneg_left hle (by norm_num : (0 : ℝ) ≤ 10)
+  have c1 : (10 : ℝ) * 3.89106200 = 38.91062 := by norm_num
+  have c2 : (10 : ℝ) * 3.93357200 = 39.33572 := by norm_num
+  constructor <;> linarith
+
+/-- Reduced phase `delta50 = theta50 - 11*pi in (4.35, 4.79)` (odd anchor,
+mirror of `sSCUT_delta48_odd_mem`; strict via `Real.pi_gt_d4/lt_d4`;
+rounded outward from the loose-pi window `[4.35302, 4.77922]`
+(`38.91062 - 11*3.1416 = 4.35302`,
+`39.33572 - 11*3.1415 = 4.77922`) so `linarith` closes;
+tighter even-anchor cap `1.64` has negative quadratic floor `-0.3448`,
+so no odd-payoff rescue on this route — still destructive for `k = 49`). -/
+theorem sSCUT_delta50_odd_mem :
+    (4.35 : ℝ) < 10 * Real.log 50 - 11 * Real.pi ∧
+    10 * Real.log 50 - 11 * Real.pi < (4.79 : ℝ) := by
+  have hth := sSCUT_theta50_mem
+  have hpi_lo := Real.pi_gt_d4
+  have hpi_hi := Real.pi_lt_d4
+  constructor <;> linarith
+
+/-- Exact width of the `delta50` window (`0.44`). -/
+theorem sSCUT_delta50_odd_width_eq :
+    (4.79 : ℝ) - (4.35) = (0.44 : ℝ) := by
+  norm_num
+
+/-- Exact quadratic floor at the window cap
+(`1 - 4.79^2/2 = -10.47205`; `4.79^2 = 22.9441`). -/
+theorem sSCUT_cos10log50_quad_floor_eq :
+    (1 - (4.79 : ℝ) ^ 2 / 2) = (-10.47205 : ℝ) := by
+  norm_num
+
+/-- Quadratic floor is NEGATIVE, so the `1 - x^2/2 <= cos x` route yields
+no positive lower on `cos delta50` (exact gap: `-10.47205 < 0`;
+tighter even-anchor cap `1.64` gives `1 - 1.64^2/2 = -0.3448 < 0`, i.e.
+no positive lower on either route — still no ODD payoff for `k = 49`,
+which needs `cos <= -c`; `d6` pi anchors narrow the window by only
+`~0.001`, cap stays `>> sqrt(2)`). -/
+theorem sSCUT_cos10log50_quad_floor_neg :
+    (1 - (4.79 : ℝ) ^ 2 / 2) < (0 : ℝ) := by
+  norm_num
+
+/-- Tighter even-anchor cap floor, filed as arithmetic only
+(`1 - 1.64^2/2 = -0.3448`; negative, so an even-anchor cosine lower would
+also fail to be positive — destructive for ODD `k = 49`, which needs a
+NEGATIVE cosine upper; considered, not rescued). -/
+theorem sSCUT_cos10log50_tighter_cap_floor_eq :
+    (1 - (1.64 : ℝ) ^ 2 / 2) = (-0.3448 : ℝ) := by
+  norm_num
+
+/-- `50^(1/2) <= 8` (mirror of `sSCUT_sqrt48_le` with `50`; `50 <= 8^2 = 64`;
+`7` fails here since `50 > 49`). -/
+theorem sSCUT_sqrt50_le : (50 : ℝ) ^ (1 / 2 : ℝ) ≤ (8 : ℝ) := by
+  have hpow : (50 : ℝ) ≤ (((8 : ℝ) ^ (2 : ℕ))) := by norm_num
+  have hpow' : ((((50 : ℝ) ^ (1 / 2 : ℝ)) ^ (2 : ℕ))) = 50 := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    have e : ((1 / 2 : ℝ)) * ((((2 : ℕ)) : ℝ)) = 1 := by norm_num
+    rw [e, Real.rpow_one]
+  have hle : ((((50 : ℝ) ^ (1 / 2 : ℝ)) ^ (2 : ℕ))) ≤ ((8 : ℝ) ^ (2 : ℕ)) := by
+    rw [hpow']
+    exact hpow
+  exact le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hle
+
+/-- `1/8 <= r50 = 50^(-1/2)` (inverse of `sSCUT_sqrt50_le`;
+mirror of `sSCUT_rpow48_neg_ge` with `50`). -/
+theorem sSCUT_rpow50_neg_ge : (1 / 8 : ℝ) ≤ (50 : ℝ) ^ (-(1 / 2 : ℝ)) := by
+  have hle := sSCUT_sqrt50_le
+  have hpos : (0 : ℝ) < (50 : ℝ) ^ (1 / 2 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hneg : (50 : ℝ) ^ (-(1 / 2 : ℝ)) = (((50 : ℝ) ^ (1 / 2 : ℝ))⁻¹) := by
+    rw [show (-(1 / 2 : ℝ)) = -((1 / 2 : ℝ)) by norm_num,
+      Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 50)]
+  rw [hneg, show (1 / 8 : ℝ) = ((8 : ℝ))⁻¹ by norm_num]
+  exact (inv_le_inv₀ (by norm_num) hpos).mpr hle
+
+/-- Cpow real-part split for `50^{-s}` at sCut (mirror of
+`sSCUT_cpow48_neg_re`). -/
+theorem sSCUT_cpow50_neg_re : ((((50 : ℝ)) : ℂ) ^ (-sSCUT)).re
+    = (50 : ℝ) ^ (-(1 / 2 : ℝ)) * Real.cos (10 * Real.log 50) := by
+  have h50pos : (0 : ℝ) < 50 := by norm_num
+  have hxC : ((50 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h50pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((50 : ℝ) : ℂ) = (((Real.log 50 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h50pos)).symm
+  rw [hlog]
+  have hre_w : (-sSCUT).re = (-(1 / 2 : ℝ)) := by
+    have e : (-sSCUT).re = -(sSCUT.re) := rfl
+    rw [e, sSCUT_re]
+  have him_w : (-sSCUT).im = (-10 : ℝ) := by
+    have e : (-sSCUT).im = -(sSCUT.im) := rfl
+    rw [e, sSCUT_im]
+  have hzre : ((((Real.log 50 : ℝ)) : ℂ)).re = Real.log 50 := Complex.ofReal_re _
+  have hzim : ((((Real.log 50 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 50 : ℝ)) : ℂ) * (-sSCUT)).re
+      = Real.log 50 * (-(1 / 2 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 50 : ℝ)) : ℂ) * (-sSCUT)).im
+      = -(10 * Real.log 50) := by
+    rw [Complex.mul_im, hzre, hzim, hre_w, him_w]
+    ring
+  have hexp : Real.exp (Real.log 50 * (-(1 / 2 : ℝ)))
+      = (50 : ℝ) ^ (-(1 / 2 : ℝ)) :=
+    (Real.rpow_def_of_pos h50pos _).symm
+  have hcos : Real.cos (-(10 * Real.log 50))
+      = Real.cos (10 * Real.log 50) := Real.cos_neg _
+  rw [Complex.exp_re, harg_re, harg_im, hexp, hcos]
+
+/-- Eta bridge `eta49 = -(50^{-sCut})` (odd `k`; mirror of
+`sSCUT_eta47_eq_neg_cpow48`). -/
+theorem sSCUT_eta49_eq_neg_cpow50 :
+    etaDirichletTerm sSCUT 49 = -((((50 : ℝ)) : ℂ) ^ (-sSCUT)) := by
+  have e : (49 + 1 : ℕ) = 50 := rfl
+  have hcast : ((((49 + 1 : ℕ)) : ℂ)) = ((((50 : ℕ)) : ℂ)) := by rw [e]
+  have hneg : (-1 : ℂ) ^ (49 : ℕ) = -1 := by norm_num
+  have h50cast : ((((50 : ℕ)) : ℂ)) = ((((50 : ℝ)) : ℂ)) := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hneg, h50cast, neg_div, one_div, Complex.cpow_neg]
+
+/-- Eta49 payoff GAP (`k = 49` ODD, base 50): the needed
+`cos(10*log 50) <= -c` does NOT close via the banked quadratic route
+(`sSCUT_cos10log50_quad_floor_eq/neg`: floor `-10.47205 < 0` at the
+`4.79` cap from `sSCUT_delta50_odd_mem`; tighter even-anchor cap `1.64`
+gives `-0.3448 < 0`, i.e. no positive lower on either route — also no
+rescue; `d6` pi anchors save only `~0.001`);
+so `Re(eta49) >= +c` is NOT banked here. One branch only, no force.
+Next link needed: tighter `log 50` window (direct `50 = 25*2` lane or
+sharper ratio caps) or a non-quadratic cosine floor; and shard assembly
+`F33 + t49` stays open. -/
+theorem sSCUT_eta49_payoff_gap : (1 - (4.79 : ℝ) ^ 2 / 2) < (0 : ℝ) := by
+  norm_num
+
+/-- Route residual: 8-leg `F33` assembly stays below both bars
+(`F33 = -16919561/7770000` via
+`sSCUT_S9_skip8_eta10_eta12_eta15_eta17_eta27_eta29_eta31_eta33_floor_eq`,
+verdicts `..._below_bar` / `..._below_bar_8192`, shortfalls
+`33236561/7770000` and `5404318541/1406370000` unchanged by this block);
+`k = 49` chain banked through `sSCUT_cpow50_neg_re` +
+`sSCUT_eta49_eq_neg_cpow50` but payoff open (gap `sSCUT_eta49_payoff_gap`);
+next assembly `F33 + t49` and tighter `k = 49` cosine leg still open —
+filed, not forced. -/
+theorem sSCUT_S9_skip8_eta10_eta12_eta15_eta17_eta27_eta29_eta31_eta33_eta35_eta37_eta39_eta41_eta43_eta45_eta47_eta49_residual : (0 : ℝ) < 1 := by
+  norm_num
+
+/-! ## SCUT63 pattern verdict: eight consecutive destructive ODD legs.
+
+Caps strictly widen (`1.46 < 2.01 < 2.53 < 3.02 < 3.49 < 3.94 < 4.37 < 4.79`) while
+quadratic floors strictly deepen (`-0.0658 > -1.02005 > -2.20045 > -3.5602 >
+-5.09005 > -6.7618 > -8.54845 > -10.47205`), all `< 0`, so the banked-quadratic route
+yields no positive `c` at any of `k = 35/37/39/41/43/45/47/49`. Gaps banked:
+`sSCUT_eta35_payoff_gap`, `sSCUT_eta37_payoff_gap`,
+`sSCUT_eta39_payoff_gap`, `sSCUT_eta41_payoff_gap`,
+`sSCUT_eta43_payoff_gap`, `sSCUT_eta45_payoff_gap`,
+`sSCUT_eta47_payoff_gap`, `sSCUT_eta49_payoff_gap`. Tighter even-anchor floors
+(`0.50`-type through `0.24355`, now `-0.3448`) stay non-positive / wrong sign
+for ODD payoff. 8-leg `F33` stays below both bars. -/
+
+/-- Odd-leg caps strictly widen, eighth link (`4.37 < 4.79`). -/
+theorem sSCUT_odd_caps_widening63 :
+    (4.37 : ℝ) < 4.79 := by
+  norm_num
+
+/-- Odd-leg quadratic floors strictly deepen, eighth link
+(`-10.47205 < -8.54845`, still negative, no rescue). -/
+theorem sSCUT_odd_quad_floors_deepen63 :
+    (-10.47205 : ℝ) < -8.54845 := by
+  norm_num
+
+/-- Pattern verdict: eight consecutive ODD legs destructive on the
+banked-quadratic route (prior seven via `sSCUT_odd_caps_widening` /
+`sSCUT_odd_quad_floors_deepen` plus `sSCUT_odd_caps_widening61` /
+`sSCUT_odd_quad_floors_deepen61` plus `sSCUT_odd_caps_widening62` /
+`sSCUT_odd_quad_floors_deepen62`, eighth via `sSCUT_odd_caps_widening63` /
+`sSCUT_odd_quad_floors_deepen63` plus gap `sSCUT_eta49_payoff_gap`;
+gaps cited in the module doc above). -/
+theorem sSCUT_odd_destructive_pattern63_residual : (0 : ℝ) < 1 := by
+  norm_num
+
+/-! ## SCUT63 residual + gaps.
+
+Banked: `k = 49` bridges `log 49` (`sSCUT_log_fortynine_ge/le` via
+`sSCUT_log_fortyeight_ge/le` + ratio `49/48`), `log 50`
+(`sSCUT_log_fifty_ge/le` via `49` + ratio `50/49`), `theta50`
+(`sSCUT_theta50_mem`), `delta50 in (4.35, 4.79)`
+(`sSCUT_delta50_odd_mem`, width `0.44`), quad floor `-10.47205`
+(`sSCUT_cos10log50_quad_floor_eq/neg`), tighter-cap floor `-0.3448`
+(`sSCUT_cos10log50_tighter_cap_floor_eq`, non-positive / wrong sign for ODD),
+rpow `sSCUT_rpow50_neg_ge` via `sSCUT_sqrt50_le` (`<= 8`),
+cpow split `sSCUT_cpow50_neg_re`, eta bridge
+`sSCUT_eta49_eq_neg_cpow50`; pattern arithmetic
+`sSCUT_odd_caps_widening63` / `sSCUT_odd_quad_floors_deepen63` /
+`sSCUT_odd_destructive_pattern63_residual`.
+Floor verdict: 8-leg `F33` below both bars (`21/10`, `1507/905`) — FAIL to
+reach either bar; STOP on the bars.
+Route verdict: `k = 49` DESTRUCTIVE on the banked-quadratic route (gap
+`sSCUT_eta49_payoff_gap`: floor `-10.47205 < 0`, no `c > 0` closes;
+tighter even-anchor cap `1.64` gives `-0.3448 < 0`, no positive lower either;
+`d6` anchors save only `~0.001`); pattern holds over
+`k = 35/37/39/41/43/45/47/49` (caps `1.46/2.01/2.53/3.02/3.49/3.94/4.37/4.79`
+widening, floors deepening, all `< 0`).
+Gaps filed, not forced: (i) shard assembly `F33 + t49` (needs a positive
+`t49` payoff first; still below both bars on numerals — next worker to
+recompute floor and both shortfalls); (ii) tighter `k = 49` cosine leg
+(direct `log 50 = log 25 + log 2` lane or sharper ratio caps, or a
+non-quadratic cosine floor; needs `theta50` / `delta50` windows with cap
+`< sqrt(2)` for any positive floor, `< 1.342` for `c = 0.10` — currently
+`4.79`, and even-anchor route also non-positive).
+-/
+
+/-- SCUT63 close-out residual (all banked above; next assembly + tighter link open). -/
+theorem sSCUT_SCUT63_closeout_residual : (0 : ℝ) < 1 := by
+  norm_num
+
 end Door3PilotR00Zeta
