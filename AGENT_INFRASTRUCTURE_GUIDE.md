@@ -6164,6 +6164,10 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 S46+AGREECLOSE (backgrounds `ses_f34536a0d`,
+  `ses_f34536a09-follow`, proof-only, grep-clean): S46 trig-free
+  (Re -10.08 + Im conditional); agree12 strip chain + outer
+  blocked + gaps (namespace-end benign).
 - 2026-09-22 OFFAXIS-S20 (background `ses_f34536a0b`,
   proof-only, grep-clean, offaxis-only commit): S20 route filed.
 - 2026-09-22 SUPPLIERS-VERIFY (background `ses_f34577a87`,
