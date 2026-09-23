@@ -1854,3 +1854,63 @@ theorem narrow_R12_deriv_keeps_67200 (hBall : premBall_R12) (w : ℂ)
   premDeriv_R12_of_ball hBall w hw
 
 end Door3PremiseTier
+
+/-! ## 17. R13 premise-tier narrow attempt (append-only wave).
+
+Grep record (verified before writing via `default.grep`):
+* R12 narrow block in this file: `## 16. R12 premise-tier narrow attempt`
+  `:1805-1856` with `narrow_R12_closedForm_keeps :1838`,
+  `narrow_R12_residual_gap :1842`,
+  `narrow_R12_residual_is_mismatch :1846`,
+  `narrow_R12_deriv_keeps_67200 :1851`; R12 keeps `67200`, no chain.
+* R02 narrow block in this file: `## 6. R02 premise-tier narrowing via banked AO sups`
+  `:1241-1316` with `narrow_R02_deriv_162p96_of_banked :1274`,
+  `narrow_R02_deriv_163_of_banked :1281`,
+  `narrow_R02_sphere_40p74_of_banked :1288`, closed form
+  `40.74 / 0.25 = 162.96` `:1305`, residual `0.07 < 162.96` `:1309`.
+* Banked AO R13 chain search in `central_cover_assembly.lean` (no local chain):
+  pattern `namespace AO_` returns only
+  `namespace AO_R02DiscUpdate :9968` (R02 chain only, no `AO_R13` hit);
+  patterns `AO_R13|R13_deriv|R13_uniform|R13.*sphere|AO.*R13|R13.*AO|R13_gamma|R13_zeta`
+  and `R13_deriv|R13_uniform|R13.*sphere|AO.*R13|R13.*AO|R13_gamma|R13_zeta`
+  return no files; pattern `R13_` returns only rect guards
+  `R13_x0/x1/y0/y1 :2664-2667`, `R13_width_eq :2669`, `R13_strip_lo/hi :2672-2673`,
+  `R13_dx/dy_eq :2675-2681`, `R13_radius_eq/lt :2683-2689`,
+  `R13_mem_gridFine :2691`, `R13_leaf_obligations :2701`,
+  `R13_fencing_of_bounds :2705`, `R13_lowerBound_of_bounds :2709`,
+  `R13_zeroFree_of_bounds :2714`, `R13_nonvanishing_of_bounds :2719`,
+  `R13_H_instance :2730`, grid conj `:5140-5183`,
+  `R13_conjZF/LB_of_bounds :5688-5695` (tier guards, not an AO chain);
+  pattern `R13.*residual|residual.*R13` returns no files and
+  `R13_deriv_residual` over repo root returns no files
+  (no leaf residual banked for R13); pattern `R1[23]_deriv_residual|R13_leaf_of|R13_H_of`
+  returns only `R12_deriv_residual :18160` lines `:18160-18168`
+  (R12 leaf residual, not a banked AO narrow chain).
+* Result below: no R13 mirror of the R02 shape exists locally, so R13 keeps
+  value `67200` (`16800 / 0.25`) with exact residual gap `0.07 < 67200`;
+  tier `0.07` stays open by the same mismatch as `premTier_R13_mismatch :485`.
+-/
+
+namespace Door3PremiseTier
+
+/-- R13 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no banked narrow chain exists locally. -/
+theorem narrow_R13_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R13 residual gap at the kept value: tier `0.07` stays open below `67200`. -/
+theorem narrow_R13_residual_gap : (0.07 : ℝ) < 67200 := by
+  norm_num
+
+/-- R13 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R13_residual_is_mismatch : (0.07 : ℝ) < 67200 :=
+  tier07_lt_67200
+
+/-- R13 conditional deriv transfer still lands at `67200` from the ball premise
+(re-export for the narrow record). -/
+theorem narrow_R13_deriv_keeps_67200 (hBall : premBall_R13) (w : ℂ)
+    (hw : CentralCoverAssembly.R13.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  premDeriv_R13_of_ball hBall w hw
+
+end Door3PremiseTier
