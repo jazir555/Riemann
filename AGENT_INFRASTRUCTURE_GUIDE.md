@@ -6164,6 +6164,9 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 ETA-S30 (background `ses_f3467df96`, proof-only,
+  grep-clean, suppliers-only commit): S30 rung (Re -4.98 + Im
+  conditional, log29/30 phase via 10+3 route). S32 next.
 - 2026-09-22 TIER-R07 (background `ses_f3465d718`, proof-only,
   grep-clean, tier-only commit): no R07 AO narrow chain; keeps
   67200, gap filed honestly.

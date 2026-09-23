@@ -11049,3 +11049,627 @@ theorem CS_S28C_Im_neg736_below_slow_gap :
 #print axioms CS_S28C_Im_neg736_below_slow_gap
 
 end Door3CellSuppliers
+
+namespace Door3CellSuppliers
+
+/-! ## S30 rung (k=29,30; ETA-S30, proof-only)
+
+Grep-first (read-only, before writing):
+* S28 Re block: `CS_S28C` (`:10828`), `CS_S28C_Re_eq` (`:10833`),
+  `CS_complex_S28_Re_ge_neg464` (`:10849`, `-4.64` via S26 `-4.30`
+  + `CS_Re27_ge_neg034` + `CS_Re28_le_zero`); gap `:10860` (`6.58`).
+* S28 Im block: `CS_S28C_Im_eq` (`:10971`), conditional
+  `CS_complex_S28_Im_ge_of_S26` (`:10985`, `Y - 0.34 - 0.34`, tail `0.68`
+  at `:10994`); unconditional `CS_complex_S28_Im_ge_neg736` (`:11001`,
+  `-7.36` via banked `CS_complex_S26_Im_ge_neg668`); gap `:11010` (`9.30`).
+* S30 absent (grep-nil for `CS_S30C`, `CS_rpow29`, `CS_rpow30`,
+  `CS_cpow29`, `CS_cpow30`, `CS_phi29`, `CS_phi30`, `CS_cos29`,
+  `CS_cos30`, `CS_log_twentynine`, `CS_log_thirty`); no S30 residual banked.
+
+Honest S30 route (banked windows only; S28 Re `-4.64` / Im `-7.36` untouched):
+* `log 29 = log 20 + log(29/20)` (`CS_log_twentynine_eq`, mirror of
+  `CS_log_twentyseven_eq`), so `log 29 ∈ [3.3059, 3.4458]` from banked
+  `CS_log_twenty_ge/le` (`2.9956` / `2.9958`) + `log(29/20) ∈ [9/29, 9/20]`.
+* `log 30 = log 10 + log 3` (`CS_log_thirty_eq`, mirror of `CS_log_ten_eq`;
+  `30 = 10 * 3`), so `log 30 ∈ [3.3554, 3.4390]` from banked
+  `CS_log_ten_ge/le` (`2.302547` / `2.302648`) + `CS_log_three_ge/le`
+  (`1.0529` / `1.1363`). Tighter than the `20`-route upper `3.4958`
+  (whose `φ` high `23.5967 > 7.5π` would break the `6π` cos bridge);
+  banked-windows-only, honest deviation documented here.
+* Fresh phase bridges via pi bounds (`Real.pi_gt_d6` / `Real.pi_lt_d6` only):
+  `φ₂₉ = 6.75·log 29 ∈ [22.3148, 23.2592]`,
+  `φ₃₀ = 6.75·log 30 ∈ [22.6489, 23.2133]`; with `e = φ - 6π ∈ [π/2, π+π/2]`
+  so `cos φ₂₉ ≤ 0`, `cos φ₃₀ ≤ 0` via `Real.cos_add_two_pi` (thrice) +
+  `Real.cos_nonpos_of_pi_div_two_le_of_le` (mirror of `CS_cos27/28_nonpos`
+  with `6π = 3·2π`). Hence phase-aware `Re₃₀ ≤ 0` (helps the Re lower);
+  `Re₂₉` stays trig-free (`≥ -0.34`).
+* Rpow quads: `29^0.395 ≥ 3.15`, `30^0.395 ≥ 3.17` (quadratic lowers,
+  mirrors of `CS_rpow27/28pos_lower_proved`); hence `r₂₉ ≤ 0.34`
+  (`0.34·3.15 = 1.071 ≥ 1`), `r₃₀ ≤ 0.34` (`0.34·3.17 = 1.0778 ≥ 1`)
+  (reciprocal steps).
+* Cpow Re/Im splits for `29^{-s}`, `30^{-s}` (token mirrors of
+  `CS_cpow27/28_sCenter_re/im` with `Complex.exp_re/im` + `cos/sin`).
+* Re caps: `Re₂₉ ≥ -0.34` (trig-free `-1 ≤ cos`); `Re₃₀ ≤ 0` (phase-aware).
+* Assembly Re: `Re(S₃₀) = Re(S₂₈) + Re₂₉ - Re₃₀ ≥ -4.64 - 0.34 - 0 = -4.98`
+  (honest regression vs S28 `-4.64` by `0.34`; trails live best `slow = 1.94`).
+* Im caps trig-free: `Im₂₉ ≥ -0.34`, `Im₃₀ ≤ 0.34`; link
+  `Im(S₃₀) = Im(S₂₈) + Im₂₉ - Im₃₀`; conditional on explicit `S₂₈` premise
+  (mirror of `CS_complex_S28_Im_ge_of_S26`, tail width `0.68`); unconditional
+  `≥ -7.36 - 0.34 - 0.34 = -8.04` by chaining banked S28 `-7.36`
+  (`CS_complex_S28_Im_ge_neg736`). Reuses banked S28 bases; no S26 rebuild. -/
+
+/-- `log(29/20)` upper (`≤ 9/20`, mirrors `CS_log2720_upper`;
+`29/20 - 1 = 9/20`). -/
+theorem CS_log2920_upper : Real.log (29 / 20 : ℝ) ≤ (9 / 20 : ℝ) := by
+  have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 29 / 20)
+  have he : (29 / 20 : ℝ) - 1 = (9 / 20 : ℝ) := by norm_num
+  linarith
+
+/-- `log(29/20)` lower (`≥ 9/29` via `log(29/20) = -log(20/29)`, mirrors
+`CS_log2720_lower`; `20/29 - 1 = -9/29`). -/
+theorem CS_log2920_lower : (9 / 29 : ℝ) ≤ Real.log (29 / 20 : ℝ) := by
+  have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 20 / 29)
+  have he : (20 / 29 : ℝ) - 1 = (-(9 / 29) : ℝ) := by norm_num
+  have hinv : Real.log (29 / 20 : ℝ) = -Real.log (20 / 29 : ℝ) := by
+    have heq : (29 / 20 : ℝ) = (20 / 29 : ℝ)⁻¹ := by rw [inv_div]
+    rw [heq, Real.log_inv]
+  linarith
+
+/-- `log 29 = log 20 + log(29/20)` composite bridge (mirror of
+`CS_log_twentyseven_eq`; `29 = 20 * (29/20)`). -/
+theorem CS_log_twentynine_eq :
+    Real.log 29 = Real.log 20 + Real.log (29 / 20 : ℝ) := by
+  have h29 : (29 : ℝ) = 20 * (29 / 20) := by norm_num
+  conv_lhs => rw [h29]
+  rw [Real.log_mul (by norm_num) (by norm_num)]
+
+/-- `log 29` lower (`3.3059 ≤ log 29` from `CS_log_twenty_ge` +
+`CS_log2920_lower`). -/
+theorem CS_log_twentynine_ge : (3.3059 : ℝ) ≤ Real.log 29 := by
+  rw [CS_log_twentynine_eq]
+  have h20 := CS_log_twenty_ge
+  have h2920 := CS_log2920_lower
+  have hcap : (3.3059 : ℝ) ≤ 2.9956 + 9 / 29 := by norm_num
+  linarith
+
+/-- `log 29` upper (`log 29 ≤ 3.4458` from `CS_log_twenty_le` +
+`CS_log2920_upper`). -/
+theorem CS_log_twentynine_le : Real.log 29 ≤ (3.4458 : ℝ) := by
+  rw [CS_log_twentynine_eq]
+  have h20 := CS_log_twenty_le
+  have h2920 := CS_log2920_upper
+  have hcap : (2.9958 : ℝ) + 9 / 20 ≤ 3.4458 := by norm_num
+  linarith
+
+/-- `log 30 = log 10 + log 3` composite bridge (mirror of `CS_log_ten_eq`;
+`30 = 10 * 3`). Tighter than the `20`-route (upper `3.4390` vs `3.4958`);
+banked `CS_log_ten_ge/le` + `CS_log_three_ge/le` only. -/
+theorem CS_log_thirty_eq :
+    Real.log 30 = Real.log 10 + Real.log 3 := by
+  have h30 : (30 : ℝ) = 10 * 3 := by norm_num
+  conv_lhs => rw [h30]
+  rw [Real.log_mul (by norm_num) (by norm_num)]
+
+/-- `log 30` lower (`3.3554 ≤ log 30` from `CS_log_ten_ge` +
+`CS_log_three_ge`; `2.302547 + 1.0529 = 3.355447`). -/
+theorem CS_log_thirty_ge : (3.3554 : ℝ) ≤ Real.log 30 := by
+  rw [CS_log_thirty_eq]
+  have h10 := CS_log_ten_ge
+  have h3 := CS_log_three_ge
+  have hcap : (3.3554 : ℝ) ≤ 2.302547 + 1.0529 := by norm_num
+  linarith
+
+/-- `log 30` upper (`log 30 ≤ 3.4390` from `CS_log_ten_le` +
+`CS_log_three_le`; `2.302648 + 1.1363 = 3.438948`). -/
+theorem CS_log_thirty_le : Real.log 30 ≤ (3.4390 : ℝ) := by
+  rw [CS_log_thirty_eq]
+  have h10 := CS_log_ten_le
+  have h3 := CS_log_three_le
+  have hcap : (2.302648 : ℝ) + 1.1363 ≤ 3.4390 := by norm_num
+  linarith
+
+/-- Phase bridge `φ₂₉ ≥ 22.3148` (`6.75·3.3059 = 22.314825`). -/
+theorem CS_phi29_ge : (22.3148 : ℝ) ≤ 6.75 * Real.log 29 := by
+  have h29 : (3.3059 : ℝ) ≤ Real.log 29 := CS_log_twentynine_ge
+  have hmul : 6.75 * (3.3059 : ℝ) ≤ 6.75 * Real.log 29 :=
+    mul_le_mul_of_nonneg_left h29 (by norm_num)
+  have hcap : (22.3148 : ℝ) ≤ 6.75 * 3.3059 := by norm_num
+  linarith
+
+/-- Phase bridge `φ₂₉ ≤ 23.2592` (`6.75·3.4458 = 23.25915`). -/
+theorem CS_phi29_le : 6.75 * Real.log 29 ≤ (23.2592 : ℝ) := by
+  have h29 : Real.log 29 ≤ (3.4458 : ℝ) := CS_log_twentynine_le
+  have hmul : 6.75 * Real.log 29 ≤ 6.75 * 3.4458 :=
+    mul_le_mul_of_nonneg_left h29 (by norm_num)
+  have hcap : (6.75 : ℝ) * 3.4458 ≤ 23.2592 := by norm_num
+  linarith
+
+/-- Phase bridge `φ₃₀ ≥ 22.6489` (`6.75·3.3554 = 22.64895`). -/
+theorem CS_phi30_ge : (22.6489 : ℝ) ≤ 6.75 * Real.log 30 := by
+  have h30 : (3.3554 : ℝ) ≤ Real.log 30 := CS_log_thirty_ge
+  have hmul : 6.75 * (3.3554 : ℝ) ≤ 6.75 * Real.log 30 :=
+    mul_le_mul_of_nonneg_left h30 (by norm_num)
+  have hcap : (22.6489 : ℝ) ≤ 6.75 * 3.3554 := by norm_num
+  linarith
+
+/-- Phase bridge `φ₃₀ ≤ 23.2133` (`6.75·3.4390 = 23.21325`). -/
+theorem CS_phi30_le : 6.75 * Real.log 30 ≤ (23.2133 : ℝ) := by
+  have h30 : Real.log 30 ≤ (3.4390 : ℝ) := CS_log_thirty_le
+  have hmul : 6.75 * Real.log 30 ≤ 6.75 * 3.4390 :=
+    mul_le_mul_of_nonneg_left h30 (by norm_num)
+  have hcap : (6.75 : ℝ) * 3.4390 ≤ 23.2133 := by norm_num
+  linarith
+
+/-- Cosine nonpositivity at `φ₂₉ = 6.75·log 29` (TRUE `≈ -0.55 ≤ 0`).
+Route: `φ₂₉ ∈ [22.3148, 23.2592]` so `e = φ₂₉ - 6π ∈ [π/2, π+π/2]`
+(coarse `π` bounds only) and `cos φ₂₉ = cos e ≤ 0` via
+`Real.cos_add_two_pi` (thrice) +
+`Real.cos_nonpos_of_pi_div_two_le_of_le` (mirror of `CS_cos27_nonpos`
+with `6π = 3·2π`). -/
+theorem CS_cos29_nonpos : Real.cos (6.75 * Real.log 29) ≤ 0 := by
+  have hpi_lo := Real.pi_gt_d6
+  have hpi_hi := Real.pi_lt_d6
+  have hlo := CS_phi29_ge
+  have hhi := CS_phi29_le
+  set x : ℝ := 6.75 * Real.log 29 with hx_def
+  set e : ℝ := x - 6 * Real.pi with he_def
+  have h1 : Real.pi / 2 ≤ e := by
+    rw [he_def]
+    linarith
+  have h2 : e ≤ Real.pi + Real.pi / 2 := by
+    rw [he_def]
+    linarith
+  have hx_eq : x = ((e + 2 * Real.pi) + 2 * Real.pi) + 2 * Real.pi := by
+    rw [he_def]
+    ring
+  have hcos_eq : Real.cos x = Real.cos e := by
+    rw [hx_eq, Real.cos_add_two_pi, Real.cos_add_two_pi, Real.cos_add_two_pi]
+  rw [hcos_eq]
+  exact Real.cos_nonpos_of_pi_div_two_le_of_le h1 h2
+
+/-- Cosine nonpositivity at `φ₃₀ = 6.75·log 30` (TRUE `≈ -0.94 ≤ 0`).
+Route: `φ₃₀ ∈ [22.6489, 23.2133]` so `e = φ₃₀ - 6π ∈ [π/2, π+π/2]`
+(same `6π` route as `CS_cos29_nonpos`). -/
+theorem CS_cos30_nonpos : Real.cos (6.75 * Real.log 30) ≤ 0 := by
+  have hpi_lo := Real.pi_gt_d6
+  have hpi_hi := Real.pi_lt_d6
+  have hlo := CS_phi30_ge
+  have hhi := CS_phi30_le
+  set x : ℝ := 6.75 * Real.log 30 with hx_def
+  set e : ℝ := x - 6 * Real.pi with he_def
+  have h1 : Real.pi / 2 ≤ e := by
+    rw [he_def]
+    linarith
+  have h2 : e ≤ Real.pi + Real.pi / 2 := by
+    rw [he_def]
+    linarith
+  have hx_eq : x = ((e + 2 * Real.pi) + 2 * Real.pi) + 2 * Real.pi := by
+    rw [he_def]
+    ring
+  have hcos_eq : Real.cos x = Real.cos e := by
+    rw [hx_eq, Real.cos_add_two_pi, Real.cos_add_two_pi, Real.cos_add_two_pi]
+  rw [hcos_eq]
+  exact Real.cos_nonpos_of_pi_div_two_le_of_le h1 h2
+
+/-- `29^0.395 ≥ 3.15` lower input (TRUE `≈ 3.78`). -/
+def CS_rpow29pos_lower : Prop := (3.15 : ℝ) ≤ (29 : ℝ) ^ ((0.395 : ℝ))
+
+/-- CLOSED: `29^0.395 ≥ 3.15` via quadratic lower at
+`x = 0.395·log 29 > 1.3058` (uses `CS_log_twentynine_ge`). -/
+theorem CS_rpow29pos_lower_proved : CS_rpow29pos_lower := by
+  show (3.15 : ℝ) ≤ (29 : ℝ) ^ ((0.395 : ℝ))
+  have h29 : (3.3059 : ℝ) ≤ Real.log 29 := CS_log_twentynine_ge
+  have hx_lo : (1.3058 : ℝ) < 0.395 * Real.log 29 := by
+    have hmul : (0.395 : ℝ) * 3.3059 ≤ 0.395 * Real.log 29 :=
+      mul_le_mul_of_nonneg_left h29 (by norm_num)
+    have hcap : (1.3058 : ℝ) < 0.395 * 3.3059 := by norm_num
+    linarith
+  set x : ℝ := 0.395 * Real.log 29 with hx_def
+  have hx0 : (0 : ℝ) ≤ x := le_trans (by norm_num) hx_lo.le
+  have hsq : (1.3058 : ℝ) ^ 2 ≤ x ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) hx_lo.le 2
+  have hquad := Real.quadratic_le_exp_of_nonneg hx0
+  have hbase : (3.15 : ℝ) ≤ 1 + 1.3058 + (1.3058 : ℝ) ^ 2 / 2 := by
+    norm_num
+  have hchain : (3.15 : ℝ) ≤ Real.exp x := by
+    linarith [hquad, hsq, hx_lo, hbase]
+  have hrpow : (29 : ℝ) ^ ((0.395 : ℝ)) = Real.exp x := by
+    rw [Real.rpow_def_of_pos (by norm_num : (0 : ℝ) < 29)]
+    congr 1
+    rw [hx_def]
+    ring
+  rw [hrpow]
+  exact hchain
+
+/-- `29^-0.395 ≤ 0.34` upper input (TRUE `≈ 0.264`). -/
+def CS_rpow29neg_upper : Prop := (29 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.34 : ℝ)
+
+/-- CLOSED: `29^-0.395 ≤ 0.34` from `29^0.395 ≥ 3.15`
+(`0.34·3.15 = 1.071 ≥ 1`). -/
+theorem CS_rpow29neg_upper_proved : CS_rpow29neg_upper := by
+  show (29 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.34 : ℝ)
+  have hlow : (3.15 : ℝ) ≤ (29 : ℝ) ^ ((0.395 : ℝ)) := CS_rpow29pos_lower_proved
+  have hpos : (0 : ℝ) < (29 : ℝ) ^ ((0.395 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hInv : (29 : ℝ) ^ (-(0.395 : ℝ)) = 1 / (29 : ℝ) ^ ((0.395 : ℝ)) := by
+    rw [Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 29)]
+    rw [inv_eq_one_div]
+  have hle : (1 : ℝ) ≤ (0.34 : ℝ) * (29 : ℝ) ^ ((0.395 : ℝ)) := by
+    have hmul : (1 : ℝ) ≤ 0.34 * 3.15 := by norm_num
+    calc (1 : ℝ) ≤ 0.34 * 3.15 := hmul
+      _ ≤ 0.34 * (29 : ℝ) ^ ((0.395 : ℝ)) :=
+        mul_le_mul_of_nonneg_left hlow (by norm_num)
+  rw [hInv, div_le_iff₀ hpos]
+  linarith [hle]
+
+/-- `30^0.395 ≥ 3.17` lower input (TRUE `≈ 3.83`). -/
+def CS_rpow30pos_lower : Prop := (3.17 : ℝ) ≤ (30 : ℝ) ^ ((0.395 : ℝ))
+
+/-- CLOSED: `30^0.395 ≥ 3.17` via quadratic lower at
+`x = 0.395·log 30 > 1.3253` (uses `CS_log_thirty_ge`). -/
+theorem CS_rpow30pos_lower_proved : CS_rpow30pos_lower := by
+  show (3.17 : ℝ) ≤ (30 : ℝ) ^ ((0.395 : ℝ))
+  have h30 : (3.3554 : ℝ) ≤ Real.log 30 := CS_log_thirty_ge
+  have hx_lo : (1.3253 : ℝ) < 0.395 * Real.log 30 := by
+    have hmul : (0.395 : ℝ) * 3.3554 ≤ 0.395 * Real.log 30 :=
+      mul_le_mul_of_nonneg_left h30 (by norm_num)
+    have hcap : (1.3253 : ℝ) < 0.395 * 3.3554 := by norm_num
+    linarith
+  set x : ℝ := 0.395 * Real.log 30 with hx_def
+  have hx0 : (0 : ℝ) ≤ x := le_trans (by norm_num) hx_lo.le
+  have hsq : (1.3253 : ℝ) ^ 2 ≤ x ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) hx_lo.le 2
+  have hquad := Real.quadratic_le_exp_of_nonneg hx0
+  have hbase : (3.17 : ℝ) ≤ 1 + 1.3253 + (1.3253 : ℝ) ^ 2 / 2 := by
+    norm_num
+  have hchain : (3.17 : ℝ) ≤ Real.exp x := by
+    linarith [hquad, hsq, hx_lo, hbase]
+  have hrpow : (30 : ℝ) ^ ((0.395 : ℝ)) = Real.exp x := by
+    rw [Real.rpow_def_of_pos (by norm_num : (0 : ℝ) < 30)]
+    congr 1
+    rw [hx_def]
+    ring
+  rw [hrpow]
+  exact hchain
+
+/-- `30^-0.395 ≤ 0.34` upper input (TRUE `≈ 0.261`). -/
+def CS_rpow30neg_upper : Prop := (30 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.34 : ℝ)
+
+/-- CLOSED: `30^-0.395 ≤ 0.34` from `30^0.395 ≥ 3.17`
+(`0.34·3.17 = 1.0778 ≥ 1`). -/
+theorem CS_rpow30neg_upper_proved : CS_rpow30neg_upper := by
+  show (30 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.34 : ℝ)
+  have hlow : (3.17 : ℝ) ≤ (30 : ℝ) ^ ((0.395 : ℝ)) := CS_rpow30pos_lower_proved
+  have hpos : (0 : ℝ) < (30 : ℝ) ^ ((0.395 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hInv : (30 : ℝ) ^ (-(0.395 : ℝ)) = 1 / (30 : ℝ) ^ ((0.395 : ℝ)) := by
+    rw [Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 30)]
+    rw [inv_eq_one_div]
+  have hle : (1 : ℝ) ≤ (0.34 : ℝ) * (30 : ℝ) ^ ((0.395 : ℝ)) := by
+    have hmul : (1 : ℝ) ≤ 0.34 * 3.17 := by norm_num
+    calc (1 : ℝ) ≤ 0.34 * 3.17 := hmul
+      _ ≤ 0.34 * (30 : ℝ) ^ ((0.395 : ℝ)) :=
+        mul_le_mul_of_nonneg_left hlow (by norm_num)
+  rw [hInv, div_le_iff₀ hpos]
+  linarith [hle]
+
+/-- Cpow real-part split for `29^{-s}` at `sCenter` (token mirror of
+`CS_cpow27_sCenter_re`). -/
+theorem CS_cpow29_sCenter_re : ((((29 : ℝ)) : ℂ) ^ (-R02Pilot.sCenter)).re
+    = (29 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 29) := by
+  have h29pos : (0 : ℝ) < 29 := by norm_num
+  have hxC : ((29 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h29pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((29 : ℝ) : ℂ) = (((Real.log 29 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h29pos)).symm
+  rw [hlog]
+  have hre_w : (-R02Pilot.sCenter).re = (-(0.395 : ℝ)) := by
+    have e : (-R02Pilot.sCenter).re = -(R02Pilot.sCenter.re) := rfl
+    rw [e, R02Pilot.sCenter_re]
+  have him_w : (-R02Pilot.sCenter).im = (6.75 : ℝ) := by
+    have e : (-R02Pilot.sCenter).im = -(R02Pilot.sCenter.im) := rfl
+    rw [e, R02Pilot.sCenter_im]
+    norm_num
+  have hzre : ((((Real.log 29 : ℝ)) : ℂ)).re = Real.log 29 := Complex.ofReal_re _
+  have hzim : ((((Real.log 29 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 29 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).re
+      = Real.log 29 * (-(0.395 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 29 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).im
+      = Real.log 29 * (6.75 : ℝ) := by
+    rw [Complex.mul_im, hzre, hzim, him_w]
+    ring
+  have hexp : Real.exp (Real.log 29 * (-(0.395 : ℝ)))
+      = (29 : ℝ) ^ (-(0.395 : ℝ)) :=
+    (Real.rpow_def_of_pos h29pos _).symm
+  have hcos : Real.cos (Real.log 29 * (6.75 : ℝ))
+      = Real.cos (6.75 * Real.log 29) := by
+    rw [mul_comm]
+  rw [Complex.exp_re, harg_re, harg_im, hexp, hcos]
+
+/-- Cpow real-part split for `30^{-s}` at `sCenter` (token mirror of
+`CS_cpow28_sCenter_re`). -/
+theorem CS_cpow30_sCenter_re : ((((30 : ℝ)) : ℂ) ^ (-R02Pilot.sCenter)).re
+    = (30 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 30) := by
+  have h30pos : (0 : ℝ) < 30 := by norm_num
+  have hxC : ((30 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h30pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((30 : ℝ) : ℂ) = (((Real.log 30 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h30pos)).symm
+  rw [hlog]
+  have hre_w : (-R02Pilot.sCenter).re = (-(0.395 : ℝ)) := by
+    have e : (-R02Pilot.sCenter).re = -(R02Pilot.sCenter.re) := rfl
+    rw [e, R02Pilot.sCenter_re]
+  have him_w : (-R02Pilot.sCenter).im = (6.75 : ℝ) := by
+    have e : (-R02Pilot.sCenter).im = -(R02Pilot.sCenter.im) := rfl
+    rw [e, R02Pilot.sCenter_im]
+    norm_num
+  have hzre : ((((Real.log 30 : ℝ)) : ℂ)).re = Real.log 30 := Complex.ofReal_re _
+  have hzim : ((((Real.log 30 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 30 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).re
+      = Real.log 30 * (-(0.395 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 30 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).im
+      = Real.log 30 * (6.75 : ℝ) := by
+    rw [Complex.mul_im, hzre, hzim, him_w]
+    ring
+  have hexp : Real.exp (Real.log 30 * (-(0.395 : ℝ)))
+      = (30 : ℝ) ^ (-(0.395 : ℝ)) :=
+    (Real.rpow_def_of_pos h30pos _).symm
+  have hcos : Real.cos (Real.log 30 * (6.75 : ℝ))
+      = Real.cos (6.75 * Real.log 30) := by
+    rw [mul_comm]
+  rw [Complex.exp_re, harg_re, harg_im, hexp, hcos]
+
+/-- `Re₂₉ ≥ -0.34` (`r₂₉ ≤ 0.34`, `-1 ≤ cos`; TRUE `≈ -0.14`). -/
+theorem CS_Re29_ge_neg034 :
+    (-0.34 : ℝ) ≤ (29 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 29) := by
+  have hr0 : (0 : ℝ) ≤ (29 : ℝ) ^ (-(0.395 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hru : (29 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.34 : ℝ) := CS_rpow29neg_upper_proved
+  have hcos : (-1 : ℝ) ≤ Real.cos (6.75 * Real.log 29) := Real.neg_one_le_cos _
+  have h1 : (29 : ℝ) ^ (-(0.395 : ℝ)) * (-1 : ℝ)
+      ≤ (29 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 29) :=
+    mul_le_mul_of_nonneg_left hcos hr0
+  have h2 : (29 : ℝ) ^ (-(0.395 : ℝ)) * (-1 : ℝ) = -((29 : ℝ) ^ (-(0.395 : ℝ))) := by
+    ring
+  have h3 : (-0.34 : ℝ) ≤ -((29 : ℝ) ^ (-(0.395 : ℝ))) := by
+    linarith [hru]
+  linarith
+
+/-- `Re₃₀ ≤ 0` (phase-aware: `r₃₀ ≥ 0`, `cos φ₃₀ ≤ 0`; TRUE `≈ -0.24`). -/
+theorem CS_Re30_le_zero :
+    (30 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 30) ≤ (0 : ℝ) := by
+  have hr0 : (0 : ℝ) ≤ (30 : ℝ) ^ (-(0.395 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hc : Real.cos (6.75 * Real.log 30) ≤ 0 := CS_cos30_nonpos
+  exact mul_nonpos_of_nonneg_of_nonpos hr0 hc
+
+/-- Complex S30 partial sum at `sCenter` (`S₂₈ + 29^{-s} - 30^{-s}`). -/
+noncomputable def CS_S30C : ℂ :=
+  CS_S28C + (29 : ℂ) ^ (-R02Pilot.sCenter) - (30 : ℂ) ^ (-R02Pilot.sCenter)
+
+/-- Real-part link for the complex S30 (`Re(S₃₀) = Re(S₂₈) + Re₂₉ - Re₃₀`,
+mirror of `CS_S28C_Re_eq`). -/
+theorem CS_S30C_Re_eq :
+    (CS_S30C).re = (CS_S28C).re
+      + (29 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 29)
+      - (30 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 30) := by
+  unfold CS_S30C
+  have h29 : ((29 : ℂ)) = ((((29 : ℝ)) : ℂ)) := by simp
+  have h30c : ((30 : ℂ)) = ((((30 : ℝ)) : ℂ)) := by simp
+  rw [h29, h30c]
+  simp only [Complex.add_re, Complex.sub_re,
+    CS_cpow29_sCenter_re, CS_cpow30_sCenter_re]
+
+/-- Complex-S30 real part `≥ -4.98` (PROVED, unconditional):
+`Re(S₃₀) = Re(S₂₈) + Re₂₉ - Re₃₀ ≥ -4.64 - 0.34 - 0 = -4.98`
+(honest regression vs S28 `-4.64` by `0.34`; phase-aware `Re₃₀ ≤ 0`
+recovers `0.34` vs trig-free `-0.34`; reuses banked S28 base
+`CS_complex_S28_Re_ge_neg464`). -/
+theorem CS_complex_S30_Re_ge_neg498 :
+    (-4.98 : ℝ) ≤ (CS_S30C).re := by
+  have hEq := CS_S30C_Re_eq
+  have hS28 := CS_complex_S28_Re_ge_neg464
+  have hT29 := CS_Re29_ge_neg034
+  have hT30 := CS_Re30_le_zero
+  rw [hEq]
+  linarith
+
+/-- Honest gap: the new S30 Re `-4.98` trails the live best `slow = 1.94`
+(`CS_complex_S4_abs_ge_194`) by `6.92`; no S30 feed closes here. -/
+theorem CS_S30C_below_slow_gap :
+    (1.94 : ℝ) - (-4.98 : ℝ) = 6.92 := by
+  norm_num
+
+/-- Cpow imaginary-part split for `29^{-s}` at `sCenter` (token mirror of
+`CS_cpow29_sCenter_re`). -/
+theorem CS_cpow29_sCenter_im : ((((29 : ℝ)) : ℂ) ^ (-R02Pilot.sCenter)).im
+    = (29 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 29) := by
+  have h29pos : (0 : ℝ) < 29 := by norm_num
+  have hxC : ((29 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h29pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((29 : ℝ) : ℂ) = (((Real.log 29 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h29pos)).symm
+  rw [hlog]
+  have hre_w : (-R02Pilot.sCenter).re = (-(0.395 : ℝ)) := by
+    have e : (-R02Pilot.sCenter).re = -(R02Pilot.sCenter.re) := rfl
+    rw [e, R02Pilot.sCenter_re]
+  have him_w : (-R02Pilot.sCenter).im = (6.75 : ℝ) := by
+    have e : (-R02Pilot.sCenter).im = -(R02Pilot.sCenter.im) := rfl
+    rw [e, R02Pilot.sCenter_im]
+    norm_num
+  have hzre : ((((Real.log 29 : ℝ)) : ℂ)).re = Real.log 29 := Complex.ofReal_re _
+  have hzim : ((((Real.log 29 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 29 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).re
+      = Real.log 29 * (-(0.395 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 29 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).im
+      = Real.log 29 * (6.75 : ℝ) := by
+    rw [Complex.mul_im, hzre, hzim, him_w]
+    ring
+  have hexp : Real.exp (Real.log 29 * (-(0.395 : ℝ)))
+      = (29 : ℝ) ^ (-(0.395 : ℝ)) :=
+    (Real.rpow_def_of_pos h29pos _).symm
+  have hsin : Real.sin (Real.log 29 * (6.75 : ℝ))
+      = Real.sin (6.75 * Real.log 29) := by
+    rw [mul_comm]
+  rw [Complex.exp_im, harg_re, harg_im, hexp, hsin]
+
+/-- Cpow imaginary-part split for `30^{-s}` at `sCenter` (token mirror of
+`CS_cpow30_sCenter_re`). -/
+theorem CS_cpow30_sCenter_im : ((((30 : ℝ)) : ℂ) ^ (-R02Pilot.sCenter)).im
+    = (30 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 30) := by
+  have h30pos : (0 : ℝ) < 30 := by norm_num
+  have hxC : ((30 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h30pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((30 : ℝ) : ℂ) = (((Real.log 30 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h30pos)).symm
+  rw [hlog]
+  have hre_w : (-R02Pilot.sCenter).re = (-(0.395 : ℝ)) := by
+    have e : (-R02Pilot.sCenter).re = -(R02Pilot.sCenter.re) := rfl
+    rw [e, R02Pilot.sCenter_re]
+  have him_w : (-R02Pilot.sCenter).im = (6.75 : ℝ) := by
+    have e : (-R02Pilot.sCenter).im = -(R02Pilot.sCenter.im) := rfl
+    rw [e, R02Pilot.sCenter_im]
+    norm_num
+  have hzre : ((((Real.log 30 : ℝ)) : ℂ)).re = Real.log 30 := Complex.ofReal_re _
+  have hzim : ((((Real.log 30 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 30 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).re
+      = Real.log 30 * (-(0.395 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 30 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).im
+      = Real.log 30 * (6.75 : ℝ) := by
+    rw [Complex.mul_im, hzre, hzim, him_w]
+    ring
+  have hexp : Real.exp (Real.log 30 * (-(0.395 : ℝ)))
+      = (30 : ℝ) ^ (-(0.395 : ℝ)) :=
+    (Real.rpow_def_of_pos h30pos _).symm
+  have hsin : Real.sin (Real.log 30 * (6.75 : ℝ))
+      = Real.sin (6.75 * Real.log 30) := by
+    rw [mul_comm]
+  rw [Complex.exp_im, harg_re, harg_im, hexp, hsin]
+
+/-- `Im₂₉ ≥ -0.34` (`r₂₉ ≤ 0.34`, `-1 ≤ sin`; mirror of `CS_Im27_ge_neg034`). -/
+theorem CS_Im29_ge_neg034 :
+    (-0.34 : ℝ) ≤ (29 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 29) := by
+  have hr0 : (0 : ℝ) ≤ (29 : ℝ) ^ (-(0.395 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hru : (29 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.34 : ℝ) := CS_rpow29neg_upper_proved
+  have hsin : (-1 : ℝ) ≤ Real.sin (6.75 * Real.log 29) := by
+    have h := Real.sin_le_one (-(6.75 * Real.log 29))
+    rw [Real.sin_neg] at h
+    linarith
+  have h1 : (29 : ℝ) ^ (-(0.395 : ℝ)) * (-1 : ℝ)
+      ≤ (29 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 29) :=
+    mul_le_mul_of_nonneg_left hsin hr0
+  have h2 : (29 : ℝ) ^ (-(0.395 : ℝ)) * (-1 : ℝ) = -((29 : ℝ) ^ (-(0.395 : ℝ))) := by
+    ring
+  have h3 : (-0.34 : ℝ) ≤ -((29 : ℝ) ^ (-(0.395 : ℝ))) := by
+    linarith [hru]
+  linarith
+
+/-- `Im₃₀ ≤ 0.34` (`r₃₀ ≤ 0.34`, `sin ≤ 1`; mirror of `CS_Im28_le_034`). -/
+theorem CS_Im30_le_034 :
+    (30 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 30) ≤ (0.34 : ℝ) := by
+  have hr0 : (0 : ℝ) ≤ (30 : ℝ) ^ (-(0.395 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hru : (30 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.34 : ℝ) := CS_rpow30neg_upper_proved
+  have hsin : Real.sin (6.75 * Real.log 30) ≤ (1 : ℝ) := Real.sin_le_one _
+  have h1 : (30 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 30)
+      ≤ (30 : ℝ) ^ (-(0.395 : ℝ)) * (1 : ℝ) :=
+    mul_le_mul_of_nonneg_left hsin hr0
+  have h2 : (30 : ℝ) ^ (-(0.395 : ℝ)) * (1 : ℝ) = (30 : ℝ) ^ (-(0.395 : ℝ)) := by
+    ring
+  linarith [hru]
+
+/-- Imaginary-part link for the complex S30 (`Im(S₃₀) = Im(S₂₈) + Im₂₉ - Im₃₀`,
+mirror of `CS_S28C_Im_eq` / `CS_S26C_Im_eq`). -/
+theorem CS_S30C_Im_eq :
+    (CS_S30C).im = (CS_S28C).im
+      + (29 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 29)
+      - (30 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 30) := by
+  unfold CS_S30C
+  have h29 : ((29 : ℂ)) = ((((29 : ℝ)) : ℂ)) := by simp
+  have h30c : ((30 : ℂ)) = ((((30 : ℝ)) : ℂ)) := by simp
+  rw [h29, h30c]
+  simp only [Complex.add_im, Complex.sub_im,
+    CS_cpow29_sCenter_im, CS_cpow30_sCenter_im]
+
+/-- Conditional S30 Im lower via the alternating sum (explicit `S₂₈`
+premise only): from `Y ≤ Im(S₂₈)`, `Im(S₃₀) ≥ Y - 0.34 - 0.34`
+(tail width `0.68`; mirror of `CS_complex_S28_Im_ge_of_S26`). -/
+theorem CS_complex_S30_Im_ge_of_S28 (Y : ℝ) (hS28 : Y ≤ (CS_S28C).im) :
+    Y - 0.34 - 0.34 ≤ (CS_S30C).im := by
+  have hEq := CS_S30C_Im_eq
+  have hT29 := CS_Im29_ge_neg034
+  have hT30 := CS_Im30_le_034
+  rw [hEq]
+  linarith
+
+/-- S30 Im tail width (honest floor report): `0.34 + 0.34 = 0.68`. -/
+theorem CS_S30C_Im_tail_width : (0.34 : ℝ) + 0.34 = 0.68 := by
+  norm_num
+
+/-- Unconditional S30 Im floor `≥ -8.04` (PROVED): chains the banked S28 base
+`-7.36` (`CS_complex_S28_Im_ge_neg736`) through the new S30 conditional
+`CS_complex_S30_Im_ge_of_S28` (`-7.36 - 0.34 - 0.34 = -8.04`); no residual
+left on S30 Im conditional. -/
+theorem CS_complex_S30_Im_ge_neg804 :
+    (-8.04 : ℝ) ≤ (CS_S30C).im := by
+  have hS28 : (-7.36 : ℝ) ≤ (CS_S28C).im := CS_complex_S28_Im_ge_neg736
+  have h := CS_complex_S30_Im_ge_of_S28 (-7.36) hS28
+  have hnum : (-7.36 : ℝ) - 0.34 - 0.34 = -8.04 := by norm_num
+  linarith
+
+/-- Honest gap: the new S30 Im `-8.04` trails the live best `slow = 1.94`
+(`CS_complex_S4_abs_ge_194`) by `9.98`; no S30 Im feed closes here. -/
+theorem CS_S30C_Im_neg804_below_slow_gap :
+    (1.94 : ℝ) - (-8.04 : ℝ) = 9.98 := by
+  norm_num
+
+#print axioms CS_log2920_upper
+#print axioms CS_log2920_lower
+#print axioms CS_log_twentynine_eq
+#print axioms CS_log_twentynine_ge
+#print axioms CS_log_twentynine_le
+#print axioms CS_log_thirty_eq
+#print axioms CS_log_thirty_ge
+#print axioms CS_log_thirty_le
+#print axioms CS_phi29_ge
+#print axioms CS_phi29_le
+#print axioms CS_phi30_ge
+#print axioms CS_phi30_le
+#print axioms CS_cos29_nonpos
+#print axioms CS_cos30_nonpos
+#print axioms CS_rpow29pos_lower_proved
+#print axioms CS_rpow29neg_upper_proved
+#print axioms CS_rpow30pos_lower_proved
+#print axioms CS_rpow30neg_upper_proved
+#print axioms CS_cpow29_sCenter_re
+#print axioms CS_cpow30_sCenter_re
+#print axioms CS_Re29_ge_neg034
+#print axioms CS_Re30_le_zero
+#print axioms CS_S30C_Re_eq
+#print axioms CS_complex_S30_Re_ge_neg498
+#print axioms CS_S30C_below_slow_gap
+#print axioms CS_cpow29_sCenter_im
+#print axioms CS_cpow30_sCenter_im
+#print axioms CS_Im29_ge_neg034
+#print axioms CS_Im30_le_034
+#print axioms CS_S30C_Im_eq
+#print axioms CS_complex_S30_Im_ge_of_S28
+#print axioms CS_S30C_Im_tail_width
+#print axioms CS_complex_S30_Im_ge_neg804
+#print axioms CS_S30C_Im_neg804_below_slow_gap
+
+end Door3CellSuppliers
+
