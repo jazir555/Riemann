@@ -6164,6 +6164,10 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 R16C+N23 (backgrounds `ses_f34555975`,
+  `ses_f345735df`, proof-only, grep-clean): R16 sup mirror +
+  residual; N23 MEETS at GammaSeq (0.66094 ≥ 0.66), gap after
+  0.014 rate.
 - 2026-09-22 CELL-R31 (background `ses_f345648fc`, proof-only,
   grep-clean, interval-only commit): R31 route (poly 38.4/base
   19.2, banked infeasible; namespace-end benign).
