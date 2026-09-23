@@ -2198,3 +2198,61 @@ theorem narrow_R18_deriv_keeps_67200 (hBall : premBall_R18) (w : ℂ)
   premDeriv_R18_of_ball hBall w hw
 
 end Door3PremiseTier
+/-! ## 23. R19 premise-tier narrow attempt (append-only wave).
+
+Grep record (verified before writing via `default.grep`):
+* R19 premise block in this file: `premTier_R19 :641`, `premBall_R19 :643`,
+  `premTier_R19_mismatch :647`, `premDeriv_R19_of_ball :649`,
+  `premSphere_R19_of_ball :661` (`R19.mem`, tier `0.07`, value `67200`).
+* R18 narrow block in this file: `## 22. R18 premise-tier narrow attempt`
+  `:2142-2200` with `narrow_R18_closedForm_keeps :2182`,
+  `narrow_R18_residual_gap :2186`,
+  `narrow_R18_residual_is_mismatch :2190`,
+  `narrow_R18_deriv_keeps_67200 :2195`; R18 keeps `67200`, no chain.
+* R02 narrow block in this file: `## 6. R02 premise-tier narrowing via banked AO sups`
+  `:1241-1316` with `narrow_R02_deriv_162p96_of_banked :1274`,
+  `narrow_R02_deriv_163_of_banked :1281`,
+  `narrow_R02_sphere_40p74_of_banked :1288`, closed form
+  `40.74 / 0.25 = 162.96` `:1305`, residual `0.07 < 162.96` `:1309`.
+* Banked AO R19 chain search in `central_cover_assembly.lean` (no local chain):
+  pattern `AO_R19|AO_gamma_upper_disc_R19|R19_deriv|R19_uniform|R19.*sphere|R19.*residual|R19_gamma|R19_zeta`
+  returns no files; pattern `namespace AO_` returns only
+  `namespace AO_R02DiscUpdate :9968` (R02 chain only, no `AO_R19` hit);
+  pattern `theorem R19_|def R19_` returns only rect guards
+  `R19_x0/x1/y0/y1 :3168-3171`, `R19_width_eq :3173`,
+  `R19_strip_lo/hi :3176-3177`, `R19_dx_eq :3179`, `R19_dy_eq :3183`,
+  `R19_radius_eq :3187`, `R19_radius_lt :3192`, `R19_mem_gridFine :3195`,
+  `R19_leaf_obligations :3205`, `R19_fencing_of_bounds :3209`,
+  `R19_lowerBound_of_bounds :3213`, `R19_zeroFree_of_bounds :3218`,
+  `R19_nonvanishing_of_bounds :3223`, `R19_H_instance :3234`
+  (tier guards, not an AO chain);
+  pattern `narrow_R19_` in this file returns no files
+  (no prior R19 narrow).
+* Result below: no R19 mirror of the R02 shape exists locally, so R19 keeps
+  value `67200` (`16800 / 0.25`) with exact residual gap `0.07 < 67200`;
+  tier `0.07` stays open by the same mismatch as `premTier_R19_mismatch :647`.
+-/
+
+namespace Door3PremiseTier
+
+/-- R19 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no banked narrow chain exists locally. -/
+theorem narrow_R19_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R19 residual gap at the kept value: tier `0.07` stays open below `67200`. -/
+theorem narrow_R19_residual_gap : (0.07 : ℝ) < 67200 := by
+  norm_num
+
+/-- R19 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R19_residual_is_mismatch : (0.07 : ℝ) < 67200 :=
+  tier07_lt_67200
+
+/-- R19 conditional deriv transfer still lands at `67200` from the ball premise
+(re-export for the narrow record). -/
+theorem narrow_R19_deriv_keeps_67200 (hBall : premBall_R19) (w : ℂ)
+    (hw : CentralCoverAssembly.R19.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  premDeriv_R19_of_ball hBall w hw
+
+end Door3PremiseTier
