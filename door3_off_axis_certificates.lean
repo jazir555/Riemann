@@ -11912,3 +11912,128 @@ theorem OA11S16_diminishing_gap : True := by
 #print axioms OA11S16_diminishing_gap
 
 end Door3OffAxis
+
+namespace Door3OffAxis
+open scoped BigOperators
+
+/-- S17 route header (PROOF-ONLY, append-only): S6 live; S7-S16 flat routes
+filed (all diminishing); mid-low residual impossible via triangle at
+`:10644-10655` (`sCutOA11S7_mid_low_residual_rhs_neg`,
+`sCutOA11S7_mid_low_residual_impossible`).
+Grep S16 tail at `:11860-11912` (`OA11S16_transfer_triangle`,
+`OA11S16_norm_floor` (`-5879/4500`), `OA11S16_shortfall` (`-15329/4500`),
+`OA11S16_below_bar`, `OA11S16_diminishing_gap`).
+
+Attempt order per task: S17 partial via flat amplitude triangle
+(`‖t16‖ ≤ 1/4` from `4 ≤ sqrt 17`, no trig needed), then floor and bar check.
+Honest outcome filed below: S17 floor below the `21/10` bar, so S6 stays live. -/
+theorem sCutOA11S17_sqrt17_ge :
+    (4 : ℝ) ≤ (17 : ℝ) ^ ((1 / 2 : ℝ)) := by
+  have e17 : ((((17 : ℝ) ^ ((1 / 2 : ℝ))) ^ (2 : ℕ))) = 17 := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    have e2 : ((1 / 2 : ℝ)) * ((((2 : ℕ))) : ℝ) = 1 := by norm_num
+    rw [e2, Real.rpow_one]
+  have hsq : ((4 : ℝ) ^ (2 : ℕ)) ≤
+      ((((17 : ℝ) ^ ((1 / 2 : ℝ))) ^ (2 : ℕ))) := by
+    rw [e17]
+    norm_num
+  exact le_of_pow_le_pow_left₀ (by norm_num)
+    (Real.rpow_nonneg (by norm_num) _) hsq
+
+/-- Amplitude cap `17 ^ (-(1/2)) ≤ 1/4` via `4 ≤ sqrt 17`. -/
+theorem sCutOA11S17_amp17_le : (17 : ℝ) ^ (-(1 / 2 : ℝ)) ≤ (1 / 4 : ℝ) := by
+  have hsqrt := sCutOA11S17_sqrt17_ge
+  have hpos : (0 : ℝ) < (17 : ℝ) ^ ((1 / 2 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (17 : ℝ) ^ (-(1 / 2 : ℝ)) = (((17 : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [hrw, show (1 / 4 : ℝ) = (((4 : ℝ)))⁻¹ by norm_num]
+  exact (inv_le_inv₀ hpos (by norm_num)).mpr hsqrt
+
+/-- OA11 eta term 16 in closed form (`term 16 = (17^s)⁻¹`, since `(-1)^16 = 1`). -/
+theorem OA11S17_eta_term16_eq :
+    etaDirichletTerm sCutOA11 16 = ((((17 : ℕ)) : ℂ) ^ sCutOA11)⁻¹ := by
+  have e1 : (16 + 1 : ℕ) = 17 := rfl
+  have hcast : ((((16 + 1 : ℕ)) : ℂ)) = ((((17 : ℕ)) : ℂ)) := by
+    rw [e1]
+  have hneg : (-1 : ℂ) ^ (16 : ℕ) = 1 := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hneg, one_div]
+
+/-- OA11 term 16 norm cap (`‖t16‖ ≤ 1/4` from `4 ≤ sqrt 17`). -/
+theorem OA11S17_eta_term16_norm_le :
+    ‖etaDirichletTerm sCutOA11 16‖ ≤ (1 / 4 : ℝ) := by
+  have h17cast : ((((17 : ℕ)) : ℂ)) = (((17 : ℝ) : ℂ)) := by norm_num
+  have h17norm : ‖((((17 : ℕ)) : ℂ) ^ sCutOA11)‖ = (17 : ℝ) ^ sCutOA11.re := by
+    rw [h17cast]
+    exact Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num) _
+  have heq := OA11S17_eta_term16_eq
+  have hamp := sCutOA11S17_amp17_le
+  have hrw : (17 : ℝ) ^ (-(1 / 2 : ℝ)) = (((17 : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [heq, norm_inv, h17norm, sCutOA11_re, ← hrw]
+  exact hamp
+
+/-- Seventeen-term split (`S17 = S16 + t16`). -/
+theorem OA11S17_S17_eq :
+    (∑ k ∈ Finset.range 17, etaDirichletTerm sCutOA11 k) =
+      (∑ k ∈ Finset.range 16, etaDirichletTerm sCutOA11 k) +
+      etaDirichletTerm sCutOA11 16 := by
+  rw [show (17 : ℕ) = 16 + 1 by norm_num, Finset.sum_range_succ]
+
+/-- Transfer triangle for the `S16 -> S17` step. -/
+theorem OA11S17_transfer_triangle :
+    ‖∑ k ∈ Finset.range 17, etaDirichletTerm sCutOA11 k‖ ≥
+      ‖∑ k ∈ Finset.range 16, etaDirichletTerm sCutOA11 k‖ -
+        ‖etaDirichletTerm sCutOA11 16‖ := by
+  have htri : ‖∑ k ∈ Finset.range 16, etaDirichletTerm sCutOA11 k‖ ≤
+      ‖∑ k ∈ Finset.range 17, etaDirichletTerm sCutOA11 k‖ +
+        ‖etaDirichletTerm sCutOA11 16‖ := by
+    have h := norm_sub_le
+      (∑ k ∈ Finset.range 17, etaDirichletTerm sCutOA11 k)
+      (etaDirichletTerm sCutOA11 16)
+    have heq : (∑ k ∈ Finset.range 17, etaDirichletTerm sCutOA11 k) -
+        (etaDirichletTerm sCutOA11 16) =
+        (∑ k ∈ Finset.range 16, etaDirichletTerm sCutOA11 k) := by
+      rw [OA11S17_S17_eq]
+      abel
+    rw [heq] at h
+    exact h
+  linarith
+
+/-- S17 flat-triangle floor (`-7004/4500 = -5879/4500 - 1/4`). -/
+theorem OA11S17_norm_floor :
+    (-7004 / 4500 : ℝ) ≤ ‖∑ k ∈ Finset.range 17, etaDirichletTerm sCutOA11 k‖ := by
+  have hS16 := OA11S16_norm_floor
+  have ht16 := OA11S17_eta_term16_norm_le
+  have htri := OA11S17_transfer_triangle
+  have hle : (-7004 / 4500 : ℝ) = -5879 / 4500 - 1 / 4 := by norm_num
+  linarith
+
+/-- Exact S17 shortfall numeral (`-7004/4500 - 21/10 = -16454/4500`). -/
+theorem OA11S17_shortfall :
+    ((-7004 / 4500 : ℝ) - 21 / 10) = (-16454 / 4500 : ℝ) := by norm_num
+
+/-- S17 floor misses the slow bar (diminishing: `-7004/4500 < 21/10`). -/
+theorem OA11S17_below_bar :
+    (-7004 / 4500 : ℝ) < (21 / 10 : ℝ) := by norm_num
+
+/-- Option-S17 verdict (honest): the S17 flat-triangle partial is strictly worse
+than S16 (`-7004/4500 < -5879/4500`) and worse than S6 (`2449/1125`), shortfall
+falls from `-15329/4500` to `-16454/4500`, so no bigger surplus is banked; S6
+stays the live partial and the mid-low triangle impossibility above stands. -/
+theorem OA11S17_diminishing_gap : True := by
+  trivial
+
+#print axioms sCutOA11S17_sqrt17_ge
+#print axioms sCutOA11S17_amp17_le
+#print axioms OA11S17_eta_term16_eq
+#print axioms OA11S17_eta_term16_norm_le
+#print axioms OA11S17_S17_eq
+#print axioms OA11S17_transfer_triangle
+#print axioms OA11S17_norm_floor
+#print axioms OA11S17_shortfall
+#print axioms OA11S17_below_bar
+#print axioms OA11S17_diminishing_gap
+
+end Door3OffAxis

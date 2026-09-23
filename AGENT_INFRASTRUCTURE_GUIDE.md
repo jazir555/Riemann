@@ -6164,6 +6164,9 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 R14C+S17 (backgrounds `ses_f345824f4`,
+  `ses_f345866e5`, proof-only, grep-clean): R14 sup mirror +
+  residual; S17 route filed.
 - 2026-09-22 GAMMA-N22 (background `ses_f345a1d26`, proof-only,
   grep-clean, gamma-only commit): N22 honest ceiling <0.643, gap
   exact banked in-file. N23 next.
