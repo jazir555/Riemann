@@ -6164,6 +6164,9 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 TAIL-M28 (background `ses_f34716f4f`, proof-only,
+  grep-clean, tail-only commit): M268435456 exact rung 3/2048 (16384²
+  verified). M29 odd next.
 - 2026-09-22 ASSEMBLY-R12 (background `ses_f3470f02f`, proof-only,
   grep-clean, assembly-only commit): R12 leaf+H conditional (tenth +
   0.07). Post-dates GREEN; re-verify later.
