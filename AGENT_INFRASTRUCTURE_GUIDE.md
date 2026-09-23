@@ -6164,6 +6164,8 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 TAIL-M38 (background `ses_f3462701a`, proof-only,
+  grep-clean, tail-only commit): M38 exact (sqrt 524288).
 - 2026-09-22 ETA-S32 (background `ses_f3464b312`, proof-only,
   grep-clean, suppliers-only commit): S32 rung (Re -5.32 + Im
   conditional, log31/32 phase). S34 next.
