@@ -1469,3 +1469,61 @@ theorem narrow_R05_deriv_keeps_67200 (hBall : premBall_R05) (w : ℂ)
   premDeriv_R05_of_ball hBall w hw
 
 end Door3PremiseTier
+
+/-! ## 10. R06 premise-tier narrow attempt (append-only wave).
+
+Grep record (verified before writing via `default.grep`):
+* R05 narrow block in this file: `## 9. R05 premise-tier narrow attempt`
+  `:1422-1471` with `narrow_R05_closedForm_keeps :1453`,
+  `narrow_R05_residual_gap :1457`,
+  `narrow_R05_residual_is_mismatch :1461`,
+  `narrow_R05_deriv_keeps_67200 :1466`; R05 keeps `67200`, no chain.
+* R02 narrow block in this file: `## 6. R02 premise-tier narrowing via banked AO sups`
+  `:1241-1316` with `narrow_R02_deriv_162p96_of_banked :1274`,
+  `narrow_R02_deriv_163_of_banked :1281`,
+  `narrow_R02_sphere_40p74_of_banked :1288`, closed form
+  `40.74 / 0.25 = 162.96` `:1305`, residual `0.07 < 162.96` `:1309`.
+* Banked AO R06 chain search in `central_cover_assembly.lean` (no local chain):
+  pattern `AO_R06|AO_gamma_upper_disc_R06|R06.*deriv_bound|R06_uniform|AO.*R06`
+  returns no files; pattern `namespace AO_|AO_gamma|AO_sphere|AO_M_eq|AO_deriv|AO_R02`
+  returns only the R02 chain (`namespace AO_R02DiscUpdate :9968-10264`,
+  `AO_gamma_upper_disc_R02_obligation :9975`, `AO_sphere_sup_eq :9981`,
+  `AO_M_eq :9985`, `AO_deriv_improvement :9993`,
+  `AO_R02_uniform_sphere_bound :10051`,
+  `AO_R02_deriv_bound_of_zeta_upper :10063`,
+  `AO_R02_deriv_bound_163_of_zeta_upper :10078`); pattern
+  `R06_deriv|R06_uniform|R06.*sphere|R06.*gamma|gamma.*R06|R06.*zeta|zeta.*R06|R06_zeta|R06_gamma|R06.*guard|guard.*R06`
+  returns only `R06_deriv_residual :18013` lines `:17960-18031`
+  (leaf residual plus pre-existing R06 guard, not a banked AO narrow chain);
+  pattern `R06_leaf|R06_strip|R06_center|R06.*obligation` returns
+  `R06_strip_lo/hi :1785-1786`, `R06_leaf_obligations :1814`,
+  `R06_H_instance :1843`, `R06_center_residual_three_tenths :18005`,
+  `R06_deriv_residual :18013` (tier guards, not an AO chain).
+* Result below: no R06 mirror of the R02 shape exists locally, so R06 keeps
+  value `67200` (`16800 / 0.25`) with exact residual gap `0.06 < 67200`;
+  tier `0.06` stays open by the same mismatch as `premTier_R06_mismatch :294`.
+-/
+
+namespace Door3PremiseTier
+
+/-- R06 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no banked narrow chain exists locally. -/
+theorem narrow_R06_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R06 residual gap at the kept value: tier `0.06` stays open below `67200`. -/
+theorem narrow_R06_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R06 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R06_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R06 conditional deriv transfer still lands at `67200` from the ball premise
+(re-export for the narrow record). -/
+theorem narrow_R06_deriv_keeps_67200 (hBall : premBall_R06) (w : ℂ)
+    (hw : CentralCoverAssembly.R06.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  premDeriv_R06_of_ball hBall w hw
+
+end Door3PremiseTier

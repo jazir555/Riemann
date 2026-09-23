@@ -36822,3 +36822,120 @@ theorem R20_banked_infeasible :
 #print axioms R20CenterAssembly.R20_banked_infeasible
 
 end R20CenterAssembly
+
+/-!
+## R21 center assembly with banked s-center + new poly floor (conditional, filed honest).
+
+Grep-first record (checked before writing, this file only):
+* `R20CenterAssembly.poly_lower_R20` (`38.3`) + `R20_threshold_eq` (`0.065`,
+  outer tier `eps = 0.002`, `M = 0.05`): prior route template mirrored here; R21 honestly uses
+  outer tier (`eps = 0.002`, `M = 0.05`) per `R21_leaf_obligations`
+  (`central_cover_assembly.lean:3375-3377`).
+* `R21GammaUpper.sR21` with `sR21_re = 0.2` (`:5243`) and `sR21_im = -8.75`
+  (`:5249`) (`R21_center_eq`, `:5227`): banked s-center reused here; no `poly_lower_R21`
+  existed, so the poly floor is newly closed below from those banked re/im facts.
+* `CellUniform.pi_lower_of_re` (`:1752`) +
+  `CellUniform.center_bound_of_component_bounds` (`:1772`): generic bridge reused.
+* `R00GammaLower.gamma_const_pos` + `R00GammaLower.gamma_lower_center`
+  + `R00ZetaEM.etaCPartial_two_norm_ge`: cited only as shape witnesses, not as
+  discharged bounds; Gamma (`1/10000000`) and zeta (`1/26`) stay explicit open
+  premises.
+
+Shape: mirrors `R20CenterAssembly.R20_center_with_poly_pi_gamma` at the R21
+outer corner (`sR21 = 0.2 - 8.75 * I`), outer tier (`eps = 0.002`, `M = 0.05`) via
+the generic `CellUniform.center_bound_of_component_bounds` bridge. Open component
+premises are exactly two: the Gamma remainder `hgam` and the zeta lower `hzeta`
+(`hrad`, `hGam_floor`, `hZeta_floor`, `hprod` are numeric side conditions).
+-/
+
+namespace R21CenterAssembly
+
+/-- Norm version of `polyPart` at the banked R21 s-center. -/
+theorem polyPart_norm_R21 :
+    ‖R00Enclosure.polyPart R21GammaUpper.sR21‖ =
+      (1 / 2) * ‖R21GammaUpper.sR21‖ * ‖R21GammaUpper.sR21 - 1‖ := by
+  unfold R00Enclosure.polyPart
+  rw [norm_mul, norm_mul, R00Numerics.norm_half]
+
+/-- `‖sR21‖ ≥ 8.75` (`8.75^2 = 76.5625 < 0.2^2 + 8.75^2 = 76.6025`). -/
+theorem norm_sR21_ge : (8.75 : ℝ) ≤ ‖R21GammaUpper.sR21‖ := by
+  have hsq : (8.75 : ℝ) ^ 2 ≤ ‖R21GammaUpper.sR21‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply,
+      R21GammaUpper.sR21_re, R21GammaUpper.sR21_im]
+    norm_num
+  calc (8.75 : ℝ) = Real.sqrt ((8.75 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖R21GammaUpper.sR21‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖R21GammaUpper.sR21‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- `‖sR21 - 1‖ ≥ 8.78` (`0.8^2 + 8.75^2 = 77.2025 > 8.78^2 = 77.0884`). -/
+theorem norm_sR21_sub_one_ge : (8.78 : ℝ) ≤ ‖R21GammaUpper.sR21 - 1‖ := by
+  have hr1 : (R21GammaUpper.sR21 - 1).re = -0.8 := by
+    simp only [Complex.sub_re, Complex.one_re, R21GammaUpper.sR21_re]
+    norm_num
+  have hi1 : (R21GammaUpper.sR21 - 1).im = -8.75 := by
+    simp only [Complex.sub_im, Complex.one_im, R21GammaUpper.sR21_im]
+    norm_num
+  have hsq : (8.78 : ℝ) ^ 2 ≤ ‖R21GammaUpper.sR21 - 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hr1, hi1]
+    norm_num
+  calc (8.78 : ℝ) = Real.sqrt ((8.78 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖R21GammaUpper.sR21 - 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖R21GammaUpper.sR21 - 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- ENCLOSURE (hypothesis-free): `38.4 ≤ ‖polyPart sR21‖`
+(`8.75 * 8.78 / 2 = 38.4125 ≥ 38.4`; true `≈ 38.45`, slack `≈ 0.04`). -/
+theorem poly_lower_R21 : (38.4 : ℝ) ≤ ‖R00Enclosure.polyPart R21GammaUpper.sR21‖ := by
+  have hprod : (8.75 : ℝ) * 8.78 ≤ ‖R21GammaUpper.sR21‖ * ‖R21GammaUpper.sR21 - 1‖ :=
+    mul_le_mul norm_sR21_ge norm_sR21_sub_one_ge (by norm_num) (norm_nonneg _)
+  rw [polyPart_norm_R21]
+  nlinarith [hprod]
+
+/-- Conditional R21 center assembly: banked s-center + new poly `38.4` and pi `1/2`
+floors are plugged into the generic bridge; the Gamma remainder and zeta lower stay
+explicit. The numeric check needs `Agam * Azeta ≥ (0.002 + 0.05 * 1.26) / 19.2`;
+at banked floors (`1/10000000`, `1/26`) it is infeasible, so this is filed as an
+honest conditional, not a closed bound. -/
+theorem R21_center_with_poly_pi_gamma (Agam Azeta : ℝ)
+    (hrad : CentralCoverAssembly.R21.radius ≤ 1.26)
+    (hGam_floor : (1 / 10000000 : ℝ) ≤ Agam)
+    (hgam : Agam ≤ ‖R00Enclosure.gammaPart R21GammaUpper.sR21‖)
+    (hZeta_floor : (1 / 26 : ℝ) ≤ Azeta)
+    (hzeta : Azeta ≤ ‖zeta R21GammaUpper.sR21‖)
+    (hprod : (0.002 : ℝ) + 0.05 * 1.26 ≤ 38.4 * (1 / 2) * Agam * Azeta) :
+    (0.002 : ℝ) + 0.05 * CentralCoverAssembly.R21.radius ≤
+      ‖xiShifted CentralCoverAssembly.R21.center‖ := by
+  have hpoly := poly_lower_R21
+  have hpi : (1 / 2 : ℝ) ≤ ‖R00Enclosure.piPart R21GammaUpper.sR21‖ :=
+    CellUniform.pi_lower_of_re (by rw [R21GammaUpper.sR21_re]; norm_num)
+  have _hG := R00GammaLower.gamma_lower_center
+  have _hS2 := R00ZetaEM.etaCPartial_two_norm_ge
+  have hC0 : (0 : ℝ) ≤ Agam :=
+    le_trans (le_of_lt R00GammaLower.gamma_const_pos) hGam_floor
+  have hD0 : (0 : ℝ) ≤ Azeta :=
+    le_trans (by norm_num) hZeta_floor
+  have harg : R21GammaUpper.sR21
+      = (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R21.center := rfl
+  rw [harg] at hpoly hpi hgam hzeta
+  exact CellUniform.center_bound_of_component_bounds
+    CentralCoverAssembly.R21 0.002 0.05 (by norm_num) hrad
+    38.4 (1 / 2) Agam Azeta (by norm_num) (by norm_num) hC0 hD0
+    hpoly hpi hgam hzeta hprod
+
+/-- Exact outer-tier threshold: `0.002 + 0.05 * 1.26 = 0.065`. -/
+theorem R21_threshold_eq : (0.002 : ℝ) + 0.05 * 1.26 = 0.065 := by norm_num
+
+/-- Exact banked base: `38.4 * (1/2) = 19.2`. -/
+theorem R21_base_eq : (38.4 : ℝ) * (1 / 2) = 19.2 := by norm_num
+
+/-- Exact residual: banked floors `19.2 / 260000000` do not clear `0.065`
+(required `Agam * Azeta ≥ 0.065 / 19.2 ≈ 0.00339`; banked `≈ 3.85e-09`;
+short by factor `≈ 880208`, the ~6-order wall). -/
+theorem R21_banked_infeasible :
+    (38.4 : ℝ) * (1 / 2) * (1 / 10000000) * (1 / 26) < (0.002 : ℝ) + 0.05 * 1.26 := by norm_num
+
+#print axioms R21CenterAssembly.poly_lower_R21
+#print axioms R21CenterAssembly.R21_center_with_poly_pi_gamma
+#print axioms R21CenterAssembly.R21_threshold_eq
+#print axioms R21CenterAssembly.R21_banked_infeasible
+
+end R21CenterAssembly

@@ -6164,6 +6164,10 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 R21+R06 (backgrounds `ses_f34678340`,
+  `ses_f3466dfb9`, proof-only, grep-clean): R21 route (poly 38.4/
+  base 19.2, banked infeasible; namespace-end reposition benign);
+  R06 no AO chain keeps 67200.
 - 2026-09-22 TAIL-M33 (background `ses_f34678342`, proof-only,
   grep-clean, tail-only commit): M33 odd floor 92681 banked +
   beats-prior.
