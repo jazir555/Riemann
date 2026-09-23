@@ -6164,6 +6164,12 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 FLOOR1151 (background `ses_f346de151`, proof-only,
+  grep-clean, zeta-only commit): 1.151^20≤17 → 17^0.05 tightening,
+  M17 tail 17.40→17.38, K0 19.709→19.689 beats 0.02. Gap 0.231.
+- 2026-09-22 CELL-R (background `ses_f347bb15a`, proof-only,
+  grep-clean, interval-only commit): R17 center route filed
+  (poly 5.4/base 2.7 vs banked 0.1382 infeasible). R18 next.
 - 2026-09-22 ETA-S22IMC (background `ses_f347bb159`, proof-only,
   grep-clean, suppliers-only commit): S22 Im composition verified +
   S24 rung (Re -3.96 + Im conditional, log23/24 phase). S26 next.
