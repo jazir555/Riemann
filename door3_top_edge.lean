@@ -2129,3 +2129,59 @@ def ledger_open_product12 : Prop :=
   Door3TopEdgeGammaGap.entire_eq_product_ball12_gap
 
 end Door3TopEdgeLedgerClose2
+
+/-! ## TOPEDGE-ZETACLOSE zeta-12 premise honest attempt (append-only, value + exact gap).
+
+Grep tail first (this file only):
+* `Door3TopEdgeGamma12Close` (`:2070-2092`): `gamma12_upper_mono`, `zeta12_upper_mono` by `le_trans`, plus `gamma12_exact_open` / `zeta12_exact_open` aliases; no numeral `G` / `Z` closed there.
+* `Door3TopEdgeLedgerClose2` (`:2109-2131`): re-exports `ledger_open_gamma12` / `ledger_open_zeta12` as OPEN.
+* local zeta norm uppers on `closedBall 0 12`: none banked; only nonvanishing at `Re = 1` near `:151-153`; pole points `0` / `1` in ball-12 (`:1368-1376`).
+* ball-25/2 zeta upper `Door3TopEdgeBall25.zeta_ball25_upper_residual` (`:1690-1692`) stays OPEN; it restricts to ball-12 since `12 <= 25 / 2`.
+
+Value below: `zeta25_to_zeta12` / `gamma25_to_gamma12` restriction via `closedBall` monotonicity, `zeta12_at_one` specialization at the banked pole point, `zeta12_mono_chain` reuse of banked mono.
+Gap (exact, OPEN): `zeta12_exact_gap` / `zeta25_exact_gap` below; no explicit numeral `Z` is closed here, so `bottom_ballSup_residual` stays OPEN.
+-/
+
+namespace Door3TopEdgeZeta12Close
+
+open Complex Real Set Topology
+
+theorem zeta25_to_zeta12 {Z : ℝ}
+    (hZ : Door3TopEdgeBall25.zeta_ball25_upper_residual Z) :
+    Door3TopEdgeGammaGap.zeta_ball12_upper_residual Z := by
+  intro s hs
+  have h12 : dist s (0 : ℂ) ≤ (12 : ℝ) := Metric.mem_closedBall.mp hs
+  have hle : (12 : ℝ) ≤ (25 / 2 : ℝ) := by norm_num
+  have h25 : dist s (0 : ℂ) ≤ (25 / 2 : ℝ) := le_trans h12 hle
+  have hs25 : s ∈ Metric.closedBall (0 : ℂ) (25 / 2) :=
+    Metric.mem_closedBall.mpr h25
+  exact hZ s hs25
+
+theorem gamma25_to_gamma12 {G : ℝ}
+    (hG : Door3TopEdgeBall25.gamma_ball25_upper_residual G) :
+    Door3TopEdgeGammaGap.gamma_ball12_upper_residual G := by
+  intro s hs
+  have h12 : dist s (0 : ℂ) ≤ (12 : ℝ) := Metric.mem_closedBall.mp hs
+  have hle : (12 : ℝ) ≤ (25 / 2 : ℝ) := by norm_num
+  have h25 : dist s (0 : ℂ) ≤ (25 / 2 : ℝ) := le_trans h12 hle
+  have hs25 : s ∈ Metric.closedBall (0 : ℂ) (25 / 2) :=
+    Metric.mem_closedBall.mpr h25
+  exact hG s hs25
+
+theorem zeta12_at_one {Z : ℝ}
+    (hZ : Door3TopEdgeGammaGap.zeta_ball12_upper_residual Z) :
+    ‖zeta (1 : ℂ)‖ ≤ Z := by
+  exact hZ (1 : ℂ) Door3TopEdgeZetaAttempt.pole_one_mem_ball12_local
+
+theorem zeta12_mono_chain {Z1 Z2 : ℝ} (h12 : Z1 ≤ Z2)
+    (hZ : Door3TopEdgeGammaGap.zeta_ball12_upper_residual Z1) :
+    Door3TopEdgeGammaGap.zeta_ball12_upper_residual Z2 :=
+  Door3TopEdgeGamma12Close.zeta12_upper_mono h12 hZ
+
+def zeta12_exact_gap (Z : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.zeta_ball12_upper_residual Z
+
+def zeta25_exact_gap (Z : ℝ) : Prop :=
+  Door3TopEdgeBall25.zeta_ball25_upper_residual Z
+
+end Door3TopEdgeZeta12Close
