@@ -1275,3 +1275,95 @@ theorem stripBaseBoundsShape_exists_of_explicit_bounds {f : ℂ → ℂ} {x : �
 #print axioms stripBaseBoundsShape_base_pos_of_explicit
 #print axioms stripBaseBoundsShape_deriv_explicit_of_ballSup
 #print axioms stripBaseBoundsShape_exists_of_explicit_bounds
+
+/-!
+## Door-3 generic-f tier closure (SUP tail: single sup premise)
+
+Grep shapes (verified before append):
+* `R00_deriv_bound_of_sup` (`door3_deriv_certs.lean:148-163`): generic `f`,
+  sup `qB` on `ball R00c 2` gives `‖deriv f w‖ ≤ 2 * qB` on `R00Rect`.
+* `R00_deriv_meets_outer_tier` (`door3_deriv_certs.lean:167-172`): `qB ≤ 1/40`
+  gives `2 * qB ≤ 0.05`.
+
+Honest sup-premise attempt (ONE premise, chained from banked sups):
+* Banked on `closedBall R00c 2`: poly `63.4` (`shiftedS_poly_shape_sup_on_ball`),
+  `fPi ≤ 4` (`fPi_shape_sup_on_sImage`), `GammaSupCond 1.52`
+  (`deriv_GammaSupCond_152`), hence `‖xiFourShapeAt z‖ ≤ 385.472 * Z` under any
+  `ZetaSupCond Z` (`deriv_xiFourShapeAt_sup_of_gamma152`).
+* Missing (grep-clean, no unconditional instance in repo): any `ZetaSupCond Z`
+  or `JointGZSupCond J` with `Z`/`J` small enough for `1/40`. Repo grep for
+  `ZetaSupCond`/`JointGZSupCond` numeral instances and for
+  `‖xiShifted‖` sups on `closedBall R00c 2` returns only the conditional
+  shapes above — no banked zeta sup. So the `qB ≤ 1/40` premise cannot be
+  discharged unconditionally; it is filed below as the exact spec `R00SupSpec`
+  (generic `f`) with `ZetaSupCond`/`JointGZSupCond` as the xi-shape instances.
+
+Banked here (sorry-free, no `simpa`):
+* `R00SupSpec`: exact generic spec (`DiffContOnCl` + ball sup `qB` + `qB ≤ 1/40`).
+* `R00_deriv_tier_of_sup`: generic closure CALLING (not redoing)
+  `R00_deriv_bound_of_sup` + `R00_deriv_meets_outer_tier`.
+* `R00_xi_deriv_of_gamma152_zeta`: xi-shape chain CALLING
+  `deriv_xiFourShapeAt_sup_of_gamma152` + `deriv_bound_of_sphere_sup_on_ball`
+  (`385.472 * Z / (1/2) = 770.944 * Z`).
+* `R00_xi_tier_needs_zeta007`: quantified gap (`770.944 * Z ≤ 0.05` forces
+  `Z ≤ 0.00007`; `770.944 * 0.00007 = 0.05396608 > 0.05`).
+
+Value-or-gap: VALUE = conditional closures above; GAP = unconditional
+`qB ≤ 1/40` sup (needs `ZetaSupCond Z` with `Z ≤ 0.00007`, i.e. a zeta majorant
+far below the true `|ζ| ~ 1` scale on this rectangle — absent from Mathlib).
+Residual (exact): supply `ZetaSupCond Z` (or `JointGZSupCond J` with
+`J ≤ 0.0001` via `R00_deriv_meets_tier_of_joint_conds`) plus
+`DiffContOnCl ℂ xiFourShapeAt (ball R00c 2)`.
+-/
+
+/-- Exact generic sup spec for the `R00` outer tier: differentiability +
+sup `qB` on `ball R00c 2` + the tier threshold `qB ≤ 1 / 40`. -/
+def R00SupSpec (f : ℂ → ℂ) (qB : ℚ) : Prop :=
+  DiffContOnCl ℂ f (ball R00c ((2 : ℚ) : ℝ)) ∧
+  (∀ z ∈ closedBall R00c ((2 : ℚ) : ℝ), ‖f z‖ ≤ (qB : ℝ)) ∧
+  qB ≤ 1 / 40
+
+/-- **Generic-f tier closure (single sup premise).** Under `R00SupSpec f qB`,
+every `w ∈ R00Rect` satisfies the leaf tier `‖deriv f w‖ ≤ 0.05`
+(by CALLING `R00_deriv_bound_of_sup` + `R00_deriv_meets_outer_tier`). -/
+theorem R00_deriv_tier_of_sup {f : ℂ → ℂ} {qB : ℚ}
+    (h : R00SupSpec f qB) {w : ℂ} (hw : R00Rect w) :
+    ‖deriv f w‖ ≤ 0.05 := by
+  obtain ⟨hd, hB, hle⟩ := h
+  have hb := R00_deriv_bound_of_sup hd hB hw
+  have hm := R00_deriv_meets_outer_tier qB hle
+  linarith
+
+/-- Xi-shape deriv chain with the banked Gamma numeral: under any
+`ZetaSupCond Z`, `‖deriv xiFourShapeAt w‖ ≤ 770.944 * Z` on `R00Rect`
+(`385.472 * Z` sup via `deriv_xiFourShapeAt_sup_of_gamma152`, margin `1/2`
+via `deriv_bound_of_sphere_sup_on_ball`). -/
+theorem R00_xi_deriv_of_gamma152_zeta {Z : ℝ} (hZ0 : 0 ≤ Z) (hZ : ZetaSupCond Z)
+    (hd : DiffContOnCl ℂ xiFourShapeAt (ball R00c 2)) {w : ℂ} (hw : R00Rect w) :
+    ‖deriv xiFourShapeAt w‖ ≤ 770.944 * Z := by
+  have hB : ∀ z ∈ closedBall R00c 2, ‖xiFourShapeAt z‖ ≤ 385.472 * Z :=
+    fun z hz => deriv_xiFourShapeAt_sup_of_gamma152 hZ0 hZ z hz
+  have hsub : ‖w - R00c‖ ≤ 1.26 := R00Rect_norm_sub_le w hw
+  have hw' : ‖w - R00c‖ + (1 / 2 : ℝ) ≤ 2 := by linarith
+  have h := deriv_bound_of_sphere_sup_on_ball hd hB
+    (show (0 : ℝ) < 1 / 2 by norm_num) hw'
+  have heq : (385.472 * Z) / (1 / 2 : ℝ) = 770.944 * Z := by ring
+  rw [heq] at h
+  exact h
+
+/-- Quantified xi gap: reaching the deriv tier (`770.944 * Z ≤ 0.05`) forces
+`Z ≤ 0.00007` (`770.944 * 0.00007 = 0.05396608 > 0.05`). -/
+theorem R00_xi_tier_needs_zeta007 {Z : ℝ} (h : 770.944 * Z ≤ 0.05) :
+    Z ≤ 0.00007 := by
+  by_contra hc
+  push_neg at hc
+  have hpos : (0 : ℝ) < 770.944 := by norm_num
+  have h2 : (770.944 : ℝ) * 0.00007 < 770.944 * Z :=
+    mul_lt_mul_of_pos_left hc hpos
+  norm_num at h2
+  linarith
+
+#print axioms R00SupSpec
+#print axioms R00_deriv_tier_of_sup
+#print axioms R00_xi_deriv_of_gamma152_zeta
+#print axioms R00_xi_tier_needs_zeta007

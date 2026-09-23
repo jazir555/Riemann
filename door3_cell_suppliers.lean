@@ -9137,4 +9137,643 @@ theorem CS_S22C_Im_neg532_below_slow_gap :
 #print axioms CS_complex_S22_Im_ge_neg532
 #print axioms CS_S22C_Im_neg532_below_slow_gap
 
+/-! ## S24 rung (k=23,24; ETA-S24, proof-only)
+
+Grep-first (read-only, before writing):
+* S22 Im conditional `CS_complex_S22_Im_ge_of_S20` (`:9076`,
+  `Y - 0.35 - 0.34 ≤ Im(S₂₂)` from `Y ≤ Im(S₂₀)`; tail `0.69` at
+  `CS_S22C_Im_tail_width` `:9085`).
+* S20 Im floor `CS_complex_S20_Im_ge_neg463` (`:8501`, `-4.63`
+  unconditional via S18 `-3.91` + tail `0.72`); S22 Im unconditional
+  `CS_complex_S22_Im_ge_neg532` (`:9092`, `-5.32 = -4.63 - 0.35 - 0.34`)
+  already banked — no residual left on S22 Im conditional.
+* S22 Re block: `CS_S22C` (`:8919`), `CS_S22C_Re_eq` (`:8924`),
+  `CS_complex_S22_Re_ge_neg362` (`:8940`, `-3.62` via S20 `-3.27`
+  `CS_complex_S20_Re_ge_neg327` `:8107` + `CS_Re21_ge_neg035` +
+  `CS_Re22_le_zero`).
+* S22 Im block: `CS_S22C_Im_eq` (`:9062`), conditional `:9076`, closure
+  `:9092`; S24 absent (grep-nil for `CS_S24C`, `CS_rpow23`, `CS_rpow24`,
+  `CS_cpow23`, `CS_cpow24`); no S24 residual banked.
+
+Honest S24 route (banked windows only; S22 Re `-3.62` / Im `-5.32` untouched):
+* `log 23 = log 22 + log(23/22)` (`CS_log_twentythree_eq`, mirror of
+  `CS_log_twentyone_eq`), so `log 23 ∈ [3.1299, 3.1414]` from banked
+  `CS_log_twentytwo_ge/le` (`3.0865` / `3.0959`) + `log(23/22) ∈ [1/23, 1/22]`.
+* `log 24 = log 20 + log(24/20)` (`CS_log_twentyfour_eq`, mirror of
+  `CS_log_twentyone_eq` with `24 = 20 * (24/20)`), so
+  `log 24 ∈ [3.1622, 3.1958]` from banked `CS_log_twenty_ge/le`
+  (`2.9956` / `2.9958`) + `log(24/20) ∈ [1/6, 1/5]` (upper `6/5 - 1`,
+  lower via `-log(5/6)`).
+* Fresh phase bridges via pi bounds (`Real.pi_gt_d6` / `Real.pi_lt_d6` only):
+  `φ₂₃ = 6.75·log 23 ∈ [21.1268, 21.2045]`,
+  `φ₂₄ = 6.75·log 24 ∈ [21.3448, 21.5717]`; with `e = φ - 6π ∈ [π/2, π+π/2]`
+  so `cos φ₂₃ ≤ 0`, `cos φ₂₄ ≤ 0` via `Real.cos_add_two_pi` (thrice) +
+  `Real.cos_nonpos_of_pi_div_two_le_of_le` (mirror of `CS_cos21_nonpos`
+  with `6π = 3·2π`). Hence phase-aware `Re₂₄ ≤ 0` (helps the Re lower);
+  `Re₂₃` stays trig-free (`≥ -0.34`).
+* Rpow quads: `23^0.395 ≥ 2.99`, `24^0.395 ≥ 3.02` (quadratic lowers,
+  mirrors of `CS_rpow21/22pos_lower_proved`); hence `r₂₃ ≤ 0.34`
+  (`0.34·2.99 = 1.0166 ≥ 1`), `r₂₄ ≤ 0.34` (`0.34·3.02 = 1.0268 ≥ 1`)
+  (reciprocal steps).
+* Cpow Re/Im splits for `23^{-s}`, `24^{-s}` (token mirrors of
+  `CS_cpow21/22_sCenter_re/im` with `Complex.exp_re/im` + `cos/sin`).
+* Re caps: `Re₂₃ ≥ -0.34` (trig-free `-1 ≤ cos`); `Re₂₄ ≤ 0` (phase-aware).
+* Assembly Re: `Re(S₂₄) = Re(S₂₂) + Re₂₃ - Re₂₄ ≥ -3.62 - 0.34 - 0 = -3.96`
+  (honest regression vs S22 `-3.62` by `0.34`; trails live best `slow = 1.94`).
+* Im caps trig-free: `Im₂₃ ≥ -0.34`, `Im₂₄ ≤ 0.34`; link
+  `Im(S₂₄) = Im(S₂₂) + Im₂₃ - Im₂₄`; conditional on explicit `S₂₂` premise
+  (mirror of `CS_complex_S22_Im_ge_of_S20`, tail width `0.68`); unconditional
+  `≥ -5.32 - 0.34 - 0.34 = -6.00` by chaining banked S22 `-5.32`
+  (`CS_complex_S22_Im_ge_neg532`). Reuses banked S22 bases; no S20 rebuild. -/
+
+/-- `log(23/22)` upper (`≤ 1/22`, mirrors `CS_log2120_upper`). -/
+theorem CS_log2322_upper : Real.log (23 / 22 : ℝ) ≤ (1 / 22 : ℝ) := by
+  have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 23 / 22)
+  have he : (23 / 22 : ℝ) - 1 = (1 / 22 : ℝ) := by norm_num
+  linarith
+
+/-- `log(23/22)` lower (`≥ 1/23` via `log(23/22) = -log(22/23)`, mirrors
+`CS_log2120_lower`). -/
+theorem CS_log2322_lower : (1 / 23 : ℝ) ≤ Real.log (23 / 22 : ℝ) := by
+  have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 22 / 23)
+  have he : (22 / 23 : ℝ) - 1 = (-(1 / 23) : ℝ) := by norm_num
+  have hinv : Real.log (23 / 22 : ℝ) = -Real.log (22 / 23 : ℝ) := by
+    have heq : (23 / 22 : ℝ) = (22 / 23 : ℝ)⁻¹ := by rw [inv_div]
+    rw [heq, Real.log_inv]
+  linarith
+
+/-- `log 23 = log 22 + log(23/22)` composite bridge (mirror of
+`CS_log_twentyone_eq`). -/
+theorem CS_log_twentythree_eq :
+    Real.log 23 = Real.log 22 + Real.log (23 / 22 : ℝ) := by
+  have h23 : (23 : ℝ) = 22 * (23 / 22) := by norm_num
+  conv_lhs => rw [h23]
+  rw [Real.log_mul (by norm_num) (by norm_num)]
+
+/-- `log 23` lower (`3.1299 ≤ log 23` from `CS_log_twentytwo_ge` +
+`CS_log2322_lower`). -/
+theorem CS_log_twentythree_ge : (3.1299 : ℝ) ≤ Real.log 23 := by
+  rw [CS_log_twentythree_eq]
+  have h22 := CS_log_twentytwo_ge
+  have h2322 := CS_log2322_lower
+  have hcap : (3.1299 : ℝ) ≤ 3.0865 + 1 / 23 := by norm_num
+  linarith
+
+/-- `log 23` upper (`log 23 ≤ 3.1414` from `CS_log_twentytwo_le` +
+`CS_log2322_upper`). -/
+theorem CS_log_twentythree_le : Real.log 23 ≤ (3.1414 : ℝ) := by
+  rw [CS_log_twentythree_eq]
+  have h22 := CS_log_twentytwo_le
+  have h2322 := CS_log2322_upper
+  have hcap : (3.0959 : ℝ) + 1 / 22 ≤ 3.1414 := by norm_num
+  linarith
+
+/-- `log(24/20)` upper (`≤ 1/5`, mirrors `CS_log2120_upper`;
+`24/20 - 1 = 1/5`). -/
+theorem CS_log2420_upper : Real.log (24 / 20 : ℝ) ≤ (1 / 5 : ℝ) := by
+  have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 24 / 20)
+  have he : (24 / 20 : ℝ) - 1 = (1 / 5 : ℝ) := by norm_num
+  linarith
+
+/-- `log(24/20)` lower (`≥ 1/6` via `log(24/20) = -log(20/24)`, mirrors
+`CS_log2120_lower`; `20/24 - 1 = -1/6`). -/
+theorem CS_log2420_lower : (1 / 6 : ℝ) ≤ Real.log (24 / 20 : ℝ) := by
+  have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 20 / 24)
+  have he : (20 / 24 : ℝ) - 1 = (-(1 / 6) : ℝ) := by norm_num
+  have hinv : Real.log (24 / 20 : ℝ) = -Real.log (20 / 24 : ℝ) := by
+    have heq : (24 / 20 : ℝ) = (20 / 24 : ℝ)⁻¹ := by rw [inv_div]
+    rw [heq, Real.log_inv]
+  linarith
+
+/-- `log 24 = log 20 + log(24/20)` composite bridge (mirror of
+`CS_log_twentyone_eq`; `24 = 20 * (24/20)`). -/
+theorem CS_log_twentyfour_eq :
+    Real.log 24 = Real.log 20 + Real.log (24 / 20 : ℝ) := by
+  have h24 : (24 : ℝ) = 20 * (24 / 20) := by norm_num
+  conv_lhs => rw [h24]
+  rw [Real.log_mul (by norm_num) (by norm_num)]
+
+/-- `log 24` lower (`3.1622 ≤ log 24` from `CS_log_twenty_ge` +
+`CS_log2420_lower`). -/
+theorem CS_log_twentyfour_ge : (3.1622 : ℝ) ≤ Real.log 24 := by
+  rw [CS_log_twentyfour_eq]
+  have h20 := CS_log_twenty_ge
+  have h2420 := CS_log2420_lower
+  have hcap : (3.1622 : ℝ) ≤ 2.9956 + 1 / 6 := by norm_num
+  linarith
+
+/-- `log 24` upper (`log 24 ≤ 3.1958` from `CS_log_twenty_le` +
+`CS_log2420_upper`). -/
+theorem CS_log_twentyfour_le : Real.log 24 ≤ (3.1958 : ℝ) := by
+  rw [CS_log_twentyfour_eq]
+  have h20 := CS_log_twenty_le
+  have h2420 := CS_log2420_upper
+  have hcap : (2.9958 : ℝ) + 1 / 5 ≤ 3.1958 := by norm_num
+  linarith
+
+/-- Phase bridge `φ₂₃ ≥ 21.1268` (`6.75·3.1299 = 21.126825`). -/
+theorem CS_phi23_ge : (21.1268 : ℝ) ≤ 6.75 * Real.log 23 := by
+  have h23 : (3.1299 : ℝ) ≤ Real.log 23 := CS_log_twentythree_ge
+  have hmul : 6.75 * (3.1299 : ℝ) ≤ 6.75 * Real.log 23 :=
+    mul_le_mul_of_nonneg_left h23 (by norm_num)
+  have hcap : (21.1268 : ℝ) ≤ 6.75 * 3.1299 := by norm_num
+  linarith
+
+/-- Phase bridge `φ₂₃ ≤ 21.2045` (`6.75·3.1414 = 21.20445`). -/
+theorem CS_phi23_le : 6.75 * Real.log 23 ≤ (21.2045 : ℝ) := by
+  have h23 : Real.log 23 ≤ (3.1414 : ℝ) := CS_log_twentythree_le
+  have hmul : 6.75 * Real.log 23 ≤ 6.75 * 3.1414 :=
+    mul_le_mul_of_nonneg_left h23 (by norm_num)
+  have hcap : (6.75 : ℝ) * 3.1414 ≤ 21.2045 := by norm_num
+  linarith
+
+/-- Phase bridge `φ₂₄ ≥ 21.3448` (`6.75·3.1622 = 21.34485`). -/
+theorem CS_phi24_ge : (21.3448 : ℝ) ≤ 6.75 * Real.log 24 := by
+  have h24 : (3.1622 : ℝ) ≤ Real.log 24 := CS_log_twentyfour_ge
+  have hmul : 6.75 * (3.1622 : ℝ) ≤ 6.75 * Real.log 24 :=
+    mul_le_mul_of_nonneg_left h24 (by norm_num)
+  have hcap : (21.3448 : ℝ) ≤ 6.75 * 3.1622 := by norm_num
+  linarith
+
+/-- Phase bridge `φ₂₄ ≤ 21.5717` (`6.75·3.1958 = 21.57165`). -/
+theorem CS_phi24_le : 6.75 * Real.log 24 ≤ (21.5717 : ℝ) := by
+  have h24 : Real.log 24 ≤ (3.1958 : ℝ) := CS_log_twentyfour_le
+  have hmul : 6.75 * Real.log 24 ≤ 6.75 * 3.1958 :=
+    mul_le_mul_of_nonneg_left h24 (by norm_num)
+  have hcap : (6.75 : ℝ) * 3.1958 ≤ 21.5717 := by norm_num
+  linarith
+
+/-- Cosine nonpositivity at `φ₂₃ = 6.75·log 23` (TRUE `≈ -0.55 ≤ 0`).
+Route: `φ₂₃ ∈ [21.1268, 21.2045]` so `e = φ₂₃ - 6π ∈ [π/2, π+π/2]`
+(coarse `π` bounds only) and `cos φ₂₃ = cos e ≤ 0` via
+`Real.cos_add_two_pi` (thrice) +
+`Real.cos_nonpos_of_pi_div_two_le_of_le` (mirror of `CS_cos21_nonpos`
+with `6π = 3·2π`). -/
+theorem CS_cos23_nonpos : Real.cos (6.75 * Real.log 23) ≤ 0 := by
+  have hpi_lo := Real.pi_gt_d6
+  have hpi_hi := Real.pi_lt_d6
+  have hlo := CS_phi23_ge
+  have hhi := CS_phi23_le
+  set x : ℝ := 6.75 * Real.log 23 with hx_def
+  set e : ℝ := x - 6 * Real.pi with he_def
+  have h1 : Real.pi / 2 ≤ e := by
+    rw [he_def]
+    linarith
+  have h2 : e ≤ Real.pi + Real.pi / 2 := by
+    rw [he_def]
+    linarith
+  have hx_eq : x = ((e + 2 * Real.pi) + 2 * Real.pi) + 2 * Real.pi := by
+    rw [he_def]
+    ring
+  have hcos_eq : Real.cos x = Real.cos e := by
+    rw [hx_eq, Real.cos_add_two_pi, Real.cos_add_two_pi, Real.cos_add_two_pi]
+  rw [hcos_eq]
+  exact Real.cos_nonpos_of_pi_div_two_le_of_le h1 h2
+
+/-- Cosine nonpositivity at `φ₂₄ = 6.75·log 24` (TRUE `≈ -0.90 ≤ 0`).
+Route: `φ₂₄ ∈ [21.3448, 21.5717]` so `e = φ₂₄ - 6π ∈ [π/2, π+π/2]`
+(same `6π` route as `CS_cos23_nonpos`). -/
+theorem CS_cos24_nonpos : Real.cos (6.75 * Real.log 24) ≤ 0 := by
+  have hpi_lo := Real.pi_gt_d6
+  have hpi_hi := Real.pi_lt_d6
+  have hlo := CS_phi24_ge
+  have hhi := CS_phi24_le
+  set x : ℝ := 6.75 * Real.log 24 with hx_def
+  set e : ℝ := x - 6 * Real.pi with he_def
+  have h1 : Real.pi / 2 ≤ e := by
+    rw [he_def]
+    linarith
+  have h2 : e ≤ Real.pi + Real.pi / 2 := by
+    rw [he_def]
+    linarith
+  have hx_eq : x = ((e + 2 * Real.pi) + 2 * Real.pi) + 2 * Real.pi := by
+    rw [he_def]
+    ring
+  have hcos_eq : Real.cos x = Real.cos e := by
+    rw [hx_eq, Real.cos_add_two_pi, Real.cos_add_two_pi, Real.cos_add_two_pi]
+  rw [hcos_eq]
+  exact Real.cos_nonpos_of_pi_div_two_le_of_le h1 h2
+
+/-- `23^0.395 ≥ 2.99` lower input (TRUE `≈ 3.44`). -/
+def CS_rpow23pos_lower : Prop := (2.99 : ℝ) ≤ (23 : ℝ) ^ ((0.395 : ℝ))
+
+/-- CLOSED: `23^0.395 ≥ 2.99` via quadratic lower at
+`x = 0.395·log 23 > 1.2362` (uses `CS_log_twentythree_ge`). -/
+theorem CS_rpow23pos_lower_proved : CS_rpow23pos_lower := by
+  show (2.99 : ℝ) ≤ (23 : ℝ) ^ ((0.395 : ℝ))
+  have h23 : (3.1299 : ℝ) ≤ Real.log 23 := CS_log_twentythree_ge
+  have hx_lo : (1.2362 : ℝ) < 0.395 * Real.log 23 := by
+    have hmul : (0.395 : ℝ) * 3.1299 ≤ 0.395 * Real.log 23 :=
+      mul_le_mul_of_nonneg_left h23 (by norm_num)
+    have hcap : (1.2362 : ℝ) < 0.395 * 3.1299 := by norm_num
+    linarith
+  set x : ℝ := 0.395 * Real.log 23 with hx_def
+  have hx0 : (0 : ℝ) ≤ x := le_trans (by norm_num) hx_lo.le
+  have hsq : (1.2362 : ℝ) ^ 2 ≤ x ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) hx_lo.le 2
+  have hquad := Real.quadratic_le_exp_of_nonneg hx0
+  have hbase : (2.99 : ℝ) ≤ 1 + 1.2362 + (1.2362 : ℝ) ^ 2 / 2 := by
+    norm_num
+  have hchain : (2.99 : ℝ) ≤ Real.exp x := by
+    linarith [hquad, hsq, hx_lo, hbase]
+  have hrpow : (23 : ℝ) ^ ((0.395 : ℝ)) = Real.exp x := by
+    rw [Real.rpow_def_of_pos (by norm_num : (0 : ℝ) < 23)]
+    congr 1
+    rw [hx_def]
+    ring
+  rw [hrpow]
+  exact hchain
+
+/-- `23^-0.395 ≤ 0.34` upper input (TRUE `≈ 0.290`). -/
+def CS_rpow23neg_upper : Prop := (23 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.34 : ℝ)
+
+/-- CLOSED: `23^-0.395 ≤ 0.34` from `23^0.395 ≥ 2.99`
+(`0.34·2.99 = 1.0166 ≥ 1`). -/
+theorem CS_rpow23neg_upper_proved : CS_rpow23neg_upper := by
+  show (23 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.34 : ℝ)
+  have hlow : (2.99 : ℝ) ≤ (23 : ℝ) ^ ((0.395 : ℝ)) := CS_rpow23pos_lower_proved
+  have hpos : (0 : ℝ) < (23 : ℝ) ^ ((0.395 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hInv : (23 : ℝ) ^ (-(0.395 : ℝ)) = 1 / (23 : ℝ) ^ ((0.395 : ℝ)) := by
+    rw [Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 23)]
+    rw [inv_eq_one_div]
+  have hle : (1 : ℝ) ≤ (0.34 : ℝ) * (23 : ℝ) ^ ((0.395 : ℝ)) := by
+    have hmul : (1 : ℝ) ≤ 0.34 * 2.99 := by norm_num
+    calc (1 : ℝ) ≤ 0.34 * 2.99 := hmul
+      _ ≤ 0.34 * (23 : ℝ) ^ ((0.395 : ℝ)) :=
+        mul_le_mul_of_nonneg_left hlow (by norm_num)
+  rw [hInv, div_le_iff₀ hpos]
+  linarith [hle]
+
+/-- `24^0.395 ≥ 3.02` lower input (TRUE `≈ 3.50`). -/
+def CS_rpow24pos_lower : Prop := (3.02 : ℝ) ≤ (24 : ℝ) ^ ((0.395 : ℝ))
+
+/-- CLOSED: `24^0.395 ≥ 3.02` via quadratic lower at
+`x = 0.395·log 24 > 1.2489` (uses `CS_log_twentyfour_ge`). -/
+theorem CS_rpow24pos_lower_proved : CS_rpow24pos_lower := by
+  show (3.02 : ℝ) ≤ (24 : ℝ) ^ ((0.395 : ℝ))
+  have h24 : (3.1622 : ℝ) ≤ Real.log 24 := CS_log_twentyfour_ge
+  have hx_lo : (1.2489 : ℝ) < 0.395 * Real.log 24 := by
+    have hmul : (0.395 : ℝ) * 3.1622 ≤ 0.395 * Real.log 24 :=
+      mul_le_mul_of_nonneg_left h24 (by norm_num)
+    have hcap : (1.2489 : ℝ) < 0.395 * 3.1622 := by norm_num
+    linarith
+  set x : ℝ := 0.395 * Real.log 24 with hx_def
+  have hx0 : (0 : ℝ) ≤ x := le_trans (by norm_num) hx_lo.le
+  have hsq : (1.2489 : ℝ) ^ 2 ≤ x ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) hx_lo.le 2
+  have hquad := Real.quadratic_le_exp_of_nonneg hx0
+  have hbase : (3.02 : ℝ) ≤ 1 + 1.2489 + (1.2489 : ℝ) ^ 2 / 2 := by
+    norm_num
+  have hchain : (3.02 : ℝ) ≤ Real.exp x := by
+    linarith [hquad, hsq, hx_lo, hbase]
+  have hrpow : (24 : ℝ) ^ ((0.395 : ℝ)) = Real.exp x := by
+    rw [Real.rpow_def_of_pos (by norm_num : (0 : ℝ) < 24)]
+    congr 1
+    rw [hx_def]
+    ring
+  rw [hrpow]
+  exact hchain
+
+/-- `24^-0.395 ≤ 0.34` upper input (TRUE `≈ 0.286`). -/
+def CS_rpow24neg_upper : Prop := (24 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.34 : ℝ)
+
+/-- CLOSED: `24^-0.395 ≤ 0.34` from `24^0.395 ≥ 3.02`
+(`0.34·3.02 = 1.0268 ≥ 1`). -/
+theorem CS_rpow24neg_upper_proved : CS_rpow24neg_upper := by
+  show (24 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.34 : ℝ)
+  have hlow : (3.02 : ℝ) ≤ (24 : ℝ) ^ ((0.395 : ℝ)) := CS_rpow24pos_lower_proved
+  have hpos : (0 : ℝ) < (24 : ℝ) ^ ((0.395 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hInv : (24 : ℝ) ^ (-(0.395 : ℝ)) = 1 / (24 : ℝ) ^ ((0.395 : ℝ)) := by
+    rw [Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 24)]
+    rw [inv_eq_one_div]
+  have hle : (1 : ℝ) ≤ (0.34 : ℝ) * (24 : ℝ) ^ ((0.395 : ℝ)) := by
+    have hmul : (1 : ℝ) ≤ 0.34 * 3.02 := by norm_num
+    calc (1 : ℝ) ≤ 0.34 * 3.02 := hmul
+      _ ≤ 0.34 * (24 : ℝ) ^ ((0.395 : ℝ)) :=
+        mul_le_mul_of_nonneg_left hlow (by norm_num)
+  rw [hInv, div_le_iff₀ hpos]
+  linarith [hle]
+
+/-- Cpow real-part split for `23^{-s}` at `sCenter` (token mirror of
+`CS_cpow21_sCenter_re`). -/
+theorem CS_cpow23_sCenter_re : ((((23 : ℝ)) : ℂ) ^ (-R02Pilot.sCenter)).re
+    = (23 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 23) := by
+  have h23pos : (0 : ℝ) < 23 := by norm_num
+  have hxC : ((23 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h23pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((23 : ℝ) : ℂ) = (((Real.log 23 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h23pos)).symm
+  rw [hlog]
+  have hre_w : (-R02Pilot.sCenter).re = (-(0.395 : ℝ)) := by
+    have e : (-R02Pilot.sCenter).re = -(R02Pilot.sCenter.re) := rfl
+    rw [e, R02Pilot.sCenter_re]
+  have him_w : (-R02Pilot.sCenter).im = (6.75 : ℝ) := by
+    have e : (-R02Pilot.sCenter).im = -(R02Pilot.sCenter.im) := rfl
+    rw [e, R02Pilot.sCenter_im]
+    norm_num
+  have hzre : ((((Real.log 23 : ℝ)) : ℂ)).re = Real.log 23 := Complex.ofReal_re _
+  have hzim : ((((Real.log 23 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 23 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).re
+      = Real.log 23 * (-(0.395 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 23 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).im
+      = Real.log 23 * (6.75 : ℝ) := by
+    rw [Complex.mul_im, hzre, hzim, him_w]
+    ring
+  have hexp : Real.exp (Real.log 23 * (-(0.395 : ℝ)))
+      = (23 : ℝ) ^ (-(0.395 : ℝ)) :=
+    (Real.rpow_def_of_pos h23pos _).symm
+  have hcos : Real.cos (Real.log 23 * (6.75 : ℝ))
+      = Real.cos (6.75 * Real.log 23) := by
+    rw [mul_comm]
+  rw [Complex.exp_re, harg_re, harg_im, hexp, hcos]
+
+/-- Cpow real-part split for `24^{-s}` at `sCenter` (token mirror of
+`CS_cpow22_sCenter_re`). -/
+theorem CS_cpow24_sCenter_re : ((((24 : ℝ)) : ℂ) ^ (-R02Pilot.sCenter)).re
+    = (24 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 24) := by
+  have h24pos : (0 : ℝ) < 24 := by norm_num
+  have hxC : ((24 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h24pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((24 : ℝ) : ℂ) = (((Real.log 24 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h24pos)).symm
+  rw [hlog]
+  have hre_w : (-R02Pilot.sCenter).re = (-(0.395 : ℝ)) := by
+    have e : (-R02Pilot.sCenter).re = -(R02Pilot.sCenter.re) := rfl
+    rw [e, R02Pilot.sCenter_re]
+  have him_w : (-R02Pilot.sCenter).im = (6.75 : ℝ) := by
+    have e : (-R02Pilot.sCenter).im = -(R02Pilot.sCenter.im) := rfl
+    rw [e, R02Pilot.sCenter_im]
+    norm_num
+  have hzre : ((((Real.log 24 : ℝ)) : ℂ)).re = Real.log 24 := Complex.ofReal_re _
+  have hzim : ((((Real.log 24 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 24 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).re
+      = Real.log 24 * (-(0.395 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 24 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).im
+      = Real.log 24 * (6.75 : ℝ) := by
+    rw [Complex.mul_im, hzre, hzim, him_w]
+    ring
+  have hexp : Real.exp (Real.log 24 * (-(0.395 : ℝ)))
+      = (24 : ℝ) ^ (-(0.395 : ℝ)) :=
+    (Real.rpow_def_of_pos h24pos _).symm
+  have hcos : Real.cos (Real.log 24 * (6.75 : ℝ))
+      = Real.cos (6.75 * Real.log 24) := by
+    rw [mul_comm]
+  rw [Complex.exp_re, harg_re, harg_im, hexp, hcos]
+
+/-- `Re₂₃ ≥ -0.34` (`r₂₃ ≤ 0.34`, `-1 ≤ cos`; TRUE `≈ -0.16`). -/
+theorem CS_Re23_ge_neg034 :
+    (-0.34 : ℝ) ≤ (23 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 23) := by
+  have hr0 : (0 : ℝ) ≤ (23 : ℝ) ^ (-(0.395 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hru : (23 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.34 : ℝ) := CS_rpow23neg_upper_proved
+  have hcos : (-1 : ℝ) ≤ Real.cos (6.75 * Real.log 23) := Real.neg_one_le_cos _
+  have h1 : (23 : ℝ) ^ (-(0.395 : ℝ)) * (-1 : ℝ)
+      ≤ (23 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 23) :=
+    mul_le_mul_of_nonneg_left hcos hr0
+  have h2 : (23 : ℝ) ^ (-(0.395 : ℝ)) * (-1 : ℝ) = -((23 : ℝ) ^ (-(0.395 : ℝ))) := by
+    ring
+  have h3 : (-0.34 : ℝ) ≤ -((23 : ℝ) ^ (-(0.395 : ℝ))) := by
+    linarith [hru]
+  linarith
+
+/-- `Re₂₄ ≤ 0` (phase-aware: `r₂₄ ≥ 0`, `cos φ₂₄ ≤ 0`; TRUE `≈ -0.26`). -/
+theorem CS_Re24_le_zero :
+    (24 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 24) ≤ (0 : ℝ) := by
+  have hr0 : (0 : ℝ) ≤ (24 : ℝ) ^ (-(0.395 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hc : Real.cos (6.75 * Real.log 24) ≤ 0 := CS_cos24_nonpos
+  exact mul_nonpos_of_nonneg_of_nonpos hr0 hc
+
+/-- Complex S24 partial sum at `sCenter` (`S₂₂ + 23^{-s} - 24^{-s}`). -/
+noncomputable def CS_S24C : ℂ :=
+  CS_S22C + (23 : ℂ) ^ (-R02Pilot.sCenter) - (24 : ℂ) ^ (-R02Pilot.sCenter)
+
+/-- Real-part link for the complex S24 (`Re(S₂₄) = Re(S₂₂) + Re₂₃ - Re₂₄`,
+mirror of `CS_S22C_Re_eq`). -/
+theorem CS_S24C_Re_eq :
+    (CS_S24C).re = (CS_S22C).re
+      + (23 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 23)
+      - (24 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 24) := by
+  unfold CS_S24C
+  have h23 : ((23 : ℂ)) = ((((23 : ℝ)) : ℂ)) := by simp
+  have h24c : ((24 : ℂ)) = ((((24 : ℝ)) : ℂ)) := by simp
+  rw [h23, h24c]
+  simp only [Complex.add_re, Complex.sub_re,
+    CS_cpow23_sCenter_re, CS_cpow24_sCenter_re]
+
+/-- Complex-S24 real part `≥ -3.96` (PROVED, unconditional):
+`Re(S₂₄) = Re(S₂₂) + Re₂₃ - Re₂₄ ≥ -3.62 - 0.34 - 0 = -3.96`
+(honest regression vs S22 `-3.62` by `0.34`; phase-aware `Re₂₄ ≤ 0`
+recovers `0.34` vs trig-free `-0.34`; reuses banked S22 base
+`CS_complex_S22_Re_ge_neg362`). -/
+theorem CS_complex_S24_Re_ge_neg396 :
+    (-3.96 : ℝ) ≤ (CS_S24C).re := by
+  have hEq := CS_S24C_Re_eq
+  have hS22 := CS_complex_S22_Re_ge_neg362
+  have hT23 := CS_Re23_ge_neg034
+  have hT24 := CS_Re24_le_zero
+  rw [hEq]
+  linarith
+
+/-- Honest gap: the new S24 Re `-3.96` trails the live best `slow = 1.94`
+(`CS_complex_S4_abs_ge_194`) by `5.90`; no S24 feed closes here. -/
+theorem CS_S24C_below_slow_gap :
+    (1.94 : ℝ) - (-3.96 : ℝ) = 5.90 := by
+  norm_num
+
+/-- Cpow imaginary-part split for `23^{-s}` at `sCenter` (token mirror of
+`CS_cpow23_sCenter_re`). -/
+theorem CS_cpow23_sCenter_im : ((((23 : ℝ)) : ℂ) ^ (-R02Pilot.sCenter)).im
+    = (23 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 23) := by
+  have h23pos : (0 : ℝ) < 23 := by norm_num
+  have hxC : ((23 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h23pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((23 : ℝ) : ℂ) = (((Real.log 23 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h23pos)).symm
+  rw [hlog]
+  have hre_w : (-R02Pilot.sCenter).re = (-(0.395 : ℝ)) := by
+    have e : (-R02Pilot.sCenter).re = -(R02Pilot.sCenter.re) := rfl
+    rw [e, R02Pilot.sCenter_re]
+  have him_w : (-R02Pilot.sCenter).im = (6.75 : ℝ) := by
+    have e : (-R02Pilot.sCenter).im = -(R02Pilot.sCenter.im) := rfl
+    rw [e, R02Pilot.sCenter_im]
+    norm_num
+  have hzre : ((((Real.log 23 : ℝ)) : ℂ)).re = Real.log 23 := Complex.ofReal_re _
+  have hzim : ((((Real.log 23 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 23 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).re
+      = Real.log 23 * (-(0.395 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 23 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).im
+      = Real.log 23 * (6.75 : ℝ) := by
+    rw [Complex.mul_im, hzre, hzim, him_w]
+    ring
+  have hexp : Real.exp (Real.log 23 * (-(0.395 : ℝ)))
+      = (23 : ℝ) ^ (-(0.395 : ℝ)) :=
+    (Real.rpow_def_of_pos h23pos _).symm
+  have hsin : Real.sin (Real.log 23 * (6.75 : ℝ))
+      = Real.sin (6.75 * Real.log 23) := by
+    rw [mul_comm]
+  rw [Complex.exp_im, harg_re, harg_im, hexp, hsin]
+
+/-- Cpow imaginary-part split for `24^{-s}` at `sCenter` (token mirror of
+`CS_cpow24_sCenter_re`). -/
+theorem CS_cpow24_sCenter_im : ((((24 : ℝ)) : ℂ) ^ (-R02Pilot.sCenter)).im
+    = (24 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 24) := by
+  have h24pos : (0 : ℝ) < 24 := by norm_num
+  have hxC : ((24 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h24pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((24 : ℝ) : ℂ) = (((Real.log 24 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h24pos)).symm
+  rw [hlog]
+  have hre_w : (-R02Pilot.sCenter).re = (-(0.395 : ℝ)) := by
+    have e : (-R02Pilot.sCenter).re = -(R02Pilot.sCenter.re) := rfl
+    rw [e, R02Pilot.sCenter_re]
+  have him_w : (-R02Pilot.sCenter).im = (6.75 : ℝ) := by
+    have e : (-R02Pilot.sCenter).im = -(R02Pilot.sCenter.im) := rfl
+    rw [e, R02Pilot.sCenter_im]
+    norm_num
+  have hzre : ((((Real.log 24 : ℝ)) : ℂ)).re = Real.log 24 := Complex.ofReal_re _
+  have hzim : ((((Real.log 24 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 24 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).re
+      = Real.log 24 * (-(0.395 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 24 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).im
+      = Real.log 24 * (6.75 : ℝ) := by
+    rw [Complex.mul_im, hzre, hzim, him_w]
+    ring
+  have hexp : Real.exp (Real.log 24 * (-(0.395 : ℝ)))
+      = (24 : ℝ) ^ (-(0.395 : ℝ)) :=
+    (Real.rpow_def_of_pos h24pos _).symm
+  have hsin : Real.sin (Real.log 24 * (6.75 : ℝ))
+      = Real.sin (6.75 * Real.log 24) := by
+    rw [mul_comm]
+  rw [Complex.exp_im, harg_re, harg_im, hexp, hsin]
+
+/-- `Im₂₃ ≥ -0.34` (`r₂₃ ≤ 0.34`, `-1 ≤ sin`; mirror of `CS_Im21_ge_neg035`). -/
+theorem CS_Im23_ge_neg034 :
+    (-0.34 : ℝ) ≤ (23 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 23) := by
+  have hr0 : (0 : ℝ) ≤ (23 : ℝ) ^ (-(0.395 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hru : (23 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.34 : ℝ) := CS_rpow23neg_upper_proved
+  have hsin : (-1 : ℝ) ≤ Real.sin (6.75 * Real.log 23) := by
+    have h := Real.sin_le_one (-(6.75 * Real.log 23))
+    rw [Real.sin_neg] at h
+    linarith
+  have h1 : (23 : ℝ) ^ (-(0.395 : ℝ)) * (-1 : ℝ)
+      ≤ (23 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 23) :=
+    mul_le_mul_of_nonneg_left hsin hr0
+  have h2 : (23 : ℝ) ^ (-(0.395 : ℝ)) * (-1 : ℝ) = -((23 : ℝ) ^ (-(0.395 : ℝ))) := by
+    ring
+  have h3 : (-0.34 : ℝ) ≤ -((23 : ℝ) ^ (-(0.395 : ℝ))) := by
+    linarith [hru]
+  linarith
+
+/-- `Im₂₄ ≤ 0.34` (`r₂₄ ≤ 0.34`, `sin ≤ 1`; mirror of `CS_Im22_le_034`). -/
+theorem CS_Im24_le_034 :
+    (24 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 24) ≤ (0.34 : ℝ) := by
+  have hr0 : (0 : ℝ) ≤ (24 : ℝ) ^ (-(0.395 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hru : (24 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.34 : ℝ) := CS_rpow24neg_upper_proved
+  have hsin : Real.sin (6.75 * Real.log 24) ≤ (1 : ℝ) := Real.sin_le_one _
+  have h1 : (24 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 24)
+      ≤ (24 : ℝ) ^ (-(0.395 : ℝ)) * (1 : ℝ) :=
+    mul_le_mul_of_nonneg_left hsin hr0
+  have h2 : (24 : ℝ) ^ (-(0.395 : ℝ)) * (1 : ℝ) = (24 : ℝ) ^ (-(0.395 : ℝ)) := by
+    ring
+  linarith [hru]
+
+/-- Imaginary-part link for the complex S24 (`Im(S₂₄) = Im(S₂₂) + Im₂₃ - Im₂₄`,
+mirror of `CS_S24C_Re_eq` / `CS_S22C_Im_eq`). -/
+theorem CS_S24C_Im_eq :
+    (CS_S24C).im = (CS_S22C).im
+      + (23 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 23)
+      - (24 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 24) := by
+  unfold CS_S24C
+  have h23 : ((23 : ℂ)) = ((((23 : ℝ)) : ℂ)) := by simp
+  have h24c : ((24 : ℂ)) = ((((24 : ℝ)) : ℂ)) := by simp
+  rw [h23, h24c]
+  simp only [Complex.add_im, Complex.sub_im,
+    CS_cpow23_sCenter_im, CS_cpow24_sCenter_im]
+
+/-- Conditional S24 Im lower via the alternating sum (explicit `S₂₂`
+premise only): from `Y ≤ Im(S₂₂)`, `Im(S₂₄) ≥ Y - 0.34 - 0.34`
+(tail width `0.68`; mirror of `CS_complex_S22_Im_ge_of_S20`). -/
+theorem CS_complex_S24_Im_ge_of_S22 (Y : ℝ) (hS22 : Y ≤ (CS_S22C).im) :
+    Y - 0.34 - 0.34 ≤ (CS_S24C).im := by
+  have hEq := CS_S24C_Im_eq
+  have hT23 := CS_Im23_ge_neg034
+  have hT24 := CS_Im24_le_034
+  rw [hEq]
+  linarith
+
+/-- S24 Im tail width (honest floor report): `0.34 + 0.34 = 0.68`. -/
+theorem CS_S24C_Im_tail_width : (0.34 : ℝ) + 0.34 = 0.68 := by
+  norm_num
+
+/-- Unconditional S24 Im floor `≥ -6.00` (PROVED): chains the banked S22 base
+`-5.32` (`CS_complex_S22_Im_ge_neg532`) through the new S24 conditional
+`CS_complex_S24_Im_ge_of_S22` (`-5.32 - 0.34 - 0.34 = -6.00`); no residual
+left on S24 Im conditional. -/
+theorem CS_complex_S24_Im_ge_neg600 :
+    (-6.00 : ℝ) ≤ (CS_S24C).im := by
+  have hS22 : (-5.32 : ℝ) ≤ (CS_S22C).im := CS_complex_S22_Im_ge_neg532
+  have h := CS_complex_S24_Im_ge_of_S22 (-5.32) hS22
+  have hnum : (-5.32 : ℝ) - 0.34 - 0.34 = -6.00 := by norm_num
+  linarith
+
+/-- Honest gap: the new S24 Im `-6.00` trails the live best `slow = 1.94`
+(`CS_complex_S4_abs_ge_194`) by `7.94`; no S24 Im feed closes here. -/
+theorem CS_S24C_Im_neg600_below_slow_gap :
+    (1.94 : ℝ) - (-6.00 : ℝ) = 7.94 := by
+  norm_num
+
+#print axioms CS_log2322_upper
+#print axioms CS_log2322_lower
+#print axioms CS_log_twentythree_eq
+#print axioms CS_log_twentythree_ge
+#print axioms CS_log_twentythree_le
+#print axioms CS_log2420_upper
+#print axioms CS_log2420_lower
+#print axioms CS_log_twentyfour_eq
+#print axioms CS_log_twentyfour_ge
+#print axioms CS_log_twentyfour_le
+#print axioms CS_phi23_ge
+#print axioms CS_phi23_le
+#print axioms CS_phi24_ge
+#print axioms CS_phi24_le
+#print axioms CS_cos23_nonpos
+#print axioms CS_cos24_nonpos
+#print axioms CS_rpow23pos_lower_proved
+#print axioms CS_rpow23neg_upper_proved
+#print axioms CS_rpow24pos_lower_proved
+#print axioms CS_rpow24neg_upper_proved
+#print axioms CS_cpow23_sCenter_re
+#print axioms CS_cpow24_sCenter_re
+#print axioms CS_Re23_ge_neg034
+#print axioms CS_Re24_le_zero
+#print axioms CS_S24C_Re_eq
+#print axioms CS_complex_S24_Re_ge_neg396
+#print axioms CS_S24C_below_slow_gap
+#print axioms CS_cpow23_sCenter_im
+#print axioms CS_cpow24_sCenter_im
+#print axioms CS_Im23_ge_neg034
+#print axioms CS_Im24_le_034
+#print axioms CS_S24C_Im_eq
+#print axioms CS_complex_S24_Im_ge_of_S22
+#print axioms CS_S24C_Im_tail_width
+#print axioms CS_complex_S24_Im_ge_neg600
+#print axioms CS_S24C_Im_neg600_below_slow_gap
+
 end Door3CellSuppliers

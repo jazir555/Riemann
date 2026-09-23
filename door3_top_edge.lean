@@ -980,3 +980,63 @@ theorem exists_two_edge_open_cauchy_data {a b : ℝ} (hab : a ≤ b) :
 #print axioms exists_two_edge_open_cauchy_data
 
 end Door3TopEdge
+
+/-! ## TOPEDGE-NEEDS lower-boundary premise (append-only, value + residual).
+
+Grep (read before filing):
+* engine `lower_boundary_nonvanishing_from_outer_bound` (`door3_top_edge.lean:397-443`)
+  premises: `Differentiable`, `0 < eps`, `0 < M1`,
+  `h_bottom : eps ≤ ‖f (x - I*(1/2))‖`,
+  `h_deriv : ∀ y ∈ Icc (-1/2) (-1/2+eps/M1), ‖deriv f ...‖ ≤ M1`,
+  via `BoundaryProofEngine.boundary_strip_nonvanishing_of_nonzero_base`
+  (`rh_certificate_infra.lean:254-300`).
+* bottom feeders `door3_rh_wiring.lean:2040-2080` (`wireStrip_bottom_M40_at_zero_of_ballSup40`)
+  and `:2243-2283` (`wireStrip_bottom_M1000_at_zero_of_ballSup1000`) use engine at `x = 0`
+  with `eps = 1/2`, `M = 40/1000`, endpoint `wireHbot_bot_point_half_feeder` (`:1897-1899`)
+  via `Door3SliverEdge.edgeBot_single_lower` (`door3_sliver_edge.lean:243-246`),
+  endpoint norms `:196-200` / `:229-234`, deriv bridges `:768-776` / `:942-950`.
+* endpoints `Door3BoundaryEndpoints.xiShiftedEntire_at_neg_I_half`
+  (`door3_boundary_endpoints.lean:36-42`).
+
+Value below: closes `h_bottom` at `x = 0`, `eps = 1/2` for `xiShiftedEntire`
+from the banked endpoint value, with norm computed by cast + `Complex.norm_real`.
+Uniform lower over `Icc (-10) 10` and closed-ball sups stay OPEN, filed as Props.
+-/
+
+namespace Door3TopEdgeNeeds
+
+open Complex Real Set Topology
+
+theorem lower_outer_point_half_at_zero :
+    (1 / 2 : ℝ) ≤ ‖CentralCoverAssembly.xiShiftedEntire
+      (((0 : ℝ) : ℂ) - Complex.I * ((((1 / 2 : ℝ))) : ℂ))‖ := by
+  have hF : ((((0 : ℝ)) : ℂ) - Complex.I * ((((1 / 2 : ℝ))) : ℂ)) =
+      (-(Complex.I / 2)) := by
+    push_cast
+    ring
+  have hnorm : ‖CentralCoverAssembly.xiShiftedEntire (-(Complex.I / 2))‖ =
+      (1 / 2 : ℝ) := by
+    rw [Door3BoundaryEndpoints.xiShiftedEntire_at_neg_I_half]
+    have hcast : ((1 / 2 : ℂ)) = ((((1 / 2 : ℝ))) : ℂ) := by
+      push_cast
+      ring
+    rw [hcast, Complex.norm_real, Real.norm_eq_abs,
+      abs_of_pos (by norm_num : (0 : ℝ) < 1 / 2)]
+  rw [hF, hnorm]
+
+def bottom_uniform_lower_residual : Prop :=
+  ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+    (1 / 2 : ℝ) ≤ ‖CentralCoverAssembly.xiShiftedEntire
+      ((x : ℂ) - Complex.I * ((((1 / 2 : ℝ))) : ℂ))‖
+
+def bottom_ballSup_residual (C : ℝ) : Prop :=
+  ∀ z ∈ Metric.closedBall (0 : ℂ) 12,
+    ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ C
+
+def bottom_uniform_deriv_residual (M : ℝ) : Prop :=
+  ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+    ∀ v ∈ Set.Icc (-(1 / 2 : ℝ)) (-(1 / 2 : ℝ) + (1 / 2 : ℝ) / M),
+      ‖deriv CentralCoverAssembly.xiShiftedEntire
+        ((x : ℂ) + Complex.I * (v : ℂ))‖ ≤ M
+
+end Door3TopEdgeNeeds

@@ -6164,6 +6164,15 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 ETA-S22IMC (background `ses_f347bb159`, proof-only,
+  grep-clean, suppliers-only commit): S22 Im composition verified +
+  S24 rung (Re -3.96 + Im conditional, log23/24 phase). S26 next.
+- 2026-09-22 CERTS-SUP (background `ses_f347082a4`, proof-only,
+  grep-clean, deriv_certs-only commit): R00 sup specs (generic tier +
+  gamma/zeta needs). Z-spec residual open.
+- 2026-09-22 TOPEDGE-NEEDS (background `ses_f347082a5`, proof-only,
+  grep-clean, top_edge-only commit): h_bottom closed at x=0 + bottom
+  residuals filed (audit #print lines trimmed, semantic content intact).
 - 2026-09-22 TAIL-M28 (background `ses_f34716f4f`, proof-only,
   grep-clean, tail-only commit): M268435456 exact rung 3/2048 (16384²
   verified). M29 odd next.
