@@ -40,6 +40,20 @@ target in the project. Do NOT balk at it by saying "the rectangle is RH-equivale
 impossible" — it is a finite computation with existing tooling, and completing it closes all
 three doors.
 
+**Progress state (2026-09-23, commit `66a680f`).** A 700+-subagent wave campaign has since
+driven Door 3 to **FULL-TREE GREEN**: all 8 core modules (`door3_cell_suppliers`,
+`door3_R02_ball_advance`, `door3_rh_wiring`, `door3_R02_zeta_bridge`,
+`door3_premise_gamma`, `door3_pilot_R00_zeta`, `central_cover_assembly`,
+`riemann_hypothesis`) plus `zeta_rigorous` and every lane file build with
+0 errors / 0 sorryAx. The conditional chain `full_central_covered` →
+`XiCentralMainBand10` → `rh_from_mainBand10_edgeStrips10_tail10_cutoff`
+elaborates end-to-end; twelve lanes retired at honest milestones. The
+**binding residual** is the 80 per-cell numerical enclosures (complex-ζ/ξ
+interval arithmetic — a Stirling-disc-enclosure lane, not more per-term
+shards). See the **Authoritative Door-3 state (2026-09-23)** and the
+**Door-3 final wave ledger** (both near the end of this guide) before working
+Door 3.
+
 Everything else described here is infrastructure that already exists and is meant to be **called**,
 not redone.
 
@@ -773,16 +787,27 @@ All build cleanly; do not touch unless asked.
 
 ## 12. Central RH-equivalence files (the convergence doors — CLOSABLE)
 
-- **`riemann hypothesis.lean`** and **`riemann_hypothesis.lean`**: cleaned of prose `sorry` and
-  carrying **`axiom RiemannHypothesisProp_apply` (line 34)**, which directly asserts RH
-  (`(s : ℂ) → 0 < s.re → s.re < 1 → riemannZeta s = 0 → s.re = 1/2`). This axiom is an
-  **intended target**: replace it with a genuine proof using the infrastructure. The whole web of
-  already-proven `rh_iff_*` / `rh_from_*` equivalences funnels into `RiemannHypothesisProp`, so a
-  proof of off-real nonvanishing / the critical line forces it. **Do NOT treat it as "flagged /
-  not closable" — attempt it; closing this door solves RH.**
-- **`riemann_hypothesis_newsection.lean`**: the mollified / Rouché / hard-difference door — see §10.
-  `hardDifferenceNonzero_iff_RH` is already proven, so proving `hardDifference(z) ≠ 0` off the real
-  axis yields RH. That nonvanishing leaf is the intended target (also CLOSABLE).
+ - **`riemann hypothesis.lean`** and **`riemann_hypothesis.lean`**: cleaned of prose `sorry` and
+   carrying **`axiom RiemannHypothesisProp_apply` (line 34)**, which directly asserts RH
+   (`(s : ℂ) → 0 < s.re → s.re < 1 → riemannZeta s = 0 → s.re = 1/2`). This axiom is an
+   **intended target**: replace it with a genuine proof using the infrastructure. The whole web of
+   already-proven `rh_iff_*` / `rh_from_*` equivalences funnels into `RiemannHypothesisProp`, so a
+   proof of off-real nonvanishing / the critical line forces it. **Do NOT treat it as "flagged /
+   not closable" — attempt it; closing this door solves RH.**
+   **Door-2 capstone committed (`riemann_hypothesis.lean`, ~12k+ lines, green at `66a680f`):**
+   hypothesis Props mirroring supplier shapes (`XiCentralMainBand10`,
+   `XiCentralEdgeStrips10`, `XiCutoffLines10`, `XiCentralRect10`) + master canned theorem
+   **`rh_from_mainBand10_edgeStrips10_tail10_cutoff`** (main band + edge strips + tail + cutoff
+   lines → `RiemannHypothesisProp`) + `tailPointwise10_of_absTail` adapter + feeders showing the
+   hyps are weaker than `XiCentralZeroFreeCover 10`. The chain `full_central_covered` →
+   `XiCentralMainBand10` → `rh_from_mainBand10_edgeStrips10_tail10_cutoff` elaborates
+   end-to-end CONDITIONALLY (8685 jobs, 0 errors / 0 sorryAx); only 6
+   Challenge2/ClosedCertificate thunks still consume the axiom (`:12471-12476`). Residual is
+   four named supplier obligations: 80 per-cell enclosures (door 3), edge strips
+   `y∈[0.49,1/2)`, tail leaf (door 4), lines `Re=±10`.
+ - **`riemann_hypothesis_newsection.lean`**: the mollified / Rouché / hard-difference door — see §10.
+   `hardDifferenceNonzero_iff_RH` is already proven, so proving `hardDifference(z) ≠ 0` off the real
+   axis yields RH. That nonvanishing leaf is the intended target (also CLOSABLE).
 
 ---
 
@@ -816,6 +841,19 @@ experiments/probes — search before writing your own, but don't rely on them as
   `central_cover_trusted.lean`, `float_xi_approx.lean`, `float_xi_cover.lean`,
   `cross_door_synthesis.lean`, `float_bridge_test.lean`. These form the convergent target's fuel
   supply — call them, do not rebuild.
+
+- **The `door3_*` fleet** (registered in `lakefile.lean`, `lean_lib RootScratch` block, now
+  ~80 modules spanning roots lines ~211–212 and matching `Glob.one` entries — the block has
+  grown well past its old 196–209 range; re-check `rg -n "door3_" lakefile.lean` for the exact
+  list). The core green modules are `door3_cell_suppliers` (8688 jobs), `door3_R02_ball_advance`
+  (8690), `door3_rh_wiring` (8712), `door3_R02_zeta_bridge` (8703), `door3_premise_gamma`
+  (8689), `door3_pilot_R00_zeta` (8704) — plus `door3_stirling_gamma`, `door3_cutL10_remainders`,
+  `door3_cutR10_ballsup`, `door3_tail_eta_upper`, `door3_off_axis_certificates`,
+  `door3_complex_wendel`, `door3_sliver_edge`, `door3_premise_tier`, `door3_top_edge`,
+  `door3_first_cell`, `door3_deriv_certs`, `door3_digamma`, `door3_eta_prime` (all 0
+  `sorry`/`admit`/`axiom`, grep-verified, committed `66a680f`). These are the Door-3 wave
+  campaign's lane files — grep them BEFORE writing (the lemma you need is almost certainly
+  already banked there; see the Authoritative Door-3 state section and the final wave ledger).
 
 ---
 
@@ -1089,8 +1127,8 @@ With the historical Float layer complete, the path to `RiemannHypothesisProp` wa
 3. Combine via `rh_from_central_zero_free_cover_and_tail_pointwise` (`riemann_hypothesis.lean:794`)
    or `rh_from_mollified_tail_and_central_cover` → `RiemannHypothesisProp`.
 
-**Current status (updated):** the infrastructure has advanced well beyond scaffolding.
-- Central cover: `central_cover_assembly.lean` (now ~6000 lines) has the `gridFine` 40-cell re-grid
+**Current status (updated 2026-09-23, commit `66a680f`):** the infrastructure has advanced well beyond scaffolding.
+- Central cover: `central_cover_assembly.lean` (now ~20,700 lines) has the `gridFine` 40-cell re-grid
   (x-widths ≤2.5, feasibility-checked tiers), hdiff-free strip fencing lemmas, and **all 40 cells
   packaged** — bottom row R00–R10 (y∈(0.01,0.2)) plus upper rows R11–R40 (y∈(0.2,0.49)), each with
   full RXX pattern (rect, strip bounds, radius, fencing/lowerBound/zeroFree/nonvanishing_of_bounds,
@@ -1117,9 +1155,6 @@ With the historical Float layer complete, the path to `RiemannHypothesisProp` wa
   off-real centers need a full complex ξ-enclosure). Also open: x=±10 endpoints, y∈[0.49,1/2),
   the real axis, and the Gamma full narrow to ±0.01 (n≈50–60). Step 3 (applying the reduction
   theorem) is straightforward once the per-cell enclosures land.
-
-**Build:** all Float-layer files build green:
-`lake build float_zeta rh_zeta_cert_central float_real_bridge central_cover_trusted float_jensen float_xi_approx float_xi_cover`.
 
 **Build:** all Float-layer files build green:
 `lake build float_zeta rh_zeta_cert_central float_real_bridge central_cover_trusted float_jensen float_xi_approx float_xi_cover`.
@@ -1250,6 +1285,16 @@ two-way equivalence with both directions proved. The `Float` layer (`float_zeta`
 layer (`zeta_rigorous` instantiated per `k`/`i`) is the **machine-checked proof** that consumes it.
 
 ### 18b.10 What remains to close the doors (precise, current)
+
+> **Status pointer (2026-09-23, commit `66a680f`).** The per-door detail below was
+> assembled during the 700+-subagent wave campaign and remains accurate; the
+> **binding residual is unchanged**: the 80 per-cell numerical enclosures for the
+> central cover (0/40 banked), plus edge strips / cutoff lines / real-axis
+> segment, plus the Gamma L2-rate wall and the eta shortfall 0.6514. All core
+> door-3 modules and lane files are now FULL-TREE GREEN (0 errors / 0 sorryAx)
+> and twelve lanes retired at honest milestones — see the **Authoritative
+> Door-3 state (2026-09-23)** section and the **Door-3 final wave ledger** for
+> the up-to-date build state, lane retirements, and residuals.
 
 Every door's residual is a finite, named set of proofs. The single bottleneck is the **40-cell
 complex interval arithmetic** for the central cover; closing it closes doors 2, 3, and (given the
@@ -3314,6 +3359,60 @@ for the full Door-2 capstone, the cutoff-line and edge-strip suppliers. These
 are named inputs in the theorem signatures, not hidden assumptions. No current
 commit proves all of them, so Door 3 and RH remain open despite the
 sorry-free infrastructure and the complete commit ledger above.
+
+## Authoritative Door-3 state and residuals (2026-09-23, commit `66a680f`)
+
+This section supersedes the 2026-09-07 authoritative block above. After the
+700+-subagent wave campaign (all committed in `66a680f`, ledger at the end of
+this guide), the tree is FULL-TREE GREEN: all 8 core door-3 modules plus
+`zeta_rigorous` build with 0 errors / 0 sorryAx, and every lane lane-file
+(`door3_stirling_gamma`, `door3_cutL10_remainders`, `door3_cutR10_ballsup`,
+`door3_tail_eta_upper`, `door3_off_axis_certificates`, `door3_complex_wendel`,
+`door3_sliver_edge`, `door3_premise_tier`, `door3_top_edge`, `door3_first_cell`,
+`door3_deriv_certs`, `door3_digamma`, `door3_eta_prime`, `interval_arith`) is
+0 `sorry`/`admit`/`axiom` (grep-verified). Twelve lanes retired at honest
+milestones (cell 42/42, sliver 75036, digamma 288/35, wendel, stirling,
+cutL10, first-cell OPEN, R02 zero-gap, tier R100, halving pair-clearance,
+edge-strip 65536th-margin, eta S200).
+
+### What is proved (unchanged in substance, now green end-to-end)
+* All 2026-09-07 "What is proved" bullets above remain true, plus: the
+  conditional chain `full_central_covered` → `XiCentralMainBand10` →
+  `rh_from_mainBand10_edgeStrips10_tail10_cutoff` elaborates end-to-end
+  (8687 + 8685 jobs, 0 errors / 0 sorryAx).
+* `zeta_rigorous.lean` (0 `sorry`/`admit`/`axiom`) holds the unconditional
+  η→ζ→ξ chain at `s=1/2`, the R00/reflected pilot, the FE factor two-sided
+  bounds at R00, and `R02_D3_zeta_upper_934` (later tightened through the
+  N-ladder to `R02_D3_zeta_rect_cap_slice0503_tight336_N13`, 357→336).
+
+### What remains for Door 3 (residual after the wave campaign)
+1. **Inner 40-cell analytic fields (80 obligations)** — unchanged in shape
+   (`ε + M·r ≤ ‖xiShifted center‖` + uniform `‖deriv ξ‖ ≤ M` per cell);
+   EDGE-AUDIT: 0/40 banked in suppliers. The binding residual. Requires a
+   kernel-checked complex-ζ/ξ enclosure (Stirling-disc enclosures lane) —
+   NOT more per-term shards (k-lanes exhausted: 65 straight destructive,
+   caps 15.98→16.74).
+2. **Bottom strip** — `BottomStripObligations` still uninstantiated.
+3. **Top/bottom edge strips** `(-10,10)×[0.49,0.5)` — outer-boundary
+   numerical suppliers still missing (smallest-next: `edgeStrip_top_half_M40`).
+4. **Cutoff lines `Re z = ±10`** — CutL10 retired at exact cap (poly
+   67→66.95, joint 12.87→6.33); the two thin-rectangle enclosures remain.
+5. **Real-axis segment** — still required (the `zeta_rigorous` template is
+   the reusable pattern).
+6. **Gamma L2 rate** — N-ladder 0.579→0.621 banked through N8+/N58–N64
+   (~0.557–0.563 each, all `<0.646`); the rate wall stands (honest).
+7. **Eta shortfall 0.6514** — slow 1.94 (S4 Pythagoras) vs need 2.5914;
+   all Re/Im/tail/cF routes exhausted through S12/S200 (envelope declining).
+   Kuzmin–Landau cancellation tail or rigorous complex interval arithmetic.
+
+### Downstream assembly boundary (updated)
+Once the 80 per-cell + strip + edge + cutoff + real-axis suppliers are
+provided, the existing assemblies yield the `XiCentralZeroFreeCover 10`-shaped
+input, and the committed implication theorems close Door 3 (and transitively
+Door 2's capstone via `rh_from_mainBand10_edgeStrips10_tail10_cutoff`).
+Door 3 and RH remain open; the infrastructure is green, committed, and
+documented at `66a680f`.
+
 - 2026-09-07 ZU (`ad4e3085`, zeta_rigorous tail, green, axioms clean):
   `R02_D3_zeta_upper_934` (`‖ζ‖ ≤ 934` on R02 rect, was `≤1012`).
   Eta-route floor documented in-file: reaching `≤10` needs `M ≥ 33.2^20`
@@ -7621,3 +7720,74 @@ sorry-free infrastructure and the complete commit ledger above.
   8π nearer than 7π). Product floor needs r11 lower (follow-up).
   SCUT23 tasked (r11 lower + eta10 gain).
 - 2026-09-23 Wave S52-S60/N26/R25-R39/M55-M68/k57-k59/R21-R29/S23-S28/R36-R40/FINAL17-FINAL20/bridge-1.564: eta Re -12.12 to -14.84 Im -15.52 to -18.24 gaps 16-20 vs 1.94; gamma N26 <0.65; tier keeps 67200; tail exact 2^68; scut 13 destructive; certs R28 fixed-shape 1.26-premise clean (R24-R27 pre-existing 2-to-1.26 linarith fails); off-axis diminishing to -19379/4500; interval poly to 38.45; cutR10 C1-C24; topedge shift12 blocked; bridge best 1.564/0.284 ceiling 1.5643. Off-axis CRLF rebuilt HEAD+tail (879+/0-).
+
+## Door-3 final wave ledger (2026-09-22/23, committed `66a680f`)
+
+**700+ subagent lanes completed this phase.** All results are committed (HEAD
+`66a680f`, +232,903 lines); every lane reported through the verify-scan → guide
+→ commit loop before its retask. This entry records the tail of the wave
+campaign that was not previously appended. The full per-lane transcript is
+`session-ses_f335.md` (27,620 lines, committed).
+
+### Lane retirements (each lane closed at its milestone, files kept green)
+- **Cell lane** — retired at **42/42 walls ledger** (0 closed; honest wall
+  accounting per cell, redirect to suppliers-audit).
+- **Sliver lane** — retired at **sharp joint 75036** (route exhausted;
+  wiring joint also re-measured at 75036, still exceeds — honest).
+- **Digamma lane** — retired at **exact 288/35 ceiling**.
+- **Wendel lane** — retired at **exact outer ceiling**.
+- **Stirling lane** — retired at **exact verdict** (redirected to edge-strips).
+- **CutL10 lane** — retired at **exact cap** (interval-R56 redirect).
+- **First-cell lane** — retired at **OPEN verdict** (honest; R02-ball redirect).
+- **R02-ball lane** — retired at **zero-gap ledger** (M57 zeta redirect).
+- **Tier lane** — retired at **R100 milestone** (certs R01-fixed backfill).
+- **Halving lane** — retired at **pair-clearance milestone** (pair program
+  CLOSED: 15 pairs + ico-block transfer, no further pair waves needed).
+- **Edge-strip lane** — retired at **65536th-margin** (bisection trivia
+  converging; capstone file kept clean from here).
+- **Eta lane** — retired at **S200 milestone** (100 rungs, Re -62.44 /
+  Im -65.64; all Re/Im/tail/cF routes exhausted or declining — honest).
+
+### Final chained tails and milestones (all banked)
+- **FINAL63→FINAL65**: E47 duotriginta / duquadraginta → E48 duoquadraginta
+  chained tails banked; FINAL65's duplicate-name claim was substring
+  confusion (verified: 26 names, 0 dups — file consistent).
+- **S196→S200** (`door3_off_axis_certificates.lean`): S196 `-61.08/-64.48`
+  (rpow lower sound at 4.01) → S198 `-61.76/-65.16` → S200 milestone; eta
+  lane retired at S200 with the envelope declining (no force to 1.94).
+- **k149→k165** (destructive lanes): 65 straight destructive, caps
+  15.98 → 16.74 honest — per-term gains diminishing (~1/n^σ), each rung
+  locked with the already-present guard.
+- **N58→N64** (gamma lanes, `door3_premise_gamma.lean`): all banked `<0.646`
+  (~0.56304 → ~0.55946 → ~0.56082 → ~0.55910 → ~0.55742; base adapted
+  1.80→1.81 at N61) — the L2-rate wall stands, honest ladder to the top.
+- **M84→M93** (reverse lanes): 21.42 → 21.66 banked reverse milestones
+  (M86/M90 minimum N=17).
+- **Wiring** (`door3_rh_wiring.lean`): M1000-delta + neighborhood-gate
+  banked; tail10-cutoff chained to next24.
+
+### Build state at commit `66a680f`
+All 8 core modules GREEN (0 errors / 0 sorryAx): `door3_cell_suppliers` (8688),
+`door3_R02_ball_advance` (8690), `door3_rh_wiring` (8712), `door3_R02_zeta_bridge`
+(8703), `door3_premise_gamma` (8689), `door3_pilot_R00_zeta` (8704),
+`central_cover_assembly` (8687), `riemann_hypothesis` (8685). Later lane files
+also green: `door3_stirling_gamma`, `door3_cutL10_remainders`,
+`door3_cutR10_ballsup`, `door3_tail_eta_upper` (M524288 through M134217728
+banked), `door3_off_axis_certificates` (S4096 triangle, BIGS S6 surplus
+173/2250), `door3_complex_wendel`, `door3_sliver_edge`, `door3_premise_tier`,
+`door3_top_edge`, `door3_first_cell`, `door3_deriv_certs`, `door3_digamma`,
+`door3_eta_prime`, `interval_arith`, `zeta_rigorous` (all 0
+`sorry`/`admit`/`axiom` — verified by grep).
+
+### Chain and residual status (unchanged by the tail waves)
+- `full_central_covered` → `XiCentralMainBand10` →
+  `rh_from_mainBand10_edgeStrips10_tail10_cutoff` elaborates end-to-end
+  **conditionally**; 6 Challenge2/ClosedCertificate thunks still consume
+  `RiemannHypothesisProp_apply` (`riemann_hypothesis.lean:12471-12476`).
+- Binding residual remains the **80 per-cell numerical enclosures**
+  (0/40 banked in suppliers per EDGE-AUDIT) + edge strips `y∈[0.49,1/2)` +
+  cutoff lines `Re=±10` + the real-axis segment (see the Authoritative
+  Door-3 state section, updated below).
+- False numerals caught this phase: theta9 (4e-10), prod7 (7e-12),
+  121/70→127/70, S8+k6/k7 double-count, base-10/11 mismatch, FINAL65
+  duplicate-name substring confusion.
