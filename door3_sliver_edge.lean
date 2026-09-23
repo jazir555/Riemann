@@ -1599,6 +1599,198 @@ theorem puncturedStrip_quarter_subset_strip :
 
 end Door3SliverEdge
 
+/-! ### (R) FINAL sliver ledger — single audit + complete residual list
+
+Grepped before writing (all banked values + all open specs):
+* (S/F) `edgeS_top :43`, `edgeS_bot :55`, `edgeS_general :67`,
+  `edgeTopForm_eq :83`, `edgeBotForm_eq :89`, `edgePoly_top :95`,
+  `edgePoly_bot :108`, `entire_top_expand :123`, `entire_bot_expand :135`,
+  `entire_top_expand_consumer :147`, `entire_bot_expand_consumer :157`;
+* (E) `endpoint_top_value :169`, `endpoint_bot_value :179`,
+  `endpoint_top_norm :189`, `endpoint_bot_norm :196`,
+  `endpoint_top_sharp :203`, `endpoint_bot_sharp :208`,
+  `edgeTop_at_zero :213`, `edgeBot_at_zero :217`,
+  `edgeTop_consumer_norm_at_zero :221`, `edgeBot_consumer_norm_at_zero :229`,
+  `edgeTop_single_lower :237`, `edgeBot_single_lower :243`;
+* (mono) `uniform_lower_mono_top :251`, `uniform_lower_mono_bot :260`;
+* (covers/bridges) `entire_deriv_le_of_sphere_bound :271`,
+  `edgeMem_norm_le :280` (`≤ 11`), `edgeSphere_cover :303`,
+  `edgeSphere_cover_half :323` (both into `closedBall 0 12`),
+  `uniform_top_deriv_of_closedBall :343`, `uniform_bot_deriv_of_closedBall :368`,
+  `uniform_top_deriv_of_closedBall_half :393`,
+  `uniform_bot_deriv_of_closedBall_half :418`;
+* (G) `width_gate_top_iff :445`, `width_gate_bot_iff :454`,
+  `example_width_top :463`, `example_width_bot :467`, `example_gate :471`,
+  `miss_top :475`, `miss_bot :479`, `shortfall_top :483`, `shortfall_bot :487`;
+* (H) `uniform_top_lower_le_half :502`, `uniform_bot_lower_le_half :516`;
+* (I) `topEdgeNorm_continuous :549`, `botEdgeNorm_continuous :557`,
+  `m_half_existence_of_zero_top :565`, `m_half_existence_of_zero_bot :605`,
+  `m_half_existence_of_zero :645` (half-optimal `1 / 4` near zero);
+* (M40) `m40_gate_top :690`, `m40_width_top :693`, `m40_width_bot :696`,
+  `m40_delta_pos :699`, `m40_delta_le_one :702`, `m40_delta_eq :705` (`1/80`),
+  `uniform_top_deriv_M40_of_closedBall :708`,
+  `uniform_top_lower_not_gt_half :719`, `uniform_bot_lower_not_gt_half :727`,
+  `uniform_top_lower_gap_51 :735`, `uniform_bot_lower_gap_51 :742`,
+  `m40_gate_bot :765`, `uniform_bot_deriv_M40_of_closedBall :768`,
+  `uniform_top_lower_gap_501 :779`, `uniform_bot_lower_gap_501 :786`,
+  `uniform_top_lower_gap_1001_2000 :793`,
+  `uniform_bot_lower_gap_1001_2000 :800`;
+* (ball-sup mgmt) `closedBall12_mem_endpoint_top :838`,
+  `ballSup_necessary_ge_half :848` (`C ≥ 1/2`),
+  `ballSup_mono :858`, `uniform_pair_of_closedBall :867`,
+  `uniform_M40_pair_of_closedBall :885`;
+* (M1000) `m1000_delta_le_one :925`, `m1000_delta_pos :928`,
+  `uniform_top_deriv_M1000_of_closedBall :931`,
+  `uniform_bot_deriv_M1000_of_closedBall :942`,
+  `uniform_M1000_pair_of_closedBall :953`,
+  `ballSup40_to_ballSup1000 :971`, `ballSup79_to_ballSup1000 :980`,
+  `uniform_M1000_pair_of_ballSup79 :989`,
+  `uniform_M1000_pair_of_ballSup40 :1004`;
+* (poly79) `poly_upper_closedBall12_le78 :1049` (`78 = 12*13/2`),
+  `poly_upper_closedBall12 :1079` (`≤ 79`);
+* (pi4096) `ball12_re_bounds :1122`, `piOf_norm_eq_ball12 :1135`,
+  `piOf_upper_closedBall12 :1146` (`≤ 4096 = 4^6`),
+  `poly_pi_upper_closedBall12 :1166` (`≤ 319488 = 78*4096`);
+* (punctured) `puncturedBall12 :1231`, `pole_zero_mem_ball12 :1235`,
+  `pole_one_mem_ball12 :1240`, `puncturedBall12_subset :1245`,
+  `puncturedBall12_excludes_zero :1252`, `puncturedBall12_excludes_one :1261`,
+  `poly_pi_upper_punctured :1270`, `PuncturedGammaSup :1277` (SPEC OPEN),
+  `PuncturedZetaSup :1281` (SPEC OPEN), `fourFactor_punctured_upper :1286`,
+  `puncturedBall12_quarter :1309`, `puncturedBall12_quarter_excludes_zero :1312`,
+  `puncturedBall12_quarter_excludes_one :1320`, `poly_pi_upper_quarter :1328`,
+  `puncturedBall12z :1336`, `PuncturedEntireSup :1341` (SPEC OPEN),
+  `preimage_pole_bot_mem :1346`, `puncturedBall12z_excludes_top :1356`,
+  `puncturedBall12z_excludes_bot :1365`;
+* (strip-punct) `openStrip :1422`, `puncturedStrip12z :1425`,
+  `puncturedStrip_subset_punctured :1429`, `puncturedStrip_subset_strip :1436`,
+  `shiftedS_eq_top_mul :1443`, `shiftedS_eq_bot_mul :1456`,
+  `shiftedS_dist_zero :1467`, `shiftedS_dist_one :1476`,
+  `shiftedS_mem_punctured_of_mem :1487`,
+  `entire_eq_shifted_of_mem_puncturedStrip :1502`,
+  `entire_norm_eq_shifted_of_mem_puncturedStrip :1511`,
+  `xiShifted_norm_eq_fourFactor_norm_DCB :1518`,
+  `entire_puncturedStrip_upper :1545` (conditional `319488*G*Z`),
+  `puncturedStrip_quarter :1584`, `puncturedStrip_quarter_subset :1587`,
+  `puncturedStrip_quarter_subset_strip :1594`;
+* (wiring consumers, owned elsewhere, NOT closed here)
+  `door3_rh_wiring.lean:470` (`hTopDeriv40_of_ballSup40`),
+  `:1625` (`hTopDeriv1000_of_ballSup1000`), `:487/:523` (M40 strips),
+  `:1949/:2040/:2141/:2243` (zero-line feeders); supplier premises
+  `hTopLower/hBotLower` uniform `1/2` + `hTopDeriv/hBotDeriv` stay conditional.
+
+What is banked below (proved, no new foundational assumptions):
+* `SliverFinalResidualList` — the COMPLETE residual as one Prop (OPEN by filing,
+  not proved; exactly the 7 open premises);
+* `sliver_final_banked_core` — unconditional conjunction of the lane numerals
+  (`1/80`, M40 gates/widths, M1000 delta, endpoint `1/2` norms, poles-inside,
+  poly `78`/`79`, pi `4096`, joint `319488`);
+* `sliver_final_audit` — single conditional audit: the residual list as ONE
+  hypothesis closes the M40 pair (`40`), the M1000 pair (`1000`), and the
+  quarter-punctured four-factor (`319488*G*Z`).
+Value-or-gap / verdict: BANKED-CONDITIONAL. No uniform `1/2` lower, no full-ball
+`C = 40` / `C = 1000` Entire sup, no punctured Gamma/zeta/Entire numerals are
+claimed here. Grep-clean: none of the four forbidden placeholders/tactics in this file.
+Residual (complete, open, owned elsewhere): R1 uniform top `1/2` lower on
+`Icc (-10) 10`; R2 uniform bottom `1/2` lower; R3 full-ball Entire sup `40`;
+R4 full-ball Entire sup `1000`; R5 punctured Gamma numeral `G` at `1/4` radii;
+R6 punctured zeta numeral `Z` at `1/4` radii; R7 punctured Entire numeral
+(`1000` shape) at `1/4` radii. The `s`-ball premise for strip transfer and the
+strip-exit limitation on radius-`1` spheres (documented at (Q)) persist.
+-/
+
+namespace Door3SliverEdge
+
+/-- COMPLETE residual list as a single Prop (OPEN: filed, not proved).
+
+R1/R2 uniform `1/2` edge lowers; R3/R4 full-ball Entire sups `40`/`1000`;
+R5/R6 punctured Gamma/zeta numeral sups at quarter radii;
+R7 punctured Entire numeral sup at quarter radii. -/
+def SliverFinalResidualList (G Z : ℝ) : Prop :=
+  (∀ (x : ℝ), x ∈ Set.Icc (-10 : ℝ) (10 : ℝ) →
+    (1 / 2 : ℝ) ≤ ‖CentralCoverAssembly.xiShiftedEntire
+      (((x : ℂ) + Complex.I * ((((1 / 2 : ℝ))) : ℂ)))‖) ∧
+  (∀ (x : ℝ), x ∈ Set.Icc (-10 : ℝ) (10 : ℝ) →
+    (1 / 2 : ℝ) ≤ ‖CentralCoverAssembly.xiShiftedEntire
+      (((x : ℂ) - Complex.I * ((((1 / 2 : ℝ))) : ℂ)))‖) ∧
+  (∀ (z : ℂ), z ∈ Metric.closedBall (0 : ℂ) 12 →
+    ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ (40 : ℝ)) ∧
+  (∀ (z : ℂ), z ∈ Metric.closedBall (0 : ℂ) 12 →
+    ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ (1000 : ℝ)) ∧
+  PuncturedGammaSup (1 / 4 : ℝ) (1 / 4 : ℝ) G ∧
+  PuncturedZetaSup (1 / 4 : ℝ) (1 / 4 : ℝ) Z ∧
+  PuncturedEntireSup (1 / 4 : ℝ) (1 / 4 : ℝ) (1000 : ℝ)
+
+/-- Unconditional banked core: M40/M1000 deltas, endpoint `1/2` norms,
+poles-inside ball-12, poly `78`/`79`, pi `4096`, joint `319488`. -/
+theorem sliver_final_banked_core :
+    ((0.01 : ℝ) < (1 / 2 : ℝ) / (40 : ℝ)) ∧
+    ((1 / 2 : ℝ) - (1 / 2 : ℝ) / (40 : ℝ) < (0.49 : ℝ)) ∧
+    ((1 / 2 : ℝ) / (40 : ℝ) = (1 / 80 : ℝ)) ∧
+    ((0 : ℝ) < (1 / 2 : ℝ) / (1000 : ℝ)) ∧
+    (‖CentralCoverAssembly.xiShiftedEntire (Complex.I / 2)‖ = (1 / 2 : ℝ)) ∧
+    (‖CentralCoverAssembly.xiShiftedEntire (-(Complex.I / 2))‖ = (1 / 2 : ℝ)) ∧
+    ((0 : ℂ) ∈ Metric.closedBall (0 : ℂ) 12) ∧
+    ((1 : ℂ) ∈ Metric.closedBall (0 : ℂ) 12) ∧
+    (∀ s : ℂ, s ∈ Metric.closedBall (0 : ℂ) 12 →
+      ‖CentralCoverAssembly.polyOf s‖ ≤ (78 : ℝ)) ∧
+    (∀ s : ℂ, s ∈ Metric.closedBall (0 : ℂ) 12 →
+      ‖CentralCoverAssembly.polyOf s‖ ≤ (79 : ℝ)) ∧
+    (∀ s : ℂ, s ∈ Metric.closedBall (0 : ℂ) 12 →
+      ‖CentralCoverAssembly.piOf s‖ ≤ (4096 : ℝ)) ∧
+    (∀ s : ℂ, s ∈ Metric.closedBall (0 : ℂ) 12 →
+      ‖CentralCoverAssembly.polyOf s * CentralCoverAssembly.piOf s‖ ≤
+        (319488 : ℝ)) := by
+  refine ⟨m40_gate_top, m40_width_top, m40_delta_eq, m1000_delta_pos,
+    endpoint_top_norm, endpoint_bot_norm,
+    pole_zero_mem_ball12, pole_one_mem_ball12, ?_, ?_, ?_, ?_⟩
+  · intro s hs
+    exact poly_upper_closedBall12_le78 hs
+  · intro s hs
+    exact poly_upper_closedBall12 hs
+  · intro s hs
+    exact piOf_upper_closedBall12 hs
+  · intro s hs
+    exact poly_pi_upper_closedBall12 hs
+
+/-- Single FINAL audit: one residual-list hypothesis closes the M40 pair,
+the M1000 pair, and the quarter-punctured four-factor bound. -/
+theorem sliver_final_audit (G Z : ℝ) (hG0 : 0 ≤ G) (hZ0 : 0 ≤ Z)
+    (hRes : SliverFinalResidualList G Z) :
+    (∀ (x : ℝ), x ∈ Set.Icc (-10 : ℝ) (10 : ℝ) →
+      ∀ (y : ℝ), y ∈ Set.Icc ((1 / 2 : ℝ) - (1 / 2 : ℝ) / (40 : ℝ)) (1 / 2 : ℝ) →
+        ‖deriv CentralCoverAssembly.xiShiftedEntire
+          (((x : ℂ) + Complex.I * (((y : ℝ)) : ℂ)))‖ ≤ (40 : ℝ)) ∧
+    (∀ (x : ℝ), x ∈ Set.Icc (-10 : ℝ) (10 : ℝ) →
+      ∀ (y : ℝ), y ∈ Set.Icc (-(1 / 2 : ℝ)) (-(1 / 2 : ℝ) + (1 / 2 : ℝ) / (40 : ℝ)) →
+        ‖deriv CentralCoverAssembly.xiShiftedEntire
+          (((x : ℂ) + Complex.I * (((y : ℝ)) : ℂ)))‖ ≤ (40 : ℝ)) ∧
+    (∀ (x : ℝ), x ∈ Set.Icc (-10 : ℝ) (10 : ℝ) →
+      ∀ (y : ℝ), y ∈ Set.Icc ((1 / 2 : ℝ) - (1 / 2 : ℝ) / (1000 : ℝ)) (1 / 2 : ℝ) →
+        ‖deriv CentralCoverAssembly.xiShiftedEntire
+          (((x : ℂ) + Complex.I * (((y : ℝ)) : ℂ)))‖ ≤ (1000 : ℝ)) ∧
+    (∀ (x : ℝ), x ∈ Set.Icc (-10 : ℝ) (10 : ℝ) →
+      ∀ (y : ℝ), y ∈ Set.Icc (-(1 / 2 : ℝ)) (-(1 / 2 : ℝ) + (1 / 2 : ℝ) / (1000 : ℝ)) →
+        ‖deriv CentralCoverAssembly.xiShiftedEntire
+          (((x : ℂ) + Complex.I * (((y : ℝ)) : ℂ)))‖ ≤ (1000 : ℝ)) ∧
+    (∀ s : ℂ, s ∈ puncturedBall12 (1 / 4 : ℝ) (1 / 4 : ℝ) →
+      ‖CentralCoverAssembly.polyOf s * CentralCoverAssembly.piOf s *
+        CentralCoverAssembly.gammaOf s * riemannZeta s‖ ≤
+        (319488 : ℝ) * G * Z) := by
+  obtain ⟨_, _, hC40, hC1000, hGam, hZet, _⟩ := hRes
+  have hM40 := uniform_M40_pair_of_closedBall hC40
+  have hM1000 := uniform_M1000_pair_of_closedBall hC1000
+  obtain ⟨hM40T, hM40B⟩ := hM40
+  obtain ⟨hM1000T, hM1000B⟩ := hM1000
+  refine ⟨hM40T, hM40B, hM1000T, hM1000B, ?_⟩
+  intro s hs
+  exact fourFactor_punctured_upper (1 / 4 : ℝ) (1 / 4 : ℝ) G Z hG0 hZ0 hGam hZet hs
+
+/-- Ledger verdict (documentation as data): banked-conditional, residual open. -/
+def sliverFinalVerdict : String :=
+  "BANKED-CONDITIONAL: core numerals + M40/M1000/punctured closers conditional on SliverFinalResidualList R1-R7 (uniform 1/2 x2, ballSup 40, ballSup 1000, punctured G/Z/Entire); no uniform 1/2, no C=40/1000, no G/Z numerals claimed."
+
+end Door3SliverEdge
+
 /-! ### (R) SLIVER-FINAL ledger: banked close plus complete open list
 
 Grepped before writing:

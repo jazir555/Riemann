@@ -12718,3 +12718,112 @@ to close `XiTailPointwiseNonvanishingForX (10)` supply one distance value
 theorem tail_residual_open_distance10 :
     True :=
   trivial
+
+/-!
+## RH-FINAL single audit ledger (proof-only append)
+
+Cover feeds banked (all conditional on one cover supplier):
+- `xiCentralRect10_of_zeroFreeCover` (:12277) feeds `XiCentralRect10`
+- `xiCutoffLines10_of_zeroFreeCover` (:12286) feeds `XiCutoffLines10`
+- `xiCentralMainBand10_of_zeroFreeCover` (:12267) feeds `XiCentralMainBand10`
+- `xiCentralMainBand10_of_centralPointwise` (:12296) alternate main-band feed
+- `xiCentralEdgeStrips10_of_zeroFreeCover` (:12487) closes edge strips on same cover
+- `rh_from_rect10_tail10_cutoff` (:12226) canned RH from rect + tail + cutoff
+- `rh_from_mainBand10_edgeStrips10_tail10_cutoff` (:12238) master canned RH
+
+Tail conditionals banked (halved right-tail chain):
+- `tailPointwise10_of_absTail` (:12250) absolute-tail adapter
+- `tailPointwise10_of_rightTail_and_negSymm` (:12498) halves premise to `Hright`
+- `Hright_of_rightTailDistanceLowerBound10` (:12546) distance to `Hright`
+- `rightTailDistance_of_completedMinusPolar10` (:12574) conditional distance route
+- `rightTailDistance_of_completedMinusPolar10_scaffold` (:12580) scaffold route
+- `rightTailDistance_of_asymptotic10` (:12586) asymptotic route
+- `Hright_of_completedMinusPolarTail10` (:12592) conditional `Hright` route
+- `Hright_of_completedMinusPolarTail10_scaffold` (:12602) scaffold `Hright` route
+- `Hright_of_rightTailAsymptotic10` (:12612) asymptotic `Hright` route
+- `Hright_residual_open_tailDistance10` (:12626) files distance residual
+- `Hright_of_asymptotic_narrowed10` (:12656) narrowed asymptotic chain
+- `Hright_of_exponential_narrowed10` (:12666) narrowed exponential chain
+
+Symmetry banked (closed):
+- `classicalXi_symmetry` (:1875) banked symmetry package
+- `tailNegSymm_closed` (:12652) closed neg-symmetry value
+- `tailPointwise10_of_distance_closedSymm` (:12676) two-sided tail, symm closed
+- `tailPointwise10_of_asymptotic_closedSymm` (:12684) asymptotic variant, symm closed
+- `tailPointwise10_of_exponential_closedSymm` (:12691) exponential variant, symm closed
+- `tailPointwise10_of_completedMinusPolar_closedSymm` (:12698) completed route, symm closed
+- `tailPointwise10_of_completedMinusPolar_closedSymm_scaffold` (:12705) scaffold route
+- `tail_residual_open_distance10` (:12718) files narrowed residual
+
+Open distance premise (no banked inhabitant found in this file):
+- `XiRightTailDistanceLowerBoundForX (10)`
+- `XiRightTailAsymptoticLowerBoundForX (10)`
+- `RightTailExponentialCertificate (10)`
+- `RHTractable.CompletedMinusPolarTailLowerBound10`
+- `RHProofScaffold.CompletedMinusPolarTailLowerBound10`
+
+Other retained dependencies:
+- retained RH-apply declaration at :34 directly states RH; every
+  RH-equivalent leaf in this file stays conditional on it
+- dependency audit lines at :12471-:12476 flag two apparently-closed
+  chains that both transitively cite the retained :34 declaration
+- routing notes at :12556-:12571 and :12630-:12649 record no unconditional
+  `Hright` value and no unconditional distance inhabitant
+
+Verdict: cover-collapse CLOSED conditional on one
+`XiCentralZeroFreeCover (10)`; tail-halving CLOSED; Hright narrowing CLOSED
+conditional on distance; symmetry CLOSED unconditionally via
+`tailNegSymm_closed`; distance instance OPEN; hence no unconditional RH
+value is banked in this file.
+-/
+
+/-- FINAL capstone wiring: one cover plus one distance value yields RH.
+Cover-collapse uses the same cover for rect and cutoff; tail uses the
+closed-symmetry adapter. -/
+theorem rhFinal_from_cover10_and_distance10
+    (C : XiCentralZeroFreeCover (10 : ℝ))
+    (T : XiRightTailDistanceLowerBoundForX (10 : ℝ)) :
+    RiemannHypothesisProp :=
+  rh_from_rect10_tail10_cutoff
+    (xiCentralRect10_of_zeroFreeCover C)
+    (tailPointwise10_of_distance_closedSymm T)
+    (xiCutoffLines10_of_zeroFreeCover C)
+
+/-- FINAL wiring via narrowed asymptotic premise with symmetry closed. -/
+theorem rhFinal_from_cover10_and_asymptotic10
+    (C : XiCentralZeroFreeCover (10 : ℝ))
+    (A : XiRightTailAsymptoticLowerBoundForX (10 : ℝ)) :
+    RiemannHypothesisProp :=
+  rhFinal_from_cover10_and_distance10 C (A.toDistanceLowerBound)
+
+/-- FINAL wiring via narrowed exponential premise with symmetry closed. -/
+theorem rhFinal_from_cover10_and_exponential10
+    (C : XiCentralZeroFreeCover (10 : ℝ))
+    (E : RightTailExponentialCertificate (10 : ℝ)) :
+    RiemannHypothesisProp :=
+  rhFinal_from_cover10_and_asymptotic10 C (rightTailAsymptotic_of_exponential E)
+
+/-- FINAL wiring via completed-minus-polar premise with symmetry closed. -/
+theorem rhFinal_from_cover10_and_completedMinusPolar10
+    (C : XiCentralZeroFreeCover (10 : ℝ))
+    (L : RHTractable.CompletedMinusPolarTailLowerBound10) :
+    RiemannHypothesisProp :=
+  rhFinal_from_cover10_and_distance10 C
+    (RHTractable.tailDistance_from_completedMinusPolar L)
+
+/-- FINAL wiring via scaffold completed-minus-polar premise, symmetry closed. -/
+theorem rhFinal_from_cover10_and_completedMinusPolar10_scaffold
+    (C : XiCentralZeroFreeCover (10 : ℝ))
+    (L : RHProofScaffold.CompletedMinusPolarTailLowerBound10) :
+    RiemannHypothesisProp :=
+  rhFinal_from_cover10_and_distance10 C
+    (RHProofScaffold.xiRightTailDistanceLowerBound_from_completedMinusPolar L)
+
+/-- Complete residual list filed by RH-FINAL: to close RH supply one cover
+`XiCentralZeroFreeCover (10)` plus one distance value
+`XiRightTailDistanceLowerBoundForX (10)` (or one of its narrowed premises
+listed in the ledger above); the retained :34 RH-apply declaration remains
+the top-level conditional for all RH-equivalent leaves. -/
+theorem rhFinal_residual_open :
+    True :=
+  trivial

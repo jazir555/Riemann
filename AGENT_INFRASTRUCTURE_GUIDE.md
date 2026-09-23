@@ -6164,6 +6164,13 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 RH-FINAL (background `ses_f3472a834`, proof-only,
+  grep-clean*, RH-only commit): FINAL wiring (cover+4 tail routes) +
+  residual list. Distance instance open. RH lane COMPLETE-conditional.
+  (*whole-file simpa/axiom hits pre-existing; new block clean.)
+- 2026-09-22 SLIVER-FINAL (background `ses_f34752dfe`, proof-only,
+  grep-clean, sliver_edge-only commit): FINAL ledger (banked core +
+  audit over 8 residuals). Sliver lane COMPLETE.
 - 2026-09-22 WENDEL-FINAL (background `ses_f34730b03`, proof-only,
   grep-clean, wendel-only commit): FINAL 29-conjunct ledger (outer/leaf/
   mid closed 1.16/2.56/8.51; inner blocked). Wendel lane COMPLETE.
