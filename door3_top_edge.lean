@@ -1964,3 +1964,44 @@ def final_open_agree : Prop :=
   Door3TopEdgeAgreeExt.agree_extension_open_gap
 
 end Door3TopEdgeFinalLedger
+
+/-! ## TOPEDGE-CLOSE final confirmation (append-only, proof-only).
+
+Grep tail before filing (1966 lines):
+* closed engines/edges lines 12-920, closed numerals lines 1010-1649,
+  closed conditionals lines 1069-1839, final aliases lines 1926-1966.
+* open residuals lines 1027-1855 re-exported by FinalLedger defs.
+
+Value below: `ballSup_40_to_1000` chains banked defs locally:
+  sup bound 40 gives sup bound 1000 by transitivity of `≤` with `40 ≤ 1000`.
+Residual below: absolute sup bounds stay OPEN, filed as exact Props.
+-/
+
+namespace Door3TopEdgeClose
+
+open Complex Real Set Topology
+
+theorem ballSup_40_to_1000 :
+    Door3TopEdgeNeeds.bottom_ballSup_residual 40 →
+      Door3TopEdgeNeeds.bottom_ballSup_residual 1000 := by
+  intro h z hz
+  have hle := h z hz
+  have h40 : (40 : ℝ) ≤ 1000 := by norm_num
+  exact le_trans hle h40
+
+def close_open_ballSup_40 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 40
+
+def close_open_ballSup_1000 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 1000
+
+def close_open_uniform_lower : Prop :=
+  Door3TopEdgeNeeds.bottom_uniform_lower_residual
+
+def close_open_gamma12 (G : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.gamma_ball12_upper_residual G
+
+def close_open_zeta12 (Z : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.zeta_ball12_upper_residual Z
+
+end Door3TopEdgeClose

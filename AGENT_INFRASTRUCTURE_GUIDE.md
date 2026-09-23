@@ -6164,6 +6164,10 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 R18+TOPCLOSE (backgrounds `ses_f34592b29`,
+  `ses_f3458d948`, proof-only, grep-clean): R18 no chain keeps
+  67200 (R17 whitespace touch, content intact); 40→1000 monotone
+  + close gaps filed (namespace-end benign).
 - 2026-09-22 R13C+K47 (backgrounds `ses_f34592b28`,
   `ses_f345b31ef`, proof-only, grep-clean): R13 sup mirror +
   residual; k47 destructive (cap 4.37, 7th consecutive).
