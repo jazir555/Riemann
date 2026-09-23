@@ -6164,6 +6164,10 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 K41+STRIP (backgrounds `ses_f34627018`,
+  `ses_f3462701c`, proof-only, grep-clean): k41 destructive on
+  quadratic route (cap 3.02); shift 12→25/2 + invariance gap filed
+  (namespace-end benign).
 - 2026-09-22 AUDIT+S11+R24 (backgrounds `ses_f34627019`,
   `ses_f34622606`, `ses_f34622604`, proof-only, grep-clean): cutR10
   closeout audit (closed vs gaps inventory); S11 route; R24 route

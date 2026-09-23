@@ -1468,3 +1468,61 @@ def ballSup_open_gap_1000 : Prop :=
   Door3TopEdgeBallSup.ballSup_full_exact_gap_1000
 
 end Door3TopEdgeUniformLower
+
+/-! ## TOPEDGE-STRIP shift-invariance premise attempt (append-only, value-or-gap).
+
+Grep (read before filing):
+* tail `door3_top_edge.lean:1393-1470` (`bottom_ballSup_of_shifted_uppers`
+  needs `hshift : ∀ z ∈ closedBall 0 12, (1/2 + I*z) ∈ closedBall 0 12`;
+  `Door3TopEdgeUniformLower` banks exist-lower Icc10, point-form eq,
+  open gaps 40/1000).
+* local ball12 inclusions: sphere-in-ball `closedBall 0 12` at `:1097-1111`
+  (`|x| + |v| ≤ 11` triangle) and `:498-507`, `:347-356`; poly-78
+  `:1159-1186`, pi-4096 `:1210-1227`, joint-319488 `:1229-1243`;
+  no `shift_mem` lemma present locally (grep `shift_mem` empty in this file).
+* agreement `xiShifted_eq_entire_on_strip` holds only on the open strip
+  (`:1274-1276`), so no full-ball transfer is available in-tree.
+
+Value: triangle rebuild chaining the banked `norm_add_le` technique gives
+`12 → 25/2` inclusion for `z ↦ 1/2 + I*z`.
+Gap (exact, OPEN): `shift_invariance_12_gap` (`12 → 12`) below; the
+triangle bound yields `1/2 + 12 = 25/2`, not `12`, and no banked lemma
+in this file improves it to `12`, so the `12 → 12` premise stays OPEN.
+-/
+
+namespace Door3TopEdgeStrip
+
+open Complex Real Set Topology
+
+theorem shift_norm_le_of_mem_ball12 {z : ℂ}
+    (hz : z ∈ Metric.closedBall (0 : ℂ) 12) :
+    ‖(1 / 2 : ℂ) + Complex.I * z‖ ≤ (25 / 2 : ℝ) := by
+  have hdist : dist z (0 : ℂ) ≤ (12 : ℝ) := Metric.mem_closedBall.mp hz
+  rw [dist_zero_right] at hdist
+  have hI : ‖Complex.I * z‖ = ‖z‖ := by
+    rw [norm_mul, Complex.norm_I, one_mul]
+  have hhalf : ‖(1 / 2 : ℂ)‖ = (1 / 2 : ℝ) := by
+    have hcast : (1 / 2 : ℂ) = (((1 / 2 : ℝ)) : ℂ) := by
+      push_cast
+      ring
+    rw [hcast, Complex.norm_real, Real.norm_eq_abs,
+      abs_of_pos (by norm_num : (0 : ℝ) < 1 / 2)]
+  have htri : ‖(1 / 2 : ℂ) + Complex.I * z‖ ≤
+      ‖(1 / 2 : ℂ)‖ + ‖Complex.I * z‖ := norm_add_le _ _
+  rw [hhalf, hI] at htri
+  linarith
+
+theorem shift_mem_ball125_of_mem_ball12 {z : ℂ}
+    (hz : z ∈ Metric.closedBall (0 : ℂ) 12) :
+    ((1 / 2 : ℂ) + Complex.I * z) ∈ Metric.closedBall (0 : ℂ) (25 / 2) := by
+  rw [Metric.mem_closedBall, dist_zero_right]
+  exact shift_norm_le_of_mem_ball12 hz
+
+def shift_invariance_12_gap : Prop :=
+  ∀ z ∈ Metric.closedBall (0 : ℂ) 12,
+    ((1 / 2 : ℂ) + Complex.I * z) ∈ Metric.closedBall (0 : ℂ) 12
+
+def shift_invariance_12_open : Prop :=
+  shift_invariance_12_gap
+
+end Door3TopEdgeStrip
