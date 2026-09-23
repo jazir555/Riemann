@@ -2256,3 +2256,65 @@ theorem narrow_R19_deriv_keeps_67200 (hBall : premBall_R19) (w : ℂ)
   premDeriv_R19_of_ball hBall w hw
 
 end Door3PremiseTier
+
+/-! ## 24. R20 premise-tier narrow attempt (append-only wave).
+
+Grep record (verified before writing via `default.grep`):
+* R19 premise block in this file: `premTier_R19 :641`, `premBall_R19 :643`,
+  `premTier_R19_mismatch :647`, `premDeriv_R19_of_ball :649`,
+  `premSphere_R19_of_ball :661` (`R19.mem`, tier `0.07`, value `67200`).
+* R20 premise block in this file: `premTier_R20 :668`, `premBall_R20 :670`,
+  `premTier_R20_mismatch :674`, `premDeriv_R20_of_ball :676`,
+  `premSphere_R20_of_ball :688` (`R20.mem`, tier `0.05`, value `67200`).
+* R19 narrow block in this file: `## 23. R19 premise-tier narrow attempt`
+  `:2201-2258` with `narrow_R19_closedForm_keeps :2240`,
+  `narrow_R19_residual_gap :2244`,
+  `narrow_R19_residual_is_mismatch :2248`,
+  `narrow_R19_deriv_keeps_67200 :2253`; R19 keeps `67200`, no chain.
+* R02 narrow block in this file: `## 6. R02 premise-tier narrowing via banked AO sups`
+  `:1241-1316` with `narrow_R02_deriv_162p96_of_banked :1274`,
+  `narrow_R02_deriv_163_of_banked :1281`,
+  `narrow_R02_sphere_40p74_of_banked :1288`, closed form
+  `40.74 / 0.25 = 162.96` `:1305`, residual `0.07 < 162.96` `:1309`.
+* Banked AO R20 chain search in `central_cover_assembly.lean` (no local chain):
+  pattern `AO_R20|AO_gamma_upper_disc_R20|R20_deriv|R20_uniform|R20.*sphere|R20.*residual|R20_gamma|R20_zeta`
+  returns no files; pattern `namespace AO_` returns only
+  `namespace AO_R02DiscUpdate :9968` (R02 chain only, no `AO_R20` hit);
+  pattern `theorem R20_|def R20_` returns only rect guards
+  `R20_x0/x1/y0/y1 :3252-3255`, `R20_width_eq :3257`,
+  `R20_strip_lo/hi :3260-3261`, `R20_dx_eq :3263`, `R20_dy_eq :3267`,
+  `R20_radius_eq :3271`, `R20_radius_lt :3276`, `R20_mem_gridFine :3279`,
+  `R20_leaf_obligations :3289`, `R20_fencing_of_bounds :3293`,
+  `R20_lowerBound_of_bounds :3297`, `R20_zeroFree_of_bounds :3302`,
+  `R20_nonvanishing_of_bounds :3307`, `R20_H_instance :3318`
+  (tier guards, not an AO chain);
+  pattern `narrow_R20_` in this file returns no files
+  (no prior R20 narrow).
+* Result below: no R20 mirror of the R02 shape exists locally, so R20 keeps
+  value `67200` (`16800 / 0.25`) with exact residual gap `0.05 < 67200`;
+  tier `0.05` stays open by the same mismatch as `premTier_R20_mismatch :674`.
+-/
+
+namespace Door3PremiseTier
+
+/-- R20 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no banked narrow chain exists locally. -/
+theorem narrow_R20_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R20 residual gap at the kept value: tier `0.05` stays open below `67200`. -/
+theorem narrow_R20_residual_gap : (0.05 : ℝ) < 67200 := by
+  norm_num
+
+/-- R20 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R20_residual_is_mismatch : (0.05 : ℝ) < 67200 :=
+  tier05_lt_67200
+
+/-- R20 conditional deriv transfer still lands at `67200` from the ball premise
+(re-export for the narrow record). -/
+theorem narrow_R20_deriv_keeps_67200 (hBall : premBall_R20) (w : ℂ)
+    (hw : CentralCoverAssembly.R20.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  premDeriv_R20_of_ball hBall w hw
+
+end Door3PremiseTier
