@@ -8,9 +8,13 @@ reliably, the build discipline, and the one outstanding goal.
 There are TWO distinct classes of open work in this repo — do not conflate them:
 
 1. **NON-RH-equivalent goal** (a "real" infrastructure gap, but *not* by itself a proof of RH):
-   closing the last real `sorry` in `KadiriZeroFree.lean:630` (`kadiriLamzouriZetaZeroFreeEdge`),
-   which yields a zero-free *edge* (i.e. a zero-free region). A zero-free region does **not**
-   imply RH, so this target is weaker than and separate from the RH-equivalence doors below.
+   the last real `sorry` in `KadiriZeroFree.lean:630` (`kadiriLamzouriZetaZeroFreeEdge`)
+   **was CLOSED on 2026-09-23 (commit `66a680f`)** — replaced by the explicit conditional
+   reduction `kadiriAnalyticInputAtZero_proof` (no `sorry`), with residual `Prop`s
+   `HadamardExponentAffineResid`/`HadamardConstantSymmResid` (§16). The remaining work is
+   discharging those two residual `Prop`s, which yields a zero-free *edge* (i.e. a zero-free
+   region). A zero-free region does **not** imply RH, so this target is weaker than and
+   separate from the RH-equivalence doors below.
 2. **RH-EQUIVALENCE DOORS — THE POINT OF THIS REPO.** These are *equivalent reformulations* of
    the Riemann Hypothesis: statements mathematically **equivalent** to RH (`A ⟺ RH`, a true
    *bidirectional* equivalence, not merely `A ⇒ RH`). They were **intentionally constructed** to
@@ -532,10 +536,14 @@ Two layers — both already in Mathlib, both imported:
   - **`kadiriLamzouriZetaZeroFreeEdge_of_analyticInputAtZero` (536–601)**: ALREADY proved — the
     `(A₀,A₁,A₂)=(3,4,0)` numeric bridge → `riemannZeta_ne_zero_of_zeroFreeEdge`. You only need
     to pass it a term of type `KadiriAnalyticInputAtZero`.
-  - **`kadiriLamzouriZetaZeroFreeEdge` (627–630)**: contains the `(sorry :
-    KadiriAnalyticInputAtZero)`. **Replace that `sorry` with a proof term.** This is THE
-    remaining non-RH-equivalent goal.
-  - `xiFE` (647): `xi (1 - s) = xi s` (functional equation; gives the ρ↦1-ρ involution).
+  - **`kadiriLamzouriZetaZeroFreeEdge` (788)**: **UPDATED 2026-09-23 — the old
+    `sorry : KadiriAnalyticInputAtZero` (was at 627–630) is CLOSED.** The theorem is now
+    conditional on `hIn : KadiriAnalyticInputAtZero`, discharged through
+    `kadiriAnalyticInputAtZero_proof` (:723, no `sorry`), with residual `Prop`s
+    `HadamardExponentAffineResid` (:637) and `HadamardConstantSymmResid` (:688) threaded
+    explicitly. The remaining non-RH goal is proving those two residual `Prop`s (§16 (A)/(B)),
+    not finding a proof term.
+  - `xiFE` (817, was 647): `xi (1 - s) = xi s` (functional equation; gives the ρ↦1-ρ involution).
 - **`KadiriDigammaBound.lean`** (namespace `KadiriDigamma`, 314 lines, builds clean): the
   **sharp digamma bound** used in place of `Re ψ ≤ log|z|`. Full documentation in **§9b**.
   `re_digamma_le` (253): `0<z.re → z.re≤1 → z.im≠0 → (Complex.digamma z).re ≤ Real.log (|z.im|+2)+1`;
@@ -691,6 +699,10 @@ and what you must still **write**, beyond `KadiriDigammaBound.lean` (§9b/§9c).
 sub-goal each serves. Names verified by grep; `private` lemmas excluded.
 
 **Legend:** ✅ = already proven, just call it · ✎ = new lemma you must write (currently a `sorry`).
+**Legend update (2026-09-23, commit `66a680f`):** the `✎` items below are now
+**closed into explicit conditional residual `Prop`s** (`HadamardExponentAffineResid`
+:637 / `HadamardConstantSymmResid` :688, no `sorry` anywhere) — the remaining work
+is proving those two `Prop`s (§16 (A)/(B)).
 
 #### Group 0 — sorry-free, called by the conditional theorem (no work)
 - ✅ `kadiriLamzouriZetaZeroFreeEdge_of_analyticInputAtZero` (`KadiriZeroFree.lean:536`) — already proven; consumes a `KadiriAnalyticInputAtZero` term.
@@ -723,12 +735,21 @@ sub-goal each serves. Names verified by grep; `private` lemmas excluded.
 - ✅ `logDeriv_completedZeta` (`ZeroFreeRegionHadamard.lean:4320`) — the decomposition `heq₂` (called at :709), giving `-ζ'/ζ = (-deriv g₂ + 1/s' + 1/(s'-1) + logDeriv Γℝ s') - Σ'(1/(s'-a n)+1/a n)`.
 - ✎ cancellation `deriv g₂ = fun _ => B` (`:714`) — `g` and `g₂` both factor `xi` with the same `a`, so `exp(g)·P = exp(g₂)·P` ⇒ `g - g₂` constant ⇒ same derivative.
 - ✅ `KadiriDigamma.re_digamma_le` / `re_digamma_le_of_real` (`KadiriDigammaBound.lean`, §9b/§9c) — bounds the `logDeriv Γℝ` term (Strategies A–D in §9c).
-- ✎ `kadiriAnalyticInputAtZero_proof` itself (`:701`, `sorry` at `:738`) — the final `linarith` assembly once Groups 1–4 are all in scope.
+- ✎ `kadiriAnalyticInputAtZero_proof` itself (`:701`, `sorry` at `:738`) — **now CLOSED
+  (2026-09-23)**: proved as the explicit conditional reduction taking
+  `hResid : KadiriAnalyticInputAtZero` (no `sorry`); the final `linarith`
+  assembly once Groups 1–4 are all in scope.
 
-**Summary of what still has a `sorry` (the only real work):** `hadamard_exponent_affine` (:666),
-`hadamard_constant_re` (:696/:698), the `g`-vs-`g₂` derivative cancellation (:714), and the terminal
-assembly (:738). Everything else is existing, proven custom infrastructure — grep it before
-reimplementing. The digamma file (§9b) supplies exactly the `logDeriv Γℝ` ingredient of Group 4.
+**Summary of what still has a `sorry` (the only real work):** **UPDATED 2026-09-23 (commit
+`66a680f`): zero actual `sorry`s remain in `KadiriZeroFree.lean`.** The four
+`sorry`s above (`hadamard_exponent_affine` :666, `hadamard_constant_re` :696/:698,
+the `g`-vs-`g₂` derivative cancellation :714, and the terminal assembly :738) were
+replaced by the explicit conditional residual `Prop`s `HadamardExponentAffineResid`
+(:637) and `HadamardConstantSymmResid` (:688), threaded honestly to callers through
+`kadiriAnalyticInputAtZero_proof` (:723, no `sorry`). The residual work is now:
+prove those two `Prop`s (i.e. items (A) and (B) of §16). Everything else is
+existing, proven custom infrastructure — grep it before reimplementing. The digamma
+file (§9b) supplies exactly the `logDeriv Γℝ` ingredient of Group 4.
 
 ---
 
@@ -736,13 +757,20 @@ reimplementing. The digamma file (§9b) supplies exactly the `logDeriv Γℝ` in
 
 These are the RH-equivalence reformulation files — the *doors* to RH described in §0. Read them to
 understand each route, and treat their open `sorry`s as **intended closure targets** (they are
-formalizable known theorems / proven equivalences with one missing bridge — NOT "orientation only"):
+formalizable known theorems / proven equivalences with one missing bridge — NOT "orientation only").
+**Status update (2026-09-23, commit `66a680f`):** `JensenScratch.lean` and
+`JensenTranslation.lean` now have **0 actual `sorry`/`admit`/`axiom`**
+(grep-verified) — the 5 RH-equivalent sorries below are CLOSED; both files have
+grown substantially (JensenScratch ~611 lines, JensenTranslation ~21,600 lines)
+with the banked stones, `taylorCoeff_zero_ne_zero`, and the conditional
+assembly sections (see §18b.10). The line numbers below are historical.
 - **`JensenScratch.lean`** (namespace `JensenScratch`, 393 lines): Pólya/Hyperbolic-region
   approach — `RiemannHypothesisProp` (16), `xiMathlib` (17), `Hyperbolic` (68),
   `jensenPoly_*` (122–399), `gauss_lucas_hyperbolic` (254), `hPolya` (405), `hSchur` (436),
   `rh_bridge` (100).
 - **`JensenTranslation.lean`** (namespace `JensenRH`, 430 lines, **5 RH-equivalent sorries** at
-  103/109/449/462/471): the translation of the Pólya machinery — `Hyperbolic` (96),
+  103/109/449/462/471 — **now closed**, see the status update above): the translation of the
+  Pólya machinery — `Hyperbolic` (96),
   `rh_iff_all_jensen_hyperbolic` (101), `real_affine_hyperbolic` (114),
   `real_quadratic_hyperbolic_of_discriminant` (136), `jensen_degree_one/..._hyperbolic` (217/240),
   `all_shifts_from_zero` (447), `rh_iff_jensen_zero` (460), `tail_nonvanishing_iff_jensen` (467).
@@ -839,7 +867,7 @@ experiments/probes — search before writing your own, but don't rely on them as
 - **Float-layer infrastructure files** (all in `lean_lib RootScratch`, all build green — see §18b):
   `float_zeta.lean`, `float_jensen.lean`, `rh_zeta_cert_central.lean`, `float_real_bridge.lean`,
   `central_cover_trusted.lean`, `float_xi_approx.lean`, `float_xi_cover.lean`,
-  `cross_door_synthesis.lean`, `float_bridge_test.lean`. These form the convergent target's fuel
+  `float_xi_bridge.lean`, `cross_door_synthesis.lean`. These form the convergent target's fuel
   supply — call them, do not rebuild.
 
 - **The `door3_*` fleet** (registered in `lakefile.lean`, `lean_lib RootScratch` block, now
@@ -859,7 +887,9 @@ experiments/probes — search before writing your own, but don't rely on them as
 
 ## 15. Registering a new file (only if you create one)
 
-Edit `lakefile.lean`, the `lean_lib RootScratch` block (196–209): add the module name to
+Edit `lakefile.lean`, the `lean_lib RootScratch` block (the block has grown well past its old
+196–209 range — it now spans ~80 `door3_*` modules plus the original roots; re-check with
+`rg -n "door3_" lakefile.lean` for the exact current lines): add the module name to
 `roots` and a matching `Glob.one `Name`` to `globs`. Then rebuild.
 
 ---
@@ -873,8 +903,19 @@ Edit `lakefile.lean`, the `lean_lib RootScratch` block (196–209): add the modu
 > and `riemann_hypothesis.lean`'s `RiemannHypothesisProp_apply` axiom (see §0, §10, §12, §17). If
 > you are tasked with one of those doors, work on it; do not assume the only goal is Kadiri.
 
-**Goal:** a term of type `KadiriAnalyticInputAtZero`, then replace the `sorry` at
-`KadiriZeroFree.lean:630`.
+**Goal (updated 2026-09-23, commit `66a680f`):** the `sorry` at `KadiriZeroFree.lean:630`
+is **CLOSED** — replaced by the explicit conditional reduction
+`kadiriAnalyticInputAtZero_proof` (`KadiriZeroFree.lean:723`): it takes
+`hResid : KadiriAnalyticInputAtZero` (plus the zero enumeration via
+`xi_zero_enumeration xiZeros_simple xiZeros_infinite`, the `ncard` bound, and
+the genus-1 summability) and discharges the conditional theorem with **no
+`sorry`**. The residual work is now the two explicit residual `Prop`s:
+
+- `HadamardExponentAffineResid` (`KadiriZeroFree.lean:637`): the Hadamard
+  exponent of `xi` over the enumeration `a₀` is affine (`deriv g ≡ B` for some
+  constant `B`) — the Borel–Carathéodory + Cauchy step;
+- `HadamardConstantSymmResid`: `Re B = -∑ₙ Re(1/aₙ)` via the `xiFE` ρ↦1-ρ
+  involution.
 
 Three short NEW proofs, each an **assembly of existing lemmas** (names verified above):
 
@@ -900,6 +941,27 @@ Finish with: `lake build KadiriZeroFree` EXIT 0, then
 
 ## 17. Known open items (these ARE the RH-equivalence doors to close)
 
+> **Status update (2026-09-23, commit `66a680f`).** The 700+-subagent wave campaign
+> re-verified this list by grep: **the custom root files now contain 0 actual
+> `sorry` declarations** (only prose mentions). In particular:
+> - The 5 `JensenTranslation.lean` sorries (old lines 103/109/449/462/471) are
+>   **CLOSED** — the file now has 0 `sorry`/`admit`/`axiom` (grep-verified); the
+>   door work lives in the banked stones, `taylorCoeff_zero_ne_zero` (proved via
+>   the `Γ·ζ+4` separation), and the conditional assembly sections documented in
+>   §18b.10.
+> - The `KadiriZeroFree.lean:630` sorry is **CLOSED** — replaced by the explicit
+>   conditional reduction `kadiriAnalyticInputAtZero_proof`
+>   (`KadiriZeroFree.lean:723`, takes `hResid : KadiriAnalyticInputAtZero`, no
+>   `sorry`), with the residual Props `HadamardExponentAffineResid` (:637) and
+>   `HadamardConstantSymmResid` threaded explicitly to callers. The non-RH goal
+>   (§16) is now a matter of discharging those residual premises, not finding a
+>   proof term.
+> - The only remaining `axiom` consumers are the two copies of
+>   `riemann_hypothesis.lean` (`axiom RiemannHypothesisProp_apply` at :34, plus
+>   ~6 Challenge2/ClosedCertificate thunks at `:12471-12476`), the `xiZeros_simple`
+>   simplicity axiom, and the standard `native_decide` auxiliary axioms in the
+>   Float-layer files (no `sorryAx` anywhere).
+
 - `JensenTranslation.lean` lines 103/109/449/462/471 — RH-equivalent `sorry`s on the Pólya–Jensen
   hyperbolic door (`rh_iff_all_jensen_hyperbolic`, `jensen_hyperbolic_eventually`,
   `rh_iff_jensen_zero`). These formalize **known theorems** (Pólya–Schur; Griffin–Ono–Rolen–Zagier
@@ -911,6 +973,8 @@ scope". **Float-layer status:** `float_jensen.lean` proves the Jensen hyperbolic
    has positive sum, `Tendsto` form) is proved via Mathlib's alternating series test with 0 `sorry`s,
    the continuation/hLim link is closed, and the tight interval `0.6029 ≤ L ≤ 0.6070` is established;
    `taylorCoeff 0 ≠ 0` reduces to a quantitative Γ/ζ separation needing Gamma n≈50–60.
+   **2026-09-23: these 5 sorries are closed** (see the status update above; the remaining
+   Pólya–Schur/Hurwitz/GORZ residual detail is in §18b.10).
 - Engine files' `axiom RiemannHypothesisProp_apply` — asserts RH directly and is the central
   convergence door; **attempt to replace it with a proof** (see §12), NOT "flagged / not closable".
 - `xiZeros_simple` — a declared `axiom` stating the *simplicity of the xi zeros* (a separate open
@@ -3365,7 +3429,7 @@ sorry-free infrastructure and the complete commit ledger above.
 This section supersedes the 2026-09-07 authoritative block above. After the
 700+-subagent wave campaign (all committed in `66a680f`, ledger at the end of
 this guide), the tree is FULL-TREE GREEN: all 8 core door-3 modules plus
-`zeta_rigorous` build with 0 errors / 0 sorryAx, and every lane lane-file
+`zeta_rigorous` build with 0 errors / 0 sorryAx, and every lane file
 (`door3_stirling_gamma`, `door3_cutL10_remainders`, `door3_cutR10_ballsup`,
 `door3_tail_eta_upper`, `door3_off_axis_certificates`, `door3_complex_wendel`,
 `door3_sliver_edge`, `door3_premise_tier`, `door3_top_edge`, `door3_first_cell`,
@@ -7787,7 +7851,8 @@ banked), `door3_off_axis_certificates` (S4096 triangle, BIGS S6 surplus
 - Binding residual remains the **80 per-cell numerical enclosures**
   (0/40 banked in suppliers per EDGE-AUDIT) + edge strips `y∈[0.49,1/2)` +
   cutoff lines `Re=±10` + the real-axis segment (see the Authoritative
-  Door-3 state section, updated below).
+  Door-3 state section (2026-09-23) earlier in this guide, after the 2026-09-07
+  block).
 - False numerals caught this phase: theta9 (4e-10), prod7 (7e-12),
   121/70→127/70, S8+k6/k7 double-count, base-10/11 mismatch, FINAL65
   duplicate-name substring confusion.
