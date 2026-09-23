@@ -1801,3 +1801,56 @@ theorem narrow_R11_deriv_keeps_67200 (hBall : premBall_R11) (w : ℂ)
   premDeriv_R11_of_ball hBall w hw
 
 end Door3PremiseTier
+
+/-! ## 16. R12 premise-tier narrow attempt (append-only wave).
+
+Grep record (verified before writing via `default.grep`):
+* R11 narrow block in this file: `## 15. R11 premise-tier narrow attempt`
+  `:1749-1803` with `narrow_R11_closedForm_keeps :1785`,
+  `narrow_R11_residual_gap :1789`,
+  `narrow_R11_residual_is_mismatch :1793`,
+  `narrow_R11_deriv_keeps_67200 :1798`; R11 keeps `67200`, no chain.
+* R02 narrow block in this file: `## 6. R02 premise-tier narrowing via banked AO sups`
+  `:1241-1316` with `narrow_R02_deriv_162p96_of_banked :1274`,
+  `narrow_R02_deriv_163_of_banked :1281`,
+  `narrow_R02_sphere_40p74_of_banked :1288`, closed form
+  `40.74 / 0.25 = 162.96` `:1305`, residual `0.07 < 162.96` `:1309`.
+* Banked AO R12 chain search in `central_cover_assembly.lean` (no local chain):
+  pattern `AO_R12|AO_gamma_upper_disc_R12|R12_deriv_bound|R12_uniform`
+  returns no files; pattern `namespace AO_` returns only
+  `namespace AO_R02DiscUpdate :9968` (R02 chain only, no `AO_R12` hit);
+  pattern `R12_deriv|R12_uniform|R12.*sphere|R12.*gamma|gamma.*R12|R12.*zeta|zeta.*R12`
+  returns only `R12_deriv_residual :18160` lines `:18160-18168`
+  (leaf residual, not a banked AO narrow chain); pattern
+  `R12_leaf|R12_strip|R12_center|R12.*obligation` returns
+  `R12_strip_lo/hi :2588-2589`, `R12_leaf_obligations :2617`,
+  `R12_H_instance :2646`, `R12_center_residual_tenth :18153`,
+  `R12_deriv_residual :18160` (tier guards/residuals, not an AO chain).
+* Result below: no R12 mirror of the R02 shape exists locally, so R12 keeps
+  value `67200` (`16800 / 0.25`) with exact residual gap `0.07 < 67200`;
+  tier `0.07` stays open by the same mismatch as `premTier_R12_mismatch :458`.
+-/
+
+namespace Door3PremiseTier
+
+/-- R12 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no banked narrow chain exists locally. -/
+theorem narrow_R12_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R12 residual gap at the kept value: tier `0.07` stays open below `67200`. -/
+theorem narrow_R12_residual_gap : (0.07 : ℝ) < 67200 := by
+  norm_num
+
+/-- R12 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R12_residual_is_mismatch : (0.07 : ℝ) < 67200 :=
+  tier07_lt_67200
+
+/-- R12 conditional deriv transfer still lands at `67200` from the ball premise
+(re-export for the narrow record). -/
+theorem narrow_R12_deriv_keeps_67200 (hBall : premBall_R12) (w : ℂ)
+    (hw : CentralCoverAssembly.R12.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  premDeriv_R12_of_ball hBall w hw
+
+end Door3PremiseTier
