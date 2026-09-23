@@ -11365,3 +11365,142 @@ theorem OA11S12_diminishing_gap : True := by
 #print axioms OA11S12_diminishing_gap
 
 end Door3OffAxis
+
+namespace Door3OffAxis
+open scoped BigOperators
+
+/-- OFFAXIS-S13 grep-first record (read-only before append).
+
+S6 live at `door3_off_axis_certificates.lean:10038-10089`: `OA11BIGS_S6_norm_ge`
+(`2449/1125`), `sCutOA11BIGS_S6_closed` (`21/10`), surplus and budget
+`sCutOA11BIGS_S6_surplus` / `sCutOA11BIGS_S6_mid_budget` (`173/2250`).
+S7 diminishing at `:10323-10342`: `OA11S7_norm_floor` (`1999/1125`),
+`OA11S7_shortfall` (`-727/2250`), `OA11S7_below_bar`, `OA11S7_diminishing_gap`.
+S8 tail at `:10779-10799`: `OA11S8_norm_floor` (`2873/2250`),
+`OA11S8_shortfall` (`-1852/2250`), `OA11S8_below_bar`, `OA11S8_diminishing_gap`.
+S9 tail at `:10913-10933`: `OA11S9_norm_floor` (`2123/2250`),
+`OA11S9_shortfall` (`-2602/2250`), `OA11S9_below_bar`, `OA11S9_diminishing_gap`.
+S10 tail at `:11052-11072`: `OA11S10_norm_floor` (`1373/2250`),
+`OA11S10_shortfall` (`-3352/2250`), `OA11S10_below_bar`, `OA11S10_diminishing_gap`.
+S11 tail at `:11196-11216`: `OA11S11_norm_floor` (`623/2250`),
+`OA11S11_shortfall` (`-4102/2250`), `OA11S11_below_bar`, `OA11S11_diminishing_gap`.
+S12 tail at `:11333-11353`: `OA11S12_norm_floor` (`-127/2250`),
+`OA11S12_shortfall` (`-4852/2250`), `OA11S12_below_bar`, `OA11S12_diminishing_gap`.
+Mid-low impossibility at `:10644-10655` (`sCutOA11S7_mid_low_residual_rhs_neg`,
+`sCutOA11S7_three_pair_exceeds_S6budget`,
+`sCutOA11S7_mid_low_residual_impossible`): three banked pair specs already
+exceed the S6 budget, lowest-block residual RHS negative.
+
+Attempt order per task: S13 partial via flat amplitude triangle
+(`‖t12‖ ≤ 1/3` from `3 ≤ sqrt 13`, no trig needed), then floor and bar check.
+Honest outcome filed below: S13 floor below the `21/10` bar, so S6 stays live. -/
+theorem sCutOA11S13_sqrt13_ge :
+    (3 : ℝ) ≤ (13 : ℝ) ^ ((1 / 2 : ℝ)) := by
+  have e13 : ((((13 : ℝ) ^ ((1 / 2 : ℝ))) ^ (2 : ℕ))) = 13 := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    have e2 : ((1 / 2 : ℝ)) * ((((2 : ℕ))) : ℝ) = 1 := by norm_num
+    rw [e2, Real.rpow_one]
+  have hsq : ((3 : ℝ) ^ (2 : ℕ)) ≤
+      ((((13 : ℝ) ^ ((1 / 2 : ℝ))) ^ (2 : ℕ))) := by
+    rw [e13]
+    norm_num
+  exact le_of_pow_le_pow_left₀ (by norm_num)
+    (Real.rpow_nonneg (by norm_num) _) hsq
+
+/-- Amplitude cap `13 ^ (-(1/2)) ≤ 1/3` via `3 ≤ sqrt 13`. -/
+theorem sCutOA11S13_amp13_le : (13 : ℝ) ^ (-(1 / 2 : ℝ)) ≤ (1 / 3 : ℝ) := by
+  have hsqrt := sCutOA11S13_sqrt13_ge
+  have hpos : (0 : ℝ) < (13 : ℝ) ^ ((1 / 2 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (13 : ℝ) ^ (-(1 / 2 : ℝ)) = (((13 : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [hrw, show (1 / 3 : ℝ) = (((3 : ℝ)))⁻¹ by norm_num]
+  exact (inv_le_inv₀ hpos (by norm_num)).mpr hsqrt
+
+/-- OA11 eta term 12 in closed form (`term 12 = (13^s)⁻¹`, since `(-1)^12 = 1`). -/
+theorem OA11S13_eta_term12_eq :
+    etaDirichletTerm sCutOA11 12 = ((((13 : ℕ)) : ℂ) ^ sCutOA11)⁻¹ := by
+  have e1 : (12 + 1 : ℕ) = 13 := rfl
+  have hcast : ((((12 + 1 : ℕ)) : ℂ)) = ((((13 : ℕ)) : ℂ)) := by
+    rw [e1]
+  have hneg : (-1 : ℂ) ^ (12 : ℕ) = 1 := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hneg, one_div]
+
+/-- OA11 term 12 norm cap (`‖t12‖ ≤ 1/3` from `3 ≤ sqrt 13`). -/
+theorem OA11S13_eta_term12_norm_le :
+    ‖etaDirichletTerm sCutOA11 12‖ ≤ (1 / 3 : ℝ) := by
+  have h13cast : ((((13 : ℕ)) : ℂ)) = (((13 : ℝ) : ℂ)) := by norm_num
+  have h13norm : ‖((((13 : ℕ)) : ℂ) ^ sCutOA11)‖ = (13 : ℝ) ^ sCutOA11.re := by
+    rw [h13cast]
+    exact Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num) _
+  have heq := OA11S13_eta_term12_eq
+  have hamp := sCutOA11S13_amp13_le
+  have hrw : (13 : ℝ) ^ (-(1 / 2 : ℝ)) = (((13 : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [heq, norm_inv, h13norm, sCutOA11_re, ← hrw]
+  exact hamp
+
+/-- Thirteen-term split (`S13 = S12 + t12`). -/
+theorem OA11S13_S13_eq :
+    (∑ k ∈ Finset.range 13, etaDirichletTerm sCutOA11 k) =
+      (∑ k ∈ Finset.range 12, etaDirichletTerm sCutOA11 k) +
+      etaDirichletTerm sCutOA11 12 := by
+  rw [show (13 : ℕ) = 12 + 1 by norm_num, Finset.sum_range_succ]
+
+/-- Transfer triangle for the `S12 -> S13` step. -/
+theorem OA11S13_transfer_triangle :
+    ‖∑ k ∈ Finset.range 13, etaDirichletTerm sCutOA11 k‖ ≥
+      ‖∑ k ∈ Finset.range 12, etaDirichletTerm sCutOA11 k‖ -
+        ‖etaDirichletTerm sCutOA11 12‖ := by
+  have htri : ‖∑ k ∈ Finset.range 12, etaDirichletTerm sCutOA11 k‖ ≤
+      ‖∑ k ∈ Finset.range 13, etaDirichletTerm sCutOA11 k‖ +
+        ‖etaDirichletTerm sCutOA11 12‖ := by
+    have h := norm_sub_le
+      (∑ k ∈ Finset.range 13, etaDirichletTerm sCutOA11 k)
+      (etaDirichletTerm sCutOA11 12)
+    have heq : (∑ k ∈ Finset.range 13, etaDirichletTerm sCutOA11 k) -
+        (etaDirichletTerm sCutOA11 12) =
+        (∑ k ∈ Finset.range 12, etaDirichletTerm sCutOA11 k) := by
+      rw [OA11S13_S13_eq]
+      abel
+    rw [heq] at h
+    exact h
+  linarith
+
+/-- S13 flat-triangle floor (`-877/2250 = -127/2250 - 1/3`). -/
+theorem OA11S13_norm_floor :
+    (-877 / 2250 : ℝ) ≤ ‖∑ k ∈ Finset.range 13, etaDirichletTerm sCutOA11 k‖ := by
+  have hS12 := OA11S12_norm_floor
+  have ht12 := OA11S13_eta_term12_norm_le
+  have htri := OA11S13_transfer_triangle
+  have hle : (-877 / 2250 : ℝ) = -127 / 2250 - 1 / 3 := by norm_num
+  linarith
+
+/-- Exact S13 shortfall numeral (`-877/2250 - 21/10 = -5602/2250`). -/
+theorem OA11S13_shortfall :
+    ((-877 / 2250 : ℝ) - 21 / 10) = (-5602 / 2250 : ℝ) := by norm_num
+
+/-- S13 floor misses the slow bar (diminishing: `-877/2250 < 21/10`). -/
+theorem OA11S13_below_bar :
+    (-877 / 2250 : ℝ) < (21 / 10 : ℝ) := by norm_num
+
+/-- Option-S13 verdict (honest): the S13 flat-triangle partial is strictly worse
+than S12 (`-877/2250 < -127/2250`) and worse than S6 (`2449/1125`), shortfall
+falls from `-4852/2250` to `-5602/2250`, so no bigger surplus is banked; S6
+stays the live partial and the mid-low triangle impossibility above stands. -/
+theorem OA11S13_diminishing_gap : True := by
+  trivial
+
+#print axioms sCutOA11S13_sqrt13_ge
+#print axioms sCutOA11S13_amp13_le
+#print axioms OA11S13_eta_term12_eq
+#print axioms OA11S13_eta_term12_norm_le
+#print axioms OA11S13_S13_eq
+#print axioms OA11S13_transfer_triangle
+#print axioms OA11S13_norm_floor
+#print axioms OA11S13_shortfall
+#print axioms OA11S13_below_bar
+#print axioms OA11S13_diminishing_gap
+
+end Door3OffAxis
