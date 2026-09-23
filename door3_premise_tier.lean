@@ -2380,3 +2380,63 @@ theorem narrow_R21_deriv_keeps_67200 (hBall : premBall_R21) (w : ℂ)
   premDeriv_R21_of_ball hBall w hw
 
 end Door3PremiseTier
+
+/-! ## 26. R22 premise-tier narrow attempt (append-only wave).
+
+Grep record (verified before writing via `default.grep`):
+* R21 premise block in this file: `premTier_R21 :697`, `premBall_R21 :699`,
+  `premTier_R21_mismatch :703`, `premDeriv_R21_of_ball :705`,
+  `premSphere_R21_of_ball :717` (`R21.mem`, tier `0.05`, value `67200`).
+* R22 premise block in this file: `premTier_R22 :724`, `premBall_R22 :726`,
+  `premTier_R22_mismatch :730`, `premDeriv_R22_of_ball :732`,
+  `premSphere_R22_of_ball :744` (`R22.mem`, tier `0.07`, value `67200`).
+* R21 narrow block in this file: `## 25. R21 premise-tier narrow attempt`
+  `:2322-2382` with `narrow_R21_closedForm_keeps :2364`,
+  `narrow_R21_residual_gap :2368`,
+  `narrow_R21_residual_is_mismatch :2372`,
+  `narrow_R21_deriv_keeps_67200 :2377`; R21 keeps `67200`, no chain.
+* R02 narrow block in this file: `## 6. R02 premise-tier narrowing via banked AO sups`
+  `:1241-1316` with `narrow_R02_deriv_162p96_of_banked :1274`,
+  `narrow_R02_deriv_163_of_banked :1281`,
+  `narrow_R02_sphere_40p74_of_banked :1288`, closed form
+  `40.74 / 0.25 = 162.96` `:1305`, residual `0.07 < 162.96` `:1309`.
+* Banked AO R22 chain search in `central_cover_assembly.lean` (no local chain):
+  pattern `AO_R22|R22_deriv|R22_uniform|R22_gamma|R22_zeta|gamma_upper_disc_R22`
+  returns no files; pattern `namespace AO_` returns only
+  `namespace AO_R02DiscUpdate :9968` (R02 chain only, no `AO_R22` hit);
+  pattern `R22` returns only rect guards
+  `R22 :3419`, `R22_x0/x1/y0/y1 :3422-3425`,
+  `R22_strip_lo/hi :3430-3431`, `R22_radius_eq :3441`,
+  `R22_radius_lt :3446`, `R22_mem_gridFine :3449`,
+  `R22_leaf_obligations :3459`, `R22_fencing_of_bounds :3463`
+  (tier guards, not an AO chain);
+  pattern `narrow_R22_` in this file returns no files
+  (no prior R22 narrow).
+* Result below: no R22 mirror of the R02 shape exists locally, so R22 keeps
+  value `67200` (`16800 / 0.25`) with exact residual gap `0.07 < 67200`;
+  tier `0.07` stays open by the same mismatch as `premTier_R22_mismatch :730`.
+-/
+
+namespace Door3PremiseTier
+
+/-- R22 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no banked narrow chain exists locally. -/
+theorem narrow_R22_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R22 residual gap at the kept value: tier `0.07` stays open below `67200`. -/
+theorem narrow_R22_residual_gap : (0.07 : ℝ) < 67200 := by
+  norm_num
+
+/-- R22 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R22_residual_is_mismatch : (0.07 : ℝ) < 67200 :=
+  tier07_lt_67200
+
+/-- R22 conditional deriv transfer still lands at `67200` from the ball premise
+(re-export for the narrow record). -/
+theorem narrow_R22_deriv_keeps_67200 (hBall : premBall_R22) (w : ℂ)
+    (hw : CentralCoverAssembly.R22.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  premDeriv_R22_of_ball hBall w hw
+
+end Door3PremiseTier
