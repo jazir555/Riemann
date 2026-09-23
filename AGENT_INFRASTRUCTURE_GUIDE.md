@@ -6164,6 +6164,10 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 TRIPLE-R02M20K37 (backgrounds `ses_f3466bdb1`,
+  `ses_f3467df7e`, `ses_f34678345`, proof-only, grep-clean): R02 sup
+  mirror + cap verdicts + residual; M20 tail 17.38 → K0 19.762
+  reverses further; k37 destructive on quadratic route (cap 2.01).
 - 2026-09-22 CUTZETA+M34+TOPGAMMA (backgrounds `ses_f346759f4`,
   `ses_f34669d5`, `ses_f34678341`, proof-only, grep-clean): zeta
   edge rechains closed (≤3/≤2) + six-gap filed; M34 exact (sqrt
