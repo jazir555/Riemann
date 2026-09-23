@@ -6164,6 +6164,9 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 TIER-R07 (background `ses_f3465d718`, proof-only,
+  grep-clean, tier-only commit): no R07 AO narrow chain; keeps
+  67200, gap filed honestly.
 - 2026-09-22 OFFAXIS-S8 (background `ses_f3467df80`, proof-only,
   grep-clean, offaxis-only commit): S8 diminishing verdict (floor
   below bar, triangle transfer).
