@@ -6164,6 +6164,9 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 OFFAXIS-S8 (background `ses_f3467df80`, proof-only,
+  grep-clean, offaxis-only commit): S8 diminishing verdict (floor
+  below bar, triangle transfer).
 - 2026-09-22 TRIPLE-R02M20K37 (backgrounds `ses_f3466bdb1`,
   `ses_f3467df7e`, `ses_f34678345`, proof-only, grep-clean): R02 sup
   mirror + cap verdicts + residual; M20 tail 17.38 → K0 19.762
