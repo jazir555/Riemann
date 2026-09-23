@@ -6164,6 +6164,9 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 SCUT54 (background `ses_f34721887`, proof-only,
+  grep-clean, pilot-only commit): F27+t29 assembled + k=31 CONSTRUCTIVE
+  (+0.16, biggest leg `:eta31_Re_ge`). Constructive run: t17/t27/t29/t31.
 - 2026-09-22 SUPPLIERS-VERIFY (background `ses_f347417a1`, build owner):
   BUILD-EXIT=0 GREEN (8688 jobs, log 165547). Covers doc-fixes + S-ladder
   through S24 + Im routes. MILESTONE: third GREEN module. S22IM-compose
