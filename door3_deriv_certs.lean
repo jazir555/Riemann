@@ -2022,3 +2022,127 @@ theorem R04_tier_of_mirror_residual {R04c : ℂ} {R04Rect : ℂ → Prop} {B : �
 #print axioms R04_xi_tier_sufficient_of_zeta0064_given
 #print axioms R04MirrorCloseResidual
 #print axioms R04_tier_of_mirror_residual
+
+/-!
+## Door-3 R05 sup spec mirror attempt (R00 closed-conditional; R01-R04 mirrors filed)
+
+Grep R04 tail (verified before append):
+* `R04_deriv_bound_of_sup_given` (`door3_deriv_certs.lean:1953-1964`):
+  R04-shape generic bound CALLING `deriv_bound_of_sphere_sup_on_ball`
+  under explicit `R04c` / `R04Rect` hypotheses.
+* `R04_deriv_tier_of_sup_given` (`1967-1974`): generic tier closure
+  (`2 * B ≤ 0.05` gives `‖deriv‖ ≤ 0.05`).
+* `R04_zeta0064_cap_excludes_banked_scale` (`1977-1980`):
+  `10 ≤ Z → ¬ Z ≤ 0.000064`.
+* `R04_zeta0064_cap_excludes_true_scale` (`1983-1986`):
+  `1 ≤ Z → ¬ Z ≤ 0.000064` (true-scale wall).
+* `R04_xi_tier_sufficient_of_zeta0064_given` (`1990-1996`): sufficient
+  arithmetic `Z ≤ 0.000064 → 770.944 * Z ≤ 0.05`.
+* `R04MirrorCloseResidual` (`2000-2003`): exact missing R04 premises.
+* `R04_tier_of_mirror_residual` (`2007-2016`): closure rebuilt by CALLING
+  the generic bound.
+* R05 grep in this file: no matches (`R05c` / `R05Rect` / R05 s-image absent
+  locally); no banked R05 chain to call.
+
+Mirror attempt (honest, banked chains only, no invented coordinates):
+* Generic tier rule `deriv_bound_of_sphere_sup_on_ball` (`59-83`) is
+  center-independent, so the R05 generic tier closes conditionally below by
+  CALLING it with explicit `R05c` / `R05Rect` hypotheses (parameters, not
+  asserted geometry).
+* R05-specific geometry (center/rect/ball inclusion) and R05 s-image
+  Gamma/Zeta sups are absent locally; R00 numerals (`63.4 * 4 * 1.52`,
+  `770.944`, cap `0.000064`) are reused only as conditional arithmetic shape,
+  not as R05 facts.
+* zeta0064 cap impossibility carries over arithmetically at the same cap.
+
+Banked here (direct tactics only):
+* `R05_deriv_bound_of_sup_given`: R05-shape generic bound CALLING the banked
+  Cauchy rule under explicit hypotheses.
+* `R05_deriv_tier_of_sup_given`: generic tier closure (`2 * B ≤ 0.05` gives
+  `‖deriv‖ ≤ 0.05`).
+* `R05_zeta0064_cap_excludes_banked_scale` / `R05_zeta0064_cap_excludes_true_scale`:
+  cap impossibility at banked/true scales (same shape as R00-R04).
+* `R05_xi_tier_sufficient_of_zeta0064_given`: sufficient arithmetic
+  (`Z ≤ 0.000064 → 770.944 * Z ≤ 0.05`), R00-shape numeral, conditional.
+* `R05MirrorCloseResidual`: exact missing R05 premises (parameters, not invented).
+* `R05_tier_of_mirror_residual`: closure rebuilt by CALLING the generic bound.
+
+Value-or-gap: VALUE = conditional R05 mirror + cap impossibility above;
+  GAP = unconditional R05 geometry + R05 s-image zeta sup (absent locally).
+Residual (exact): supply `R05MirrorCloseResidual`.
+-/
+
+/-- R05-shape generic deriv bound under explicit hypotheses (by CALLING the
+banked Cauchy rule; `R05c` / `R05Rect` are parameters, no coordinates invented). -/
+theorem R05_deriv_bound_of_sup_given {f : ℂ → ℂ} {R05c : ℂ} {R05Rect : ℂ → Prop}
+    {B : ℝ} (hd : DiffContOnCl ℂ f (ball R05c 2))
+    (hB : ∀ z ∈ closedBall R05c 2, ‖f z‖ ≤ B)
+    (hsub : ∀ w : ℂ, R05Rect w → ‖w - R05c‖ ≤ 1.26)
+    {w : ℂ} (hw : R05Rect w) :
+    ‖deriv f w‖ ≤ 2 * B := by
+  have hle : ‖w - R05c‖ ≤ 1.26 := hsub w hw
+  have hw' : ‖w - R05c‖ + (1 / 2 : ℝ) ≤ 2 := by linarith
+  have h := deriv_bound_of_sphere_sup_on_ball hd hB
+    (show (0 : ℝ) < 1 / 2 by norm_num) hw'
+  have heq : B / (1 / 2 : ℝ) = 2 * B := by ring
+  rwa [heq] at h
+
+/-- R05-shape generic tier closure (`2 * B ≤ 0.05` gives the leaf tier). -/
+theorem R05_deriv_tier_of_sup_given {f : ℂ → ℂ} {R05c : ℂ} {R05Rect : ℂ → Prop}
+    {B : ℝ} (hd : DiffContOnCl ℂ f (ball R05c 2))
+    (hB : ∀ z ∈ closedBall R05c 2, ‖f z‖ ≤ B)
+    (hsub : ∀ w : ℂ, R05Rect w → ‖w - R05c‖ ≤ 1.26)
+    {w : ℂ} (hw : R05Rect w) (hTier : 2 * B ≤ 0.05) :
+    ‖deriv f w‖ ≤ 0.05 := by
+  have h := R05_deriv_bound_of_sup_given hd hB hsub hw
+  linarith
+
+/-- R05 cap wall at the banked scale: any `Z ≥ 10` cannot meet `0.000064`. -/
+theorem R05_zeta0064_cap_excludes_banked_scale {Z : ℝ} (h : 10 ≤ Z) :
+    ¬ Z ≤ 0.000064 := by
+  intro hcap
+  linarith
+
+/-- R05 cap wall at the true `|ζ| ~ 1` scale: any `Z ≥ 1` cannot meet `0.000064`. -/
+theorem R05_zeta0064_cap_excludes_true_scale {Z : ℝ} (h : 1 ≤ Z) :
+    ¬ Z ≤ 0.000064 := by
+  intro hcap
+  linarith
+
+/-- R05-shape sufficient arithmetic at the R00 numeral (conditional only):
+`Z ≤ 0.000064 → 770.944 * Z ≤ 0.05`. -/
+theorem R05_xi_tier_sufficient_of_zeta0064_given {Z : ℝ} (h : Z ≤ 0.000064) :
+    770.944 * Z ≤ 0.05 := by
+  have hpos : (0 : ℝ) ≤ 770.944 := by norm_num
+  have h2 : (770.944 : ℝ) * Z ≤ 770.944 * 0.000064 :=
+    mul_le_mul_of_nonneg_left h hpos
+  have e : (770.944 : ℝ) * 0.000064 ≤ 0.05 := by norm_num
+  linarith
+
+/-- Exact missing R05 mirror premises (parameters; nothing asserted about the
+true R05 cell — that geometry plus R05 s-image sups are absent locally). -/
+def R05MirrorCloseResidual (R05c : ℂ) (R05Rect : ℂ → Prop) (B : ℝ) : Prop :=
+  (∀ w : ℂ, R05Rect w → w ∈ closedBall R05c 2) ∧
+  (∀ z ∈ closedBall R05c 2, ‖xiFourShapeAt z‖ ≤ B) ∧
+  2 * B ≤ 0.05 ∧ DiffContOnCl ℂ xiFourShapeAt (ball R05c 2)
+
+/-- R05 tier closure rebuilt from the exact residual (by CALLING the generic
+bound above). -/
+theorem R05_tier_of_mirror_residual {R05c : ℂ} {R05Rect : ℂ → Prop} {B : ℝ}
+    (h : R05MirrorCloseResidual R05c R05Rect B)
+    {w : ℂ} (hw : R05Rect w) : ‖deriv xiFourShapeAt w‖ ≤ 0.05 := by
+  obtain ⟨hmem, hB, hTier, hd⟩ := h
+  have hsub : ∀ u : ℂ, R05Rect u → ‖u - R05c‖ ≤ 1.26 := by
+    intro u hu
+    have h2 := hmem u hu
+    rw [mem_closedBall, dist_eq_norm] at h2
+    linarith
+  exact R05_deriv_tier_of_sup_given hd hB hsub hw hTier
+
+#print axioms R05_deriv_bound_of_sup_given
+#print axioms R05_deriv_tier_of_sup_given
+#print axioms R05_zeta0064_cap_excludes_banked_scale
+#print axioms R05_zeta0064_cap_excludes_true_scale
+#print axioms R05_xi_tier_sufficient_of_zeta0064_given
+#print axioms R05MirrorCloseResidual
+#print axioms R05_tier_of_mirror_residual
