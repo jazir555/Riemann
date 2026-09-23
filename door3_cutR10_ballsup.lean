@@ -2028,3 +2028,81 @@ theorem cutR10_gamma_sup_of_prodCap_greenfield (s : ℂ)
   hProdCap
 
 end Door3CutR10BallSup
+
+/-! # APPEND-6 (next premise after Gamma-half rechain; append-only tail; LF):
+rechain tail + one banked close + one exact residual.
+
+Grep record (read before writing):
+* APPEND-5 `:1998-2030`: gate `:898-902` identity on `hProdCap`,
+  sup shapes needing `1 / 100` at `:279 :931 :1724 :1766`,
+  banked chain `:691 :743 :771 :808 :839 :871 :1316 :1328 :1358` reaching `1 / 2`.
+* Greenfield rechain `:2011-2015` (`cutR10_gamma_half_greenfield_rechain`,
+  calls `:1358`), shortfall `:2018-2020`
+  (`cutR10_gamma_half_to_hundred_shortfall`, `(1/2)/(1/100) = 50`),
+  residual `:2023-2028` (`cutR10_gamma_sup_of_prodCap_greenfield`).
+* Closed zeta edge `:1638-1649` (`cutR10_zeta_rightEdge_two_closed`,
+  `Re >= 2 -> <= 2` from `:1056 :1068` via Euler `delta = 1`).
+
+Verdict attempted here:
+* CLOSE (banked, no new premises): sliver joint `1072 / 5 = 214.4`
+  on the in-ball `Re >= 2` part, from CLOSED `cutR10_hProd_closed`
+  + `ballPoly_upper (67)` + `ballPi_upper (16/5)`
+  + `cutR10_gamma_sup_half_closed (1/2)` + `cutR10_zeta_rightEdge_two_closed (2)`.
+  Numerals: `67 * (16/5) * (1/2) * 2 = 1072 / 5`, closed by `norm_num`.
+* RESIDUAL (exact, still open): full-rectangle `1 / 100` stays gated on
+  the single explicit Prop `hProdCap` (50x beyond the closed `1 / 2`);
+  full `0.04` stays gated on `hJoint`; full `Re <= 3/2` zeta `<= 6`
+  stays gated on `hFE`/chi plus middle reflected cap.
+No new imports; nothing else touched.
+-/
+
+namespace Door3CutR10BallSup
+
+/-- Banked sliver joint CLOSED (no sup premises): on the in-ball part with
+`2 <= (shiftedS z).re`, `‖xiShiftedEntire‖ <= 1072 / 5` from the closed
+poly/pi/Gamma-half/zeta-edge bounds. -/
+theorem cutR10_sliver_sup_banked_closed (z : ℂ)
+    (hz : z ∈ Metric.closedBall CutR10.center (CutR10.radius + 1))
+    (hs2 : (2 : ℝ) ≤ (shiftedS z).re) :
+    ‖xiShiftedEntire z‖ ≤ (1072 / 5 : ℝ) := by
+  have hP : xiShiftedEntire z = ((1 / 2 : ℂ) * shiftedS z * (shiftedS z - 1)) *
+      ((Real.pi : ℂ) ^ (-(shiftedS z / 2))) *
+      (Complex.Gamma (shiftedS z / 2)) * (zeta (shiftedS z)) :=
+    cutR10_hProd_closed z hz
+  rw [hP, norm_mul, norm_mul, norm_mul]
+  have hpoly := ballPoly_upper hz
+  have hpi := ballPi_upper hz
+  have hre := mem_ball_shiftedS_re_bounds hz
+  have him := mem_ball_shiftedS_im_bounds hz
+  have hG : ‖Complex.Gamma (shiftedS z / 2)‖ ≤ (1 / 2 : ℝ) :=
+    cutR10_gamma_sup_half_closed _ hre.1 hre.2 him.1 him.2
+  have hZ : ‖zeta (shiftedS z)‖ ≤ (2 : ℝ) :=
+    cutR10_zeta_rightEdge_two_closed _ hs2
+  have g1 : ‖(1 / 2 : ℂ) * shiftedS z * (shiftedS z - 1)‖ *
+        ‖((Real.pi : ℂ) ^ (-(shiftedS z / 2)))‖ ≤ (67 : ℝ) * (16 / 5) :=
+    mul_le_mul hpoly hpi (norm_nonneg _) (by norm_num)
+  have g2 : (‖(1 / 2 : ℂ) * shiftedS z * (shiftedS z - 1)‖ *
+        ‖((Real.pi : ℂ) ^ (-(shiftedS z / 2)))‖) *
+        ‖Complex.Gamma (shiftedS z / 2)‖ ≤ ((67 : ℝ) * (16 / 5)) * (1 / 2) :=
+    mul_le_mul g1 hG (norm_nonneg _) (by norm_num)
+  have g3 : ((‖(1 / 2 : ℂ) * shiftedS z * (shiftedS z - 1)‖ *
+        ‖((Real.pi : ℂ) ^ (-(shiftedS z / 2)))‖) *
+        ‖Complex.Gamma (shiftedS z / 2)‖) * ‖zeta (shiftedS z)‖ ≤
+        (((67 : ℝ) * (16 / 5)) * (1 / 2)) * 2 :=
+    mul_le_mul g2 hZ (norm_nonneg _) (by norm_num)
+  have hcap : (((67 : ℝ) * (16 / 5)) * (1 / 2)) * 2 ≤ (1072 / 5 : ℝ) := by
+    norm_num
+  exact le_trans g3 hcap
+
+/-- Exact residual for the full rectangle: `1 / 100` stays gated on the single
+explicit Prop `hProdCap` (50x beyond the closed `1 / 2` above). No closure
+claimed; closure needs the `pi / 2` rate or a `20`-factor product, neither
+banked. -/
+theorem cutR10_fullGamma_residual_open (s : ℂ)
+    (hlo : (-1.06 : ℝ) ≤ s.re) (hhi : s.re ≤ (2.06 : ℝ))
+    (hilo : (8.44 : ℝ) ≤ s.im) (hihi : s.im ≤ (11.56 : ℝ))
+    (hProdCap : ‖Complex.Gamma (s / 2)‖ ≤ 1 / 100) :
+    ‖Complex.Gamma (s / 2)‖ ≤ 1 / 100 :=
+  hProdCap
+
+end Door3CutR10BallSup
