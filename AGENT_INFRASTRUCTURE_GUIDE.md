@@ -6164,6 +6164,9 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 GAMMA-N19 (background `ses_f3461a33b`, proof-only,
+  grep-clean, gamma-only commit): N19 honest ceiling <0.643 vs
+  0.66, exact gap 0.017 banked in-file. N20 next.
 - 2026-09-22 ZETA-M24 (background `ses_f346086de`, proof-only,
   grep-clean, zeta-only commit): M24 tail → K0 19.858 reverses
   further (minimum at N=17 stands).
