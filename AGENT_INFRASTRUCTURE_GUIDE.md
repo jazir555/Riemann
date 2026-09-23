@@ -6164,6 +6164,9 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 M39+M23 (backgrounds `ses_f3461d624`,
+  `ses_f34622602`, proof-only, grep-clean): M39 odd floor 741455
+  banked + beats-prior; M23 tail → K0 19.834 reverses further.
 - 2026-09-22 K41+STRIP (backgrounds `ses_f34627018`,
   `ses_f3462701c`, proof-only, grep-clean): k41 destructive on
   quadratic route (cap 3.02); shift 12→25/2 + invariance gap filed
